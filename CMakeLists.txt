@@ -2,7 +2,7 @@
 # Project setup
 ########################################################################
 cmake_minimum_required(VERSION 2.8.9)
-project(PothosComms CXX)
+project(PothosComms CXX C)
 
 find_package(Pothos CONFIG REQUIRED)
 
