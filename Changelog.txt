@@ -1,8 +1,9 @@
 This this the changelog file for the Pothos Comms toolkit.
 
-Release 0.1.0 (pending)
+Release 0.1.0 (2015-12-16)
 ==========================
 
+- Added debian packaging support for comms toolkit
 - Added complex rotation block with label support
 - Added constant scalar block with label support
 - Fix propagateLabels() for arithmetic feedback loop
