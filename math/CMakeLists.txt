@@ -17,6 +17,7 @@ endif(MSVC)
 POTHOS_MODULE_UTIL(
     TARGET MathBlocks
     SOURCES
+        Abs.cpp
         Arithmetic.cpp
         TestComparatorBlocks.cpp
         Comparator.cpp
