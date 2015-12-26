@@ -18,6 +18,8 @@ POTHOS_MODULE_UTIL(
     TARGET MathBlocks
     SOURCES
         Abs.cpp
+        Angle.cpp
+        fxpt_atan2.c
         Arithmetic.cpp
         TestComparatorBlocks.cpp
         Comparator.cpp
