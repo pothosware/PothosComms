@@ -6,6 +6,23 @@
 #include <iostream>
 #include <complex>
 #include <algorithm> //min/max
+#include <type_traits>
+
+//absolute value for floating point and real integer types
+template <typename OutType, typename InType>
+OutType getAbs(const InType &in)
+{
+    return OutType(std::abs(in));
+}
+
+//absolute value for fixed point complex types
+template <typename OutType, typename InType>
+typename std::enable_if<std::is_integral<OutType>::value, OutType>::type
+getAbs(const std::complex<InType> &in)
+{
+    const auto mag2 = in.real()*in.real() + in.imag()*in.imag();
+    return OutType(std::sqrt(float(mag2)));
+}
 
 /***********************************************************************
  * |PothosDoc Abs
@@ -52,7 +69,7 @@ public:
         //perform abs operation
         for (size_t i = 0; i < elems; i++)
         {
-            out[i] = std::abs(in[i]);
+            out[i] = getAbs<OutType>(in[i]);
         }
 
         //produce and consume on 0th ports

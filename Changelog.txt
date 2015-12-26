@@ -3,6 +3,7 @@ This this the changelog file for the Pothos Comms toolkit.
 Release 0.1.1 (pending)
 ==========================
 
+- Added complex angle math block (fixed and floating)
 - Added complex conjugate math block
 - Added abs() math block for real and complex inputs
 - Added missing libpoco-dev to debian Build-Depends
