@@ -23,7 +23,11 @@
  *
  */
 
+#ifdef _MSC_VER
+#define inline __inline
 #define _USE_MATH_DEFINES
+#endif
+
 #include <math.h>
 #include <stdint.h>
 
