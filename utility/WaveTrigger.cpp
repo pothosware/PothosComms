@@ -500,7 +500,11 @@ void WaveTrigger::work(void)
 
         //check if this port was handled on a previous call
         const size_t windowsAcquired = packet.payload.elements()/(_numPoints/_numWindows);
-        if (windowsAcquired + _windowsRemaining == _numWindows) continue;
+        if (windowsAcquired + _windowsRemaining == _numWindows)
+        {
+            if (not _alignment) port->consume(port->elements());
+            continue;
+        }
 
         //require that we have enough elements in the buffer
         auto buff = port->buffer();
@@ -552,7 +556,8 @@ void WaveTrigger::work(void)
         }
 
         //consume from the input buffer
-        port->consume(buff.length);
+        if (_alignment) port->consume(buff.length);
+        else port->consume(port->elements());
         port->setReserve(0);
     }
 
