@@ -488,26 +488,30 @@ void WaveTrigger::work(void)
     //trigger search mode
     if (_pointsRemaining == 0) return this->triggerWork();
 
-    //ensure the required number of elements is on each input
-    for (auto port : this->inputs())
-    {
-        const auto &buff = port->buffer();
-        if (buff.elements() >= _pointsRemaining) continue;
-        port->setReserve(_pointsRemaining*buff.dtype.size());
-        return;
-    }
-
     //flags for first and last window
     const bool firstWindow = (_windowsRemaining == _numWindows-1);
     const bool lastWindow = (_windowsRemaining == 0);
 
     //forward a packet for each port
+    bool allAcquired = true;
     for (auto port : this->inputs())
     {
         auto &packet = _packets[port->index()];
 
-        //truncate buffer to the requested number of points
+        //check if this port was handled on a previous call
+        const size_t windowsAcquired = packet.payload.elements()/(_numPoints/_numWindows);
+        if (windowsAcquired + _windowsRemaining == _numWindows) continue;
+
+        //require that we have enough elements in the buffer
         auto buff = port->buffer();
+        if (buff.elements() < _pointsRemaining)
+        {
+            port->setReserve(_pointsRemaining*buff.dtype.size());
+            allAcquired = false;
+            continue;
+        }
+
+        //truncate buffer to the requested number of points
         buff.length = _pointsRemaining*buff.dtype.size();
 
         //append new labels
@@ -547,19 +551,23 @@ void WaveTrigger::work(void)
             packet.payload.length += buff.length;
         }
 
-        //produce the entire packet on the last window
-        if (lastWindow)
-        {
-            outPort->postMessage(packet);
-            packet = Pothos::Packet();
-        }
-
         //consume from the input buffer
         port->consume(buff.length);
+        port->setReserve(0);
+    }
+
+    //collected buffers for every port?
+    if (not allAcquired) return;
+
+    //produce the entire packet on the last window
+    if (lastWindow) for (auto port : this->inputs())
+    {
+        auto &packet = _packets[port->index()];
+        outPort->postMessage(packet);
+        packet = Pothos::Packet();
     }
 
     //reset for next trigger
-    for (auto port : this->inputs()) port->setReserve(0);
     _pointsRemaining = 0;
     _holdOffRemaining = _holdOff;
     _lastTriggerTime = std::chrono::high_resolution_clock::now();
