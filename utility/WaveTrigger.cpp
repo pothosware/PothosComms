@@ -595,23 +595,29 @@ void WaveTrigger::triggerWork(void)
     //require the minimum amount leaving room for a window/history of _position
     //and an extra trailing element that isnt consumed for the slope search
     size_t numElems = trigBuff.elements();
-    if (numElems <= _position+1)
-    {
-        //+1 after position, +1 for slope search
-        trigPort->setReserve((_position+1+1)*trigBuff.dtype.size());
-        return;
-    }
+    bool allPortsReady = true;
 
     //calculate available elements when alignment required
-    if (_alignment) for (auto port : this->inputs())
+    for (auto port : this->inputs())
     {
+        //always consume non-trigger ports when not aligned
+        if (not _alignment and port != trigPort)
+        {
+            port->consume(port->elements());
+            continue;
+        }
+
+        //check aligned ports and trigger port for reserve
         const auto &buff = port->buffer();
         numElems = std::min(numElems, buff.elements());
         if (numElems > _position+1) continue;
         //+1 after position, +1 for slope search
         port->setReserve((_position+1+1)*buff.dtype.size());
-        return;
+        allPortsReady = false;
     }
+
+    //not ready? return asap
+    if (not allPortsReady) return;
 
     //search for the trigger point (interpolated point result)
     //for complex data, we trigger on the absolute value
@@ -680,18 +686,13 @@ void WaveTrigger::triggerWork(void)
     std::cout << "_holdOffRemaining " << _holdOffRemaining << std::endl;
     //*/
 
-    //consume from all ports, handle alignment mode
+    //consume from aligned ports and trigger port
     for (auto port : this->inputs())
     {
         const auto &buff = port->buffer();
-        if (_alignment or _source == size_t(port->index()))
+        if (_alignment or trigPort == port)
         {
             port->consume(consumeElems*buff.dtype.size());
-        }
-        else
-        {
-            //no alignment, consume all on non-trigger port
-            port->consume(port->elements());
         }
     }
 
