@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2015 Josh Blum
+// Copyright (c) 2014-2016 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
@@ -189,7 +189,7 @@ private:
         {
             const auto delta = std::llround(frac*numEntries);
             if (frac == 0.0) break;
-            if (std::abs(delta) >= minimumTableStepSize) break;
+            if (size_t(std::abs(delta)) >= minimumTableStepSize) break;
             if (numEntries*2 > _table.max_size()) break;
             if (numEntries*2 > maxWaveTableSize) break;
             numEntries *= 2;

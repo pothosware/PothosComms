@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2015 Josh Blum
+// Copyright (c) 2014-2016 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
@@ -133,7 +133,7 @@ public:
     void propagateLabels(const Pothos::InputPort *port)
     {
         //this is a feedback port, don't propagate labels from it
-        if (_preload.size() > port->index() and _preload[port->index()] > 0) return;
+        if (_preload.size() > size_t(port->index()) and _preload[port->index()] > 0) return;
 
         //otherwise implement the regular label propagation
         Pothos::Block::propagateLabels(port);
