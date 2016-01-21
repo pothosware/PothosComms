@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2015 Josh Blum
+// Copyright (c) 2015-2016 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
@@ -703,6 +703,7 @@ void WaveTrigger::triggerWork(void)
         _windowsRemaining--;
         _pointsRemaining = _numPoints/_numWindows;
         for (auto port : this->inputs()) port->setReserve(0);
+        this->yield();
     }
 }
 

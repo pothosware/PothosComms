@@ -1,5 +1,10 @@
 This this the changelog file for the Pothos Comms toolkit.
 
+Release 0.1.2 (pending)
+==========================
+
+- Wave trigger should call yield() after trigger event
+
 Release 0.1.1 (2015-12-29)
 ==========================
 
