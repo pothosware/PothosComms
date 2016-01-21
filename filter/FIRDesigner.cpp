@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2015 Josh Blum
+// Copyright (c) 2014-2016 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
@@ -169,6 +169,7 @@ public:
         this->registerCall(this, POTHOS_FCN_TUPLE(FIRDesigner, windowArgs));
         this->registerCall(this, POTHOS_FCN_TUPLE(FIRDesigner, setSampleRate));
         this->registerCall(this, POTHOS_FCN_TUPLE(FIRDesigner, sampleRate));
+        this->registerCall(this, POTHOS_FCN_TUPLE(FIRDesigner, setFrequencies));
         this->registerCall(this, POTHOS_FCN_TUPLE(FIRDesigner, setFrequencyLower));
         this->registerCall(this, POTHOS_FCN_TUPLE(FIRDesigner, frequencyLower));
         this->registerCall(this, POTHOS_FCN_TUPLE(FIRDesigner, setFrequencyUpper));
@@ -261,6 +262,13 @@ public:
     double sampleRate(void) const
     {
         return _sampRate;
+    }
+
+    void setFrequencies(const std::vector<double> &freqs)
+    {
+        if (freqs.size() > 0) _freqLower = freqs.at(0);
+        if (freqs.size() > 1) _freqUpper = freqs.at(1);
+        this->recalculate();
     }
 
     void setFrequencyLower(const double freq)

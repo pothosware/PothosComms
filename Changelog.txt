@@ -3,6 +3,7 @@ This this the changelog file for the Pothos Comms toolkit.
 Release 0.1.2 (pending)
 ==========================
 
+- Added setFrequencies() convenience call to FIR Designer
 - Fixed sign comparison warnings in wave source/arithmetic
 - Wave trigger should call yield() after trigger event
 
