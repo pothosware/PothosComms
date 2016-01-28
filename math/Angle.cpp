@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2015 Josh Blum
+// Copyright (c) 2015-2016 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
@@ -8,7 +8,7 @@
 #include <algorithm> //min/max
 #include <type_traits>
 
-extern "C" uint16_t fxpt_atan2(const int16_t y, const int16_t x);
+uint16_t fxpt_atan2(const int16_t y, const int16_t x);
 
 template <typename Type>
 typename std::enable_if<std::is_floating_point<Type>::value, Type>::type

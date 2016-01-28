@@ -19,7 +19,7 @@ POTHOS_MODULE_UTIL(
     SOURCES
         Abs.cpp
         Angle.cpp
-        fxpt_atan2.c
+        fxpt_atan2.cpp
         Arithmetic.cpp
         TestComparatorBlocks.cpp
         Comparator.cpp
