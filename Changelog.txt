@@ -1,6 +1,6 @@
 This this the changelog file for the Pothos Comms toolkit.
 
-Release 0.1.2 (pending)
+Release 0.1.2 (2016-01-29)
 ==========================
 
 - Build fxpt_atan2 as a C++ source to improve compatibility
