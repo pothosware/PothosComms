@@ -19,7 +19,6 @@ POTHOS_MODULE_UTIL(
     SOURCES
         Abs.cpp
         Angle.cpp
-        fxpt_atan2.cpp
         Arithmetic.cpp
         TestComparatorBlocks.cpp
         Comparator.cpp
@@ -29,6 +28,7 @@ POTHOS_MODULE_UTIL(
         TestScale.cpp
         Rotate.cpp
         TestRotate.cpp
+    LIBRARIES CommsFunctions
     DESTINATION comms
     ENABLE_DOCS
 )
