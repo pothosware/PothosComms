@@ -32,6 +32,8 @@ endif (Spuce_FOUND)
 ########################################################################
 # Build subdirectories
 ########################################################################
+include_directories(functions)
+add_subdirectory(functions)
 add_subdirectory(demod)
 add_subdirectory(digital)
 add_subdirectory(fft)

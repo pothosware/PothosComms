@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2015 Josh Blum
+// Copyright (c) 2015-2016 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
@@ -7,22 +7,7 @@
 #include <complex>
 #include <algorithm> //min/max
 #include <type_traits>
-
-//absolute value for floating point and real integer types
-template <typename OutType, typename InType>
-OutType getAbs(const InType &in)
-{
-    return OutType(std::abs(in));
-}
-
-//absolute value for fixed point complex types
-template <typename OutType, typename InType>
-typename std::enable_if<std::is_integral<OutType>::value, OutType>::type
-getAbs(const std::complex<InType> &in)
-{
-    const auto mag2 = in.real()*in.real() + in.imag()*in.imag();
-    return OutType(std::sqrt(float(mag2)));
-}
+#include "FxptHelpers.hpp"
 
 /***********************************************************************
  * |PothosDoc Abs

@@ -14,6 +14,7 @@ POTHOS_MODULE_UTIL(
     TARGET DemodBlocks
     SOURCES
         FreqDemod.cpp
+    LIBRARIES CommsFunctions
     DESTINATION comms
     ENABLE_DOCS
 )
