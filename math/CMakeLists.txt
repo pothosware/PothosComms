@@ -19,6 +19,7 @@ POTHOS_MODULE_UTIL(
     SOURCES
         Abs.cpp
         Angle.cpp
+        TestAngle.cpp
         Arithmetic.cpp
         TestComparatorBlocks.cpp
         Comparator.cpp

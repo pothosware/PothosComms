@@ -26,8 +26,7 @@ getAngle(const std::complex<Type> &in)
     const auto real16 = int16_t(in.real());
     const auto imag16 = int16_t(in.imag());
     const auto u16out = fxpt_atan2(imag16, real16);
-    const auto s16out = u16out - 0x8000;
-    return Type(s16out);
+    return Type(u16out);
 }
 
 /***********************************************************************
