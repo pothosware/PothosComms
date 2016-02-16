@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
+#include <cmath>
 #include <cstdint>
 #include <complex>
 #include <iostream>
@@ -30,11 +31,29 @@
  * |option [Active only] "ACTIVE"
  * |default "ACTIVE"
  *
+ * |param signalAverage[Signal Average] The signal averager decay time constant in samples.
+ * This parameter effectively controls the averaging detector for energy present.
+ * Single pole filter roll-off constant: gainSignalAverage = exp(-1/signalAverage)
+ * |default 10
+ * |units samples
+ *
+ * |param noiseAverage[Noise Average] The noise averager decay time constant in samples.
+ * The detector uses this filter to determine the noise floor when inactive.
+ * Single pole filter roll-off constant: gainNoiseAverage = exp(-1/noiseAverage)
+ * |default 100
+ * |units samples
+ *
+ * |param lookahead A configurable input delay to compensate for envelope lag.
+ * Without lookahead, the envelope calculation lags behind the input due to filtering.
+ * The lookahead compensation adjusts the envelope to match up with the input events.
+ * |default 10
+ * |units samples
+ *
  * |param activationLevel[Activation Level] The threshold level that the input must exceed to activate.
  * This threshold level is a power in dB that is relative to the noise floor.
  * |default 3.0
  * |units dB
- * |tab EnergyDetectors
+ * |tab Thresholds
  *
  * |param activationMin[Activation Minimum] The minimum number of samples to remain activated.
  * The detector will remain active for at least this many samples reguardless of the deactivation threshold.
@@ -42,7 +61,7 @@
  * |default 0
  * |preview valid
  * |units samples
- * |tab EnergyDetectors
+ * |tab Thresholds
  *
  * |param activationMax[Activation Maximum] The maximum number of samples to remain activated.
  * The detector will remain active for at most many samples reguardless of the deactivation threshold.
@@ -51,13 +70,13 @@
  * |default 0
  * |preview valid
  * |units samples
- * |tab EnergyDetectors
+ * |tab Thresholds
  *
  * |param deactivationLevel[Deactivation Level] The threshold level that the input must fall-below to deactivate.
  * This threshold level is a power in dB that is relative to the noise floor.
  * |default 3.0
  * |units dB
- * |tab EnergyDetectors
+ * |tab Thresholds
  *
  * |param deactivationMin[Deactivation Minimum] The minimum number of samples to remain inactive.
  * The detector will remain inactive for at least this many samples reguardless of the activation threshold.
@@ -65,7 +84,7 @@
  * |default 0
  * |preview valid
  * |units samples
- * |tab EnergyDetectors
+ * |tab Thresholds
  *
  * |param deactivationMax[Deactivation Maximum] The maximum number of samples to remain inactive.
  * The detector will remain inactive for at most many samples reguardless of the activation threshold.
@@ -74,35 +93,7 @@
  * |default 0
  * |preview valid
  * |units samples
- * |tab EnergyDetectors
- *
- * |param attackAverage[Attack Average] The run-up time constant in samples.
- * This parameter effectively controls the averaging detector while inactive.
- * Single pole filter roll-off constant: gainAttackAverage = exp(-1/attackAverage)
- * |default 10
- * |units samples
- * |tab Filter
- *
- * |param releaseAverage[Release Average] The decay time constant in samples.
- * This parameter effectively controls the averaging detector while active.
- * Single pole filter roll-off constant: gainReleaseAverage = exp(-1/releaseAverage)
- * |default 10
- * |units samples
- * |tab Filter
- *
- * |param noiseAverage[Noise Average] The noise averager decay time constant in samples.
- * The detector uses this filter to determine the noise floor when inactive.
- * Single pole filter roll-off constant: gainNoiseAverage = exp(-1/noiseAverage)
- * |default 100
- * |units samples
- * |tab Filter
- *
- * |param lookahead A configurable input delay to compensate for envelope lag.
- * Without lookahead, the envelope calculation lags behind the input due to filtering.
- * The lookahead compensation adjusts the envelope to match up with the input events.
- * |default 10
- * |units samples
- * |tab Filter
+ * |tab Thresholds
  *
  * |param activationId[Activation ID] The label ID to mark the element that crosses the activation threshold (when inactive).
  * An empty string (default) means that activate labels are not produced.
@@ -126,8 +117,7 @@
  * |setter setDeactivationLevel(deactivationLevel)
  * |setter setDeactivationMinimum(deactivationMin)
  * |setter setDeactivationMaximum(deactivationMax)
- * |setter setAttackAverage(attackAverage)
- * |setter setReleaseAverage(releaseAverage)
+ * |setter setSignalAverage(signalAverage)
  * |setter setNoiseAverage(noiseAverage)
  * |setter setLookahead(lookahead)
  * |setter setActivationId(activationId)
@@ -156,10 +146,8 @@ public:
         this->registerCall(this, POTHOS_FCN_TUPLE(EnergyDetector, getDeactivationMinimum));
         this->registerCall(this, POTHOS_FCN_TUPLE(EnergyDetector, setDeactivationMaximum));
         this->registerCall(this, POTHOS_FCN_TUPLE(EnergyDetector, getDeactivationMaximum));
-        this->registerCall(this, POTHOS_FCN_TUPLE(EnergyDetector, setAttackAverage));
-        this->registerCall(this, POTHOS_FCN_TUPLE(EnergyDetector, getAttackAverage));
-        this->registerCall(this, POTHOS_FCN_TUPLE(EnergyDetector, setReleaseAverage));
-        this->registerCall(this, POTHOS_FCN_TUPLE(EnergyDetector, getReleaseAverage));
+        this->registerCall(this, POTHOS_FCN_TUPLE(EnergyDetector, setSignalAverage));
+        this->registerCall(this, POTHOS_FCN_TUPLE(EnergyDetector, getSignalAverage));
         this->registerCall(this, POTHOS_FCN_TUPLE(EnergyDetector, setNoiseAverage));
         this->registerCall(this, POTHOS_FCN_TUPLE(EnergyDetector, getNoiseAverage));
         this->registerCall(this, POTHOS_FCN_TUPLE(EnergyDetector, setLookahead));
@@ -177,8 +165,7 @@ public:
         this->setDeactivationLevel(3.0);
         this->setDeactivationMinimum(0);
         this->setDeactivationMaximum(0);
-        this->setAttackAverage(10);
-        this->setReleaseAverage(10);
+        this->setSignalAverage(10);
         this->setNoiseAverage(100);
         this->setLookahead(10);
         this->setActivationId("");
@@ -187,9 +174,8 @@ public:
 
     void setForwardMode(const std::string &mode)
     {
-        //TODO set bool flag
-        if (mode == "ALL") {}
-        else if (mode == "ACTIVE") {}
+        if (mode == "ALL") _dropInactiveSamples = false;
+        else if (mode == "ACTIVE") _dropInactiveSamples = true;
         else throw Pothos::InvalidArgumentException("EnergyDetector::setForwardMode("+mode+")", "unknown mode");
         _forwardMode = mode;
     }
@@ -199,14 +185,15 @@ public:
         return _forwardMode;
     }
 
-    void setActivationLevel(const RealType level)
+    void setActivationLevel(const double level)
     {
-        _activationLevel = level;
+        _activationLeveldB = level;
+        _activationFactor = RealType(std::pow(10.0, _activationLeveldB/20));
     }
 
-    RealType getActivationLevel(void) const
+    double getActivationLevel(void) const
     {
-        return _activationLevel;
+        return _activationLeveldB;
     }
 
     void setActivationMinimum(const size_t minimum)
@@ -229,14 +216,15 @@ public:
         return _activationMaximum;
     }
 
-    void setDeactivationLevel(const RealType level)
+    void setDeactivationLevel(const double level)
     {
-        _deactivationLevel = level;
+        _deactivationLeveldB = level;
+        _deactivationFactor = RealType(std::pow(10.0, _deactivationLeveldB/20));
     }
 
-    RealType getDeactivationLevel(void) const
+    double getDeactivationLevel(void) const
     {
-        return _deactivationLevel;
+        return _deactivationLeveldB;
     }
 
     void setDeactivationMinimum(const size_t minimum)
@@ -259,36 +247,26 @@ public:
         return _deactivationMaximum;
     }
 
-    void setAttackAverage(const RealType attackAvg)
+    void setSignalAverage(const double signalAvg)
     {
-        _attackAverage = attackAvg;
-        //_attackGain = std::exp(-1/attack);
-        //_oneMinusAttackGain = 1-_attackGain;
+        _signalAverage = signalAvg;
+        _signalGain = RealType(std::exp(-1/signalAvg));
+        _oneMinusSignalGain = 1-_signalGain;
     }
 
-    RealType getAttackAverage(void) const
+    double getSignalAverage(void) const
     {
-        return _attackAverage;
+        return _signalAverage;
     }
 
-    void setReleaseAverage(const RealType releaseAvg)
-    {
-        _releaseAverage = releaseAvg;
-        //_releaseGain = std::exp(-1/release);
-        //_oneMinusReleaseGain = 1-_releaseGain;
-    }
-
-    RealType getReleaseAverage(void) const
-    {
-        return _releaseAverage;
-    }
-
-    void setNoiseAverage(const RealType noiseAvg)
+    void setNoiseAverage(const double noiseAvg)
     {
         _noiseAverage = noiseAvg;
+        _noiseGain = RealType(std::exp(-1/noiseAvg));
+        _oneMinusNoiseGain = 1-_noiseGain;
     }
 
-    RealType getNoiseAverage(void) const
+    double getNoiseAverage(void) const
     {
         return _noiseAverage;
     }
@@ -325,30 +303,137 @@ public:
 
     void activate(void)
     {
-        
+        //reset state before running
+        _activeState = false;
+        _samplesInState = 0;
+        _currentSignalEnvelope = 0;
+        _currentNoiseEnvelope = 0;
     }
 
     void work(void)
     {
-        
+        //access ports
+        auto inPort = this->input(0);
+        auto outPort = this->output(0);
+
+        //ensure that the input has lookahead room
+        if (inPort->elements() <= _lookahead)
+        {
+            inPort->setReserve(_lookahead+1);
+            return;
+        }
+
+        //calculate the work size given the available resources
+        const size_t N = std::min(inPort->elements()-_lookahead, outPort->elements());
+        if (N == 0) return;
+
+        size_t i = 0;
+        const bool entryState = _activeState;
+        const auto in = inPort->buffer().template as<const Type *>();
+
+        std::cout << "_activeState " << _activeState << std::endl;
+        std::cout << "_currentSignalEnvelope " << 20*std::log10(_currentSignalEnvelope) << std::endl;
+        std::cout << "_currentNoiseEnvelope " << 20*std::log10(_currentNoiseEnvelope) << std::endl;
+        std::cout << "_activationLevel " << 20*std::log10(_activationFactor) << std::endl;
+        std::cout << "_deactivationLevel " << 20*std::log10(_deactivationFactor) << std::endl;
+        std::cout << "_signalGain " << _signalGain << std::endl;
+        std::cout << "_noiseGain " << _noiseGain << std::endl;
+        std::cout << "_samplesInState " << _samplesInState << std::endl;
+
+        if (_activeState)
+        {
+            //create activation label on the first sample in this state
+            if (_samplesInState == 0 and not _activationId.empty())
+            {
+                outPort->postLabel(Pothos::Label(_activationId, Pothos::Object(), 0));
+            }
+
+            for (i = 0; i < N; i++)
+            {
+                _samplesInState++;
+                const RealType xn = RealType(std::abs(in[i+_lookahead]));
+                _currentSignalEnvelope = _signalGain*_currentSignalEnvelope + _oneMinusSignalGain*xn;
+
+                //deactivate when the envelope drops below the deactivation threshold
+                //and the sample minimum is met, or when the maximum has been reached
+                if (
+                    ((_samplesInState > _activationMinimum) and (_currentSignalEnvelope < _currentNoiseEnvelope*_deactivationFactor)) or
+                    (_activationMaximum != 0 and _samplesInState > _activationMaximum)
+                )
+                {
+
+                    //create deactivation label on the last sample in this state
+                    if (not _deactivationId.empty())
+                    {
+                        outPort->postLabel(Pothos::Label(_deactivationId, Pothos::Object(), i));
+                    }
+
+                    _samplesInState = 0;
+                    _activeState = not _activeState;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            for (i = 0; i < N; i++)
+            {
+                _samplesInState++;
+                const RealType xn = RealType(std::abs(in[i+_lookahead]));
+                _currentSignalEnvelope = _signalGain*_currentSignalEnvelope + _oneMinusSignalGain*xn;
+                _currentNoiseEnvelope = _noiseGain*_currentNoiseEnvelope + _oneMinusNoiseGain*xn;
+
+                //activate when the envelope rises above the activation threshold
+                //and the sample minimum is met, or when the maximum has been reached
+                if (
+                    ((_samplesInState > _deactivationMinimum) and (_currentSignalEnvelope > _currentNoiseEnvelope*_activationFactor)) or
+                    (_deactivationMaximum != 0 and _samplesInState > _deactivationMaximum)
+                )
+                {
+                    _samplesInState = 0;
+                    _activeState = not _activeState;
+                    break;
+                }
+            }
+        }
+
+        //consume input
+        inPort->consume(i+1);
+
+        //forward buffer for active work() or when forwarding inactive samples
+        if (entryState or not _dropInactiveSamples)
+        {
+            auto buff = inPort->buffer();
+            buff.length = (i+1)*sizeof(Type);
+            outPort->postBuffer(buff);
+        }
     }
 
 private:
 
     //current processing state
-
+    bool _activeState;
+    bool _dropInactiveSamples;
+    RealType _currentSignalEnvelope;
+    RealType _currentNoiseEnvelope;
+    RealType _signalGain;
+    RealType _oneMinusSignalGain;
+    RealType _noiseGain;
+    RealType _oneMinusNoiseGain;
+    RealType _activationFactor;
+    RealType _deactivationFactor;
+    unsigned long long _samplesInState;
 
     //configuration params
     std::string _forwardMode;
-    RealType _activationLevel;
+    double _activationLeveldB;
     size_t _activationMinimum;
     size_t _activationMaximum;
-    RealType _deactivationLevel;
+    double _deactivationLeveldB;
     size_t _deactivationMinimum;
     size_t _deactivationMaximum;
-    RealType _attackAverage;
-    RealType _releaseAverage;
-    RealType _noiseAverage;
+    double _signalAverage;
+    double _noiseAverage;
     size_t _lookahead;
     std::string _activationId;
     std::string _deactivationId;
@@ -360,14 +445,14 @@ private:
 static Pothos::Block *valueProbeFactory(const Pothos::DType &dtype)
 {
     #define ifTypeDeclareFactory(type) \
-        if (dtype == Pothos::DType(typeid(type))) return new EnergyDetector<type, double>(); \
-        if (dtype == Pothos::DType(typeid(std::complex<type>))) return new EnergyDetector<std::complex<type>, std::complex<double>>();
+        if (dtype == Pothos::DType(typeid(type))) return new EnergyDetector<type, type>(); \
+        if (dtype == Pothos::DType(typeid(std::complex<type>))) return new EnergyDetector<std::complex<type>, type>();
     ifTypeDeclareFactory(double);
     ifTypeDeclareFactory(float);
-    ifTypeDeclareFactory(int64_t);
-    ifTypeDeclareFactory(int32_t);
-    ifTypeDeclareFactory(int16_t);
-    ifTypeDeclareFactory(int8_t);
+    //ifTypeDeclareFactory(int64_t);
+    //ifTypeDeclareFactory(int32_t);
+    //ifTypeDeclareFactory(int16_t);
+    //ifTypeDeclareFactory(int8_t);
     throw Pothos::InvalidArgumentException("valueProbeFactory("+dtype.toString()+")", "unsupported type");
 }
 
