@@ -16,6 +16,7 @@ POTHOS_MODULE_UTIL(
         SignalProbe.cpp
         Threshold.cpp
         WaveTrigger.cpp
+        EnergyDetector.cpp
     DESTINATION comms
     ENABLE_DOCS
 )
