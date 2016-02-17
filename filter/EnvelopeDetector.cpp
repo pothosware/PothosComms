@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2015 Josh Blum
+// Copyright (c) 2015-2016 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
@@ -7,6 +7,7 @@
 #include <cmath>
 #include <iostream>
 #include <algorithm> //min/max
+#include "FxptHelpers.hpp"
 
 /***********************************************************************
  * |PothosDoc Envelope Detector
@@ -129,7 +130,7 @@ public:
         //perform envelope calculation operation
         for (size_t i = 0; i < N; i++)
         {
-            const OutType xn = OutType(std::abs(in[i+_lookahead]));
+            const OutType xn = getAbs<OutType>(in[i+_lookahead]);
             if (xn > _envelope)
             {
                 _envelope = _attackGain*_envelope + _oneMinusAttackGain*xn;
