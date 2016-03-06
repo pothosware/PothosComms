@@ -1,6 +1,6 @@
 This this the changelog file for the Pothos Comms toolkit.
 
-Release 0.1.3 (pending)
+Release 0.1.3 (2016-03-06)
 ==========================
 
 - Fixed EnvelopeDetector fixed point abs() support

@@ -1,3 +1,9 @@
+pothos-comms (0.1.3) unstable; urgency=low
+
+  * Release 0.1.3 (2016-03-06)
+
+ -- Josh Blum <josh@pothosware.com>  Sun, 06 Mar 2016 11:54:42 -0800
+
 pothos-comms (0.1.2) unstable; urgency=low
 
   * Release 0.1.2 (2016-01-29)
