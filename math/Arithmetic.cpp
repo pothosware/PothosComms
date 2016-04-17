@@ -21,7 +21,7 @@
  * |alias /blocks/arithmetic
  *
  * |param dtype[Data Type] The data type used in the arithmetic.
- * |widget DTypeChooser(float=1,cfloat=1,int=1,cint=1)
+ * |widget DTypeChooser(float=1,cfloat=1,int=1,cint=1,dim=1)
  * |default "complex_float64"
  * |preview disable
  *
@@ -53,7 +53,7 @@ template <typename Type, void (*Operator)(const Type *, const Type *, Type *, co
 class Arithmetic : public Pothos::Block
 {
 public:
-    Arithmetic(void):
+    Arithmetic(const size_t dimension):
         _numInlineBuffers(0)
     {
         typedef Arithmetic<Type, Operator> ClassType;
@@ -61,8 +61,8 @@ public:
         this->registerCall(this, POTHOS_FCN_TUPLE(ClassType, setPreload));
         this->registerCall(this, POTHOS_FCN_TUPLE(ClassType, preload));
         this->registerCall(this, POTHOS_FCN_TUPLE(ClassType, getNumInlineBuffers));
-        this->setupInput(0, typeid(Type));
-        this->setupOutput(0, typeid(Type), this->uid()); //unique domain because of inline buffer forwarding
+        this->setupInput(0, Pothos::DType(typeid(Type), dimension));
+        this->setupOutput(0, Pothos::DType(typeid(Type), dimension), this->uid()); //unique domain because of inline buffer forwarding
 
         //read before write optimization
         this->output(0)->setReadBeforeWrite(this->input(0));
@@ -120,7 +120,7 @@ public:
         for (size_t i = 1; i < inputs.size(); i++)
         {
             auto *inX = inputs[i]->buffer().as<const Type *>();
-            Operator(in0, inX, out, elems);
+            Operator(in0, inX, out, elems*output->dtype().dimension());
             in0 = out; //operate on output array next loop
             inputs[i]->consume(elems); //consume on ith input port
         }
@@ -182,7 +182,7 @@ void divArray(const Type *in0, const Type *in1, Type *out, const size_t num)
 static Pothos::Block *arithmeticFactory(const Pothos::DType &dtype, const std::string &operation)
 {
     #define ifTypeDeclareFactory__(type, opKey, opVal) \
-        if (dtype == Pothos::DType(typeid(type)) and operation == opKey) return new Arithmetic<type, opVal<type>>();
+        if (dtype == Pothos::DType(typeid(type)) and operation == opKey) return new Arithmetic<type, opVal<type>>(dtype.dimension());
     #define ifTypeDeclareFactory_(type) \
         ifTypeDeclareFactory__(type, "ADD", addArray) \
         ifTypeDeclareFactory__(type, "SUB", subArray) \

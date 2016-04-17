@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2015 Josh Blum
+// Copyright (c) 2014-2016 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
@@ -22,7 +22,7 @@ using Pothos::Util::floatToQ;
  * |keywords math scale multiply factor gain
  *
  * |param dtype[Data Type] The data type used in the arithmetic.
- * |widget DTypeChooser(float=1,cfloat=1,int=1,cint=1)
+ * |widget DTypeChooser(float=1,cfloat=1,int=1,cint=1,dim=1)
  * |default "complex_float64"
  * |preview disable
  *
@@ -45,15 +45,15 @@ template <typename Type, typename QType, typename ScaleType>
 class Scale : public Pothos::Block
 {
 public:
-    Scale(void):
+    Scale(const size_t dimension):
         _factor(0.0)
     {
         this->registerCall(this, POTHOS_FCN_TUPLE(Scale, setFactor));
         this->registerCall(this, POTHOS_FCN_TUPLE(Scale, getFactor));
         this->registerCall(this, POTHOS_FCN_TUPLE(Scale, setLabelId));
         this->registerCall(this, POTHOS_FCN_TUPLE(Scale, getLabelId));
-        this->setupInput(0, typeid(Type));
-        this->setupOutput(0, typeid(Type));
+        this->setupInput(0, Pothos::DType(typeid(Type), dimension));
+        this->setupOutput(0, Pothos::DType(typeid(Type), dimension));
     }
 
     void setFactor(const double factor)
@@ -111,7 +111,8 @@ public:
         }
 
         //perform scale operation
-        for (size_t i = 0; i < elems; i++)
+        const size_t N = elems*inPort->dtype().dimension();
+        for (size_t i = 0; i < N; i++)
         {
             const QType tmp = _factorScaled*QType(in[i]);
             out[i] = fromQ<Type>(tmp);
@@ -134,7 +135,7 @@ private:
 static Pothos::Block *scaleFactory(const Pothos::DType &dtype)
 {
     #define ifTypeDeclareFactory_(type, qtype, scaleType) \
-        if (dtype == Pothos::DType(typeid(type))) return new Scale<type, qtype, scaleType>();
+        if (dtype == Pothos::DType(typeid(type))) return new Scale<type, qtype, scaleType>(dtype.dimension());
     #define ifTypeDeclareFactory(type, qtype) \
         ifTypeDeclareFactory_(type, qtype, qtype) \
         ifTypeDeclareFactory_(std::complex<type>, std::complex<qtype>, qtype)

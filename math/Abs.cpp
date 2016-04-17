@@ -23,7 +23,7 @@
  *
  * |param dtype[Data Type] The input data type.
  * The output type is always real.
- * |widget DTypeChooser(float=1,cfloat=1,int=1,cint=1)
+ * |widget DTypeChooser(float=1,cfloat=1,int=1,cint=1,dim=1)
  * |default "complex_float64"
  * |preview disable
  *
@@ -33,10 +33,10 @@ template <typename InType, typename OutType>
 class Abs : public Pothos::Block
 {
 public:
-    Abs(void)
+    Abs(const size_t dimension)
     {
-        this->setupInput(0, typeid(InType));
-        this->setupOutput(0, typeid(OutType));
+        this->setupInput(0, Pothos::DType(typeid(InType), dimension));
+        this->setupOutput(0, Pothos::DType(typeid(OutType), dimension));
     }
 
     void work(void)
@@ -52,7 +52,8 @@ public:
         auto out = outPort->buffer().template as<OutType *>();
 
         //perform abs operation
-        for (size_t i = 0; i < elems; i++)
+        const size_t N = elems*inPort->dtype().dimension();
+        for (size_t i = 0; i < N; i++)
         {
             out[i] = getAbs<OutType>(in[i]);
         }
@@ -69,7 +70,7 @@ public:
 static Pothos::Block *absFactory(const Pothos::DType &dtype)
 {
     #define ifTypeDeclareFactory_(intype, outtype) \
-        if (dtype == Pothos::DType(typeid(intype))) return new Abs<intype, outtype>();
+        if (dtype == Pothos::DType(typeid(intype))) return new Abs<intype, outtype>(dtype.dimension());
     #define ifTypeDeclareFactory(type) \
         ifTypeDeclareFactory_(type, type) \
         ifTypeDeclareFactory_(std::complex<type>, type)

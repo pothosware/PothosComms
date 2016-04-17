@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2015 Tony Kirke
+// Copyright (c) 2014-2016 Tony Kirke
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
@@ -18,7 +18,7 @@
  * |keywords math logic comparator
  *
  * |param dtype[Data Type] The data type used in the arithmetic.
- * |widget DTypeChooser(float=1,int=1)
+ * |widget DTypeChooser(float=1,int=1,dim=1)
  * |default "float64"
  * |preview disable
  *
@@ -37,10 +37,10 @@ template <typename Type, void (*Operator)(const Type *, const Type *, char *, co
 class Comparator : public Pothos::Block
 {
 public:
-  Comparator(void) {
+  Comparator(const size_t dimension) {
     typedef Comparator<Type, Operator> ClassType;
-    this->setupInput(0, typeid(Type));
-    this->setupInput(1, typeid(Type));
+    this->setupInput(0, Pothos::DType(typeid(Type), dimension));
+    this->setupInput(1, Pothos::DType(typeid(Type), dimension));
     this->setupOutput(0, typeid(char));
   }
 
@@ -59,7 +59,7 @@ public:
         auto out = outPort->buffer().template as<char *>();
 
         //perform operation
-        Operator(in0, in1, out, elems);
+        Operator(in0, in1, out, elems*outPort->dtype().dimension());
 
         //produce and consume on 0th ports
         inPort0->consume(elems);
@@ -108,7 +108,7 @@ void notEqualTo(const Type *in0, const Type *in1, char *out, const size_t num)
 static Pothos::Block *comparatorFactory(const Pothos::DType &dtype, const std::string &operation)
 {
     #define ifTypeDeclareFactory__(type, opKey, opVal) \
-        if (dtype == Pothos::DType(typeid(type)) and operation == opKey) return new Comparator<type, opVal<type>>();
+        if (dtype == Pothos::DType(typeid(type)) and operation == opKey) return new Comparator<type, opVal<type>>(dtype.dimension());
     #define ifTypeDeclareFactory(type) \
         ifTypeDeclareFactory__(type, ">", greaterThan) \
         ifTypeDeclareFactory__(type, "<", lessThan) \

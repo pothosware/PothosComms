@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2015 Josh Blum
+// Copyright (c) 2014-2016 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
@@ -22,7 +22,7 @@ using Pothos::Util::floatToQ;
  * |keywords math phase multiply
  *
  * |param dtype[Data Type] The data type used in the arithmetic.
- * |widget DTypeChooser(cint=1, cfloat=1)
+ * |widget DTypeChooser(cint=1, cfloat=1,dim=1)
  * |default "complex_float64"
  * |preview disable
  *
@@ -46,15 +46,15 @@ template <typename Type, typename QType>
 class Rotate : public Pothos::Block
 {
 public:
-    Rotate(void):
+    Rotate(const size_t dimension):
         _phase(0.0)
     {
         this->registerCall(this, POTHOS_FCN_TUPLE(Rotate, setPhase));
         this->registerCall(this, POTHOS_FCN_TUPLE(Rotate, getPhase));
         this->registerCall(this, POTHOS_FCN_TUPLE(Rotate, setLabelId));
         this->registerCall(this, POTHOS_FCN_TUPLE(Rotate, getLabelId));
-        this->setupInput(0, typeid(Type));
-        this->setupOutput(0, typeid(Type));
+        this->setupInput(0, Pothos::DType(typeid(Type), dimension));
+        this->setupOutput(0, Pothos::DType(typeid(Type), dimension));
     }
 
     void setPhase(const double phase)
@@ -112,7 +112,8 @@ public:
         }
 
         //perform scale operation
-        for (size_t i = 0; i < elems; i++)
+        const size_t N = elems*inPort->dtype().dimension();
+        for (size_t i = 0; i < N; i++)
         {
             const QType tmp = _phasor*QType(in[i]);
             out[i] = fromQ<Type>(tmp);
@@ -135,7 +136,7 @@ private:
 static Pothos::Block *rotateFactory(const Pothos::DType &dtype)
 {
     #define ifTypeDeclareFactory_(type, qtype) \
-        if (dtype == Pothos::DType(typeid(type))) return new Rotate<type, qtype>();
+        if (dtype == Pothos::DType(typeid(type))) return new Rotate<type, qtype>(dtype.dimension());
     #define ifTypeDeclareFactory(type, qtype) \
         ifTypeDeclareFactory_(std::complex<type>, std::complex<qtype>)
     ifTypeDeclareFactory(double, double);

@@ -24,7 +24,7 @@
  * The floating point outputs are in radians between -pi and +pi.
  * The fixed point outputs use a signed 16-bit range to represent -pi
  * through +pi (non-inclusive).
- * |widget DTypeChooser(cfloat=1,cint=1)
+ * |widget DTypeChooser(cfloat=1,cint=1,dim=1)
  * |default "complex_float64"
  * |preview disable
  *
@@ -34,10 +34,10 @@ template <typename InType, typename OutType>
 class Angle : public Pothos::Block
 {
 public:
-    Angle(void)
+    Angle(const size_t dimension)
     {
-        this->setupInput(0, typeid(InType));
-        this->setupOutput(0, typeid(OutType));
+        this->setupInput(0, Pothos::DType(typeid(InType), dimension));
+        this->setupOutput(0, Pothos::DType(typeid(OutType), dimension));
     }
 
     void work(void)
@@ -53,7 +53,8 @@ public:
         auto out = outPort->buffer().template as<OutType *>();
 
         //compute angle using templated function
-        for (size_t i = 0; i < elems; i++)
+        const size_t N = elems*inPort->dtype().dimension();
+        for (size_t i = 0; i < N; i++)
         {
             out[i] = getAngle(in[i]);
         }
@@ -70,7 +71,7 @@ public:
 static Pothos::Block *angleFactory(const Pothos::DType &dtype)
 {
     #define ifTypeDeclareFactory_(intype, outtype) \
-        if (dtype == Pothos::DType(typeid(intype))) return new Angle<intype, outtype>();
+        if (dtype == Pothos::DType(typeid(intype))) return new Angle<intype, outtype>(dtype.dimension());
     #define ifTypeDeclareFactory(type) \
         ifTypeDeclareFactory_(std::complex<type>, type)
     ifTypeDeclareFactory(double);
