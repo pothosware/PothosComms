@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2015 Josh Blum
+// Copyright (c) 2015-2016 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
@@ -18,7 +18,7 @@
  * |keywords math conjugate complex conj
  *
  * |param dtype[Data Type] The data type.
- * |widget DTypeChooser(cfloat=1,cint=1)
+ * |widget DTypeChooser(cfloat=1,cint=1,dim=1)
  * |default "complex_float64"
  * |preview disable
  *
@@ -28,10 +28,10 @@ template <typename Type>
 class Conjugate : public Pothos::Block
 {
 public:
-    Conjugate(void)
+    Conjugate(const size_t dimension)
     {
-        this->setupInput(0, typeid(Type));
-        this->setupOutput(0, typeid(Type));
+        this->setupInput(0, Pothos::DType(typeid(Type), dimension));
+        this->setupOutput(0, Pothos::DType(typeid(Type), dimension));
     }
 
     void work(void)
@@ -47,7 +47,8 @@ public:
         auto out = outPort->buffer().template as<Type *>();
 
         //perform conjugate operation
-        for (size_t i = 0; i < elems; i++)
+        const size_t N = elems*inPort->dtype().dimension();
+        for (size_t i = 0; i < N; i++)
         {
             out[i] = std::conj(in[i]);
         }
@@ -64,7 +65,7 @@ public:
 static Pothos::Block *conjugateFactory(const Pothos::DType &dtype)
 {
     #define ifTypeDeclareFactory_(type) \
-        if (dtype == Pothos::DType(typeid(type))) return new Conjugate<type>();
+        if (dtype == Pothos::DType(typeid(type))) return new Conjugate<type>(dtype.dimension());
     #define ifTypeDeclareFactory(type) \
         ifTypeDeclareFactory_(std::complex<type>)
     ifTypeDeclareFactory(double);
