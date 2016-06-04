@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2015 Josh Blum
+// Copyright (c) 2014-2016 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
@@ -71,7 +71,7 @@ public:
         _table(waveTableSize),
         _offset(0.0),
         _scalar(1.0),
-        _wave("GAUSSIAN"),
+        _wave("NORMAL"),
         _mean(0.0),
         _b(1.0),
         _gen(_rd()),
