@@ -269,7 +269,7 @@ class kissfft
             cpx_type * twiddles = &_twiddles[0];
             cpx_type t;
             int Norig = _nfft;
-            #if defined(_MSC_VER) || defined(HAS_ALLOCA_H)
+            #ifdef KISS_FFT_USE_ALLOCA
             cpx_type *scratchbuf = (cpx_type *)alloca(p*sizeof(cpx_type));
             #else
             cpx_type scratchbuf[p];
