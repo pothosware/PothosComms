@@ -3,6 +3,10 @@
 #include <complex>
 #include <vector>
 
+#ifdef _MSC_VER
+#include <malloc.h> //alloca
+#endif //_MSC_VER
+
 #ifdef HAS_ALLOCA_H
 #include <alloca.h>
 #endif //HAS_ALLOCA_H
