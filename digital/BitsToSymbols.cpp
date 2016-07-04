@@ -1,5 +1,5 @@
 // Copyright (c) 2015-2015 Rinat Zakirov
-// Copyright (c) 2015-2015 Josh Blum
+// Copyright (c) 2015-2016 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include "SymbolHelpers.hpp"
@@ -90,13 +90,7 @@ public:
         //create a new packet for output symbols
         Pothos::Packet outPkt;
         auto outPort = this->output(0);
-        if (outPort->elements() >= numSyms)
-        {
-            outPkt.payload = outPort->buffer();
-            outPkt.payload.length = numSyms;
-            outPort->popBuffer(numSyms);
-        }
-        else outPkt.payload = Pothos::BufferChunk(outPort->dtype(), numSyms);
+        outPkt.payload = outPort->getBuffer(numSyms);
 
         //perform conversion
         auto in = inPkt.payload.as<const unsigned char*>();
