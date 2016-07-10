@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2015 Josh Blum
+// Copyright (c) 2015-2016 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Testing.hpp>
@@ -16,8 +16,7 @@ POTHOS_TEST_BLOCK("/comms/tests", test_preamble_framer)
     auto framer = registry.callProxy("/comms/preamble_framer");
     auto collector = registry.callProxy("/blocks/collector_sink", "unsigned char");
 
-    static const unsigned char preambleD[] = {0, 1, 1, 1, 1, 0};
-    std::vector<unsigned char> preamble(preambleD, preambleD+6);
+    const std::vector<unsigned char> preamble{0, 1, 1, 1, 1, 0};
     size_t testLength = 40;
     size_t startIndex = 5;
     size_t endIndex = 33;
