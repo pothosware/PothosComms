@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2015 Josh Blum
+// Copyright (c) 2014-2016 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Testing.hpp>
@@ -8,12 +8,10 @@
 
 POTHOS_TEST_BLOCK("/comms/tests", test_arithmetic_add)
 {
-    auto registry = Pothos::ProxyEnvironment::make("managed")->findProxy("Pothos/BlockRegistry");
-
-    auto feeder0 = registry.callProxy("/blocks/feeder_source", "int");
-    auto feeder1 = registry.callProxy("/blocks/feeder_source", "int");
-    auto adder = registry.callProxy("/comms/arithmetic", "int", "ADD");
-    auto collector = registry.callProxy("/blocks/collector_sink", "int");
+    auto feeder0 = Pothos::BlockRegistry::make("/blocks/feeder_source", "int");
+    auto feeder1 = Pothos::BlockRegistry::make("/blocks/feeder_source", "int");
+    auto adder = Pothos::BlockRegistry::make("/comms/arithmetic", "int", "ADD");
+    auto collector = Pothos::BlockRegistry::make("/blocks/collector_sink", "int");
 
     //load feeder blocks
     auto b0 = Pothos::BufferChunk(10*sizeof(int));
@@ -48,9 +46,9 @@ POTHOS_TEST_BLOCK("/comms/tests", test_arithmetic_feedback)
 {
     auto registry = Pothos::ProxyEnvironment::make("managed")->findProxy("Pothos/BlockRegistry");
 
-    auto feeder = registry.callProxy("/blocks/feeder_source", "int");
-    auto adder = registry.callProxy("/comms/arithmetic", "int", "ADD");
-    auto collector = registry.callProxy("/blocks/collector_sink", "int");
+    auto feeder = Pothos::BlockRegistry::make("/blocks/feeder_source", "int");
+    auto adder = Pothos::BlockRegistry::make("/comms/arithmetic", "int", "ADD");
+    auto collector = Pothos::BlockRegistry::make("/blocks/collector_sink", "int");
 
     //adder has a preload on input1 for feedback loop
     std::vector<size_t> preload(2, 0); preload[1] = 1;
@@ -87,13 +85,11 @@ POTHOS_TEST_BLOCK("/comms/tests", test_arithmetic_feedback)
 
 POTHOS_TEST_BLOCK("/comms/tests", test_inline_buffer)
 {
-    auto registry = Pothos::ProxyEnvironment::make("managed")->findProxy("Pothos/BlockRegistry");
-
-    auto feeder0 = registry.callProxy("/blocks/feeder_source", "int");
-    auto feeder1 = registry.callProxy("/blocks/feeder_source", "int");
-    auto copier = registry.callProxy("/blocks/copier");
-    auto adder = registry.callProxy("/comms/arithmetic", "int", "ADD");
-    auto collector = registry.callProxy("/blocks/collector_sink", "int");
+    auto feeder0 = Pothos::BlockRegistry::make("/blocks/feeder_source", "int");
+    auto feeder1 = Pothos::BlockRegistry::make("/blocks/feeder_source", "int");
+    auto copier = Pothos::BlockRegistry::make("/blocks/copier");
+    auto adder = Pothos::BlockRegistry::make("/comms/arithmetic", "int", "ADD");
+    auto collector = Pothos::BlockRegistry::make("/blocks/collector_sink", "int");
 
     //load feeder blocks
     const auto numElems = 4000;

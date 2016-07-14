@@ -1,3 +1,7 @@
+// Copyright (c) 2015-2015 Tony Kirke
+// Copyright (c) 2016-2016 Josh Blum
+// SPDX-License-Identifier: BSL-1.0
+
 #include <Pothos/Testing.hpp>
 #include <Pothos/Framework.hpp>
 #include <Pothos/Proxy.hpp>
@@ -9,28 +13,25 @@ static double iirfilterToneGetRMS(
 																	const double waveFreq
 )
 {
-    auto env = Pothos::ProxyEnvironment::make("managed");
-    auto registry = env->findProxy("Pothos/BlockRegistry");
-
-    auto waveSource = registry.callProxy("/comms/waveform_source", "complex128");
+    auto waveSource = Pothos::BlockRegistry::make("/comms/waveform_source", "complex128");
     waveSource.callVoid("setWaveform", "SINE");
     waveSource.callVoid("setFrequency", waveFreq);
     waveSource.callVoid("setSampleRate", sampRate);
 
-    auto finiteRelease = registry.callProxy("/blocks/finite_release");
+    auto finiteRelease = Pothos::BlockRegistry::make("/blocks/finite_release");
     finiteRelease.callVoid("setTotalElements", 4096);
 
-    auto filter = registry.callProxy("/comms/iir_filter", "complex128");
+    auto filter = Pothos::BlockRegistry::make("/comms/iir_filter", "complex128");
 		filter.callVoid("setWaitTaps", true);
 
-    auto designer = registry.callProxy("/comms/iir_designer");
+    auto designer = Pothos::BlockRegistry::make("/comms/iir_designer");
     designer.callVoid("setSampleRate", sampRate);
     designer.callVoid("setIIRType", "butterworth");
     designer.callVoid("setFilterType", "LOW_PASS");
     designer.callVoid("setFrequencyLower", 0.1*sampRate);
     designer.callVoid("setOrder", 4);
 
-    auto probe = registry.callProxy("/comms/signal_probe", "complex128");
+    auto probe = Pothos::BlockRegistry::make("/comms/signal_probe", "complex128");
     probe.callVoid("setMode", "RMS");
 
     //run the topology

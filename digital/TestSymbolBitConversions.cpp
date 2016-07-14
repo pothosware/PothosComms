@@ -1,5 +1,5 @@
 // Copyright (c) 2015-2015 Rinat Zakirov
-// Copyright (c) 2015-2015 Josh Blum
+// Copyright (c) 2015-2016 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Testing.hpp>
@@ -11,9 +11,6 @@
 
 POTHOS_TEST_BLOCK("/comms/tests", test_symbol_bit_conversions)
 {
-    auto env = Pothos::ProxyEnvironment::make("managed");
-    auto registry = env->findProxy("Pothos/BlockRegistry");
-
     //run the topology
     for (int mod = 1; mod <= 8; mod++)
     for (int i = 0; i < 2; i++)
@@ -23,14 +20,14 @@ POTHOS_TEST_BLOCK("/comms/tests", test_symbol_bit_conversions)
         std::cout << "and " << mod << " modulus" << std::endl;
 
         //create the blocks
-        auto feeder = registry.callProxy("/blocks/feeder_source", "uint8");
-        auto symsToBits = registry.callProxy("/comms/symbols_to_bits");
+        auto feeder = Pothos::BlockRegistry::make("/blocks/feeder_source", "uint8");
+        auto symsToBits = Pothos::BlockRegistry::make("/comms/symbols_to_bits");
         symsToBits.callProxy("setModulus", mod);
         symsToBits.callProxy("setBitOrder", order);
-        auto bitsToSyms = registry.callProxy("/comms/bits_to_symbols");
+        auto bitsToSyms = Pothos::BlockRegistry::make("/comms/bits_to_symbols");
         bitsToSyms.callProxy("setModulus", mod);
         bitsToSyms.callProxy("setBitOrder", order);
-        auto collector = registry.callProxy("/blocks/collector_sink", "uint8");
+        auto collector = Pothos::BlockRegistry::make("/blocks/collector_sink", "uint8");
 
         //setup the topology
         Pothos::Topology topology;

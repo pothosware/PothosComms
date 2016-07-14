@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2015 Josh Blum
+// Copyright (c) 2015-2016 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Testing.hpp>
@@ -9,13 +9,10 @@
 
 POTHOS_TEST_BLOCK("/comms/tests", test_simple_mac)
 {
-    auto env = Pothos::ProxyEnvironment::make("managed");
-    auto registry = env->findProxy("Pothos/BlockRegistry");
-
     //create test blocks
-    auto feeder = registry.callProxy("/blocks/feeder_source", "uint8");
-    auto collector = registry.callProxy("/blocks/collector_sink", "uint8");
-    auto mac = registry.callProxy("/comms/simple_mac");
+    auto feeder = Pothos::BlockRegistry::make("/blocks/feeder_source", "uint8");
+    auto collector = Pothos::BlockRegistry::make("/blocks/collector_sink", "uint8");
+    auto mac = Pothos::BlockRegistry::make("/comms/simple_mac");
     const unsigned short macId = std::rand() & 0xffff;
     mac.callVoid("setMacId", macId);
 

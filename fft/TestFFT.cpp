@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2015 Josh Blum
+// Copyright (c) 2015-2016 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Testing.hpp>
@@ -10,9 +10,6 @@
 
 POTHOS_TEST_BLOCK("/comms/tests", test_fft_float)
 {
-    auto env = Pothos::ProxyEnvironment::make("managed");
-    auto registry = env->findProxy("Pothos/BlockRegistry");
-
     /*
     numpy.fft.fft([(0.4+0.6j), (-0.7+0.6j), (-0.2+0.8j), (0.9+0.2j)])
     array([  4.00000000e-01+2.2j,   1.00000000e+00+1.4j,  -5.55111512e-17+0.6j,
@@ -33,11 +30,11 @@ POTHOS_TEST_BLOCK("/comms/tests", test_fft_float)
 
     //create blocks
     const auto dtype = Pothos::DType(typeid(std::complex<float>));
-    auto source = registry.callProxy("/blocks/vector_source", dtype);
+    auto source = Pothos::BlockRegistry::make("/blocks/vector_source", dtype);
     source.callVoid("setElements", input);
     source.callVoid("setMode", "ONCE");
-    auto collector = registry.callProxy("/blocks/collector_sink", dtype);
-    auto fft = registry.callProxy("/comms/fft", dtype, input.size(), false);
+    auto collector = Pothos::BlockRegistry::make("/blocks/collector_sink", dtype);
+    auto fft = Pothos::BlockRegistry::make("/comms/fft", dtype, input.size(), false);
 
     //run the topology
     {
@@ -63,7 +60,7 @@ POTHOS_TEST_BLOCK("/comms/tests", test_fft_float)
     source.callVoid("setElements", result);
     source.callVoid("setMode", "ONCE");
     collector.callVoid("clear");
-    auto ifft = registry.callProxy("/comms/fft", dtype, result.size(), true);
+    auto ifft = Pothos::BlockRegistry::make("/comms/fft", dtype, result.size(), true);
     {
         Pothos::Topology topology;
         topology.connect(source, 0, ifft, 0);
@@ -109,11 +106,11 @@ POTHOS_TEST_BLOCK("/comms/tests", test_fft_short)
 
     //create blocks
     const auto dtype = Pothos::DType(typeid(std::complex<short>));
-    auto source = registry.callProxy("/blocks/vector_source", dtype);
+    auto source = Pothos::BlockRegistry::make("/blocks/vector_source", dtype);
     source.callVoid("setElements", input);
     source.callVoid("setMode", "ONCE");
-    auto collector = registry.callProxy("/blocks/collector_sink", dtype);
-    auto fft = registry.callProxy("/comms/fft", dtype, input.size(), false);
+    auto collector = Pothos::BlockRegistry::make("/blocks/collector_sink", dtype);
+    auto fft = Pothos::BlockRegistry::make("/comms/fft", dtype, input.size(), false);
 
     //run the topology
     {
@@ -139,7 +136,7 @@ POTHOS_TEST_BLOCK("/comms/tests", test_fft_short)
     source.callVoid("setElements", result);
     source.callVoid("setMode", "ONCE");
     collector.callVoid("clear");
-    auto ifft = registry.callProxy("/comms/fft", dtype, result.size(), true);
+    auto ifft = Pothos::BlockRegistry::make("/comms/fft", dtype, result.size(), true);
     {
         Pothos::Topology topology;
         topology.connect(source, 0, ifft, 0);

@@ -1,4 +1,5 @@
 // Copyright (c) 2015-2015 Tony Kirke
+// Copyright (c) 2016-2016 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Testing.hpp>
@@ -13,16 +14,13 @@ static const size_t NUM_POINTS = 13;
 template <typename Type>
 void testComparatorTmpl(const double val, const std::string op_string)
 {
-    auto env = Pothos::ProxyEnvironment::make("managed");
-    auto registry = env->findProxy("Pothos/BlockRegistry");
-
     auto dtype = Pothos::DType(typeid(Type));
     std::cout << "Testing comparator with type " << dtype.toString() << ", value " << val << std::endl;
 
-    auto feeder0 = registry.callProxy("/blocks/feeder_source", dtype);
-    auto feeder1 = registry.callProxy("/blocks/feeder_source", dtype);
-    auto comp = registry.callProxy("/comms/comparator", dtype, op_string);
-    auto collector = registry.callProxy("/blocks/collector_sink", "char");
+    auto feeder0 = Pothos::BlockRegistry::make("/blocks/feeder_source", dtype);
+    auto feeder1 = Pothos::BlockRegistry::make("/blocks/feeder_source", dtype);
+    auto comp = Pothos::BlockRegistry::make("/comms/comparator", dtype, op_string);
+    auto collector = Pothos::BlockRegistry::make("/blocks/collector_sink", "char");
 
     //load the feeder
     auto buffIn0 = Pothos::BufferChunk(typeid(Type), NUM_POINTS);

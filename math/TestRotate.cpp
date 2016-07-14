@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2015 Josh Blum
+// Copyright (c) 2015-2016 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Testing.hpp>
@@ -14,16 +14,13 @@ static const size_t NUM_POINTS = 13;
 template <typename Type>
 void testRotateTmpl(const double phase)
 {
-    auto env = Pothos::ProxyEnvironment::make("managed");
-    auto registry = env->findProxy("Pothos/BlockRegistry");
-
     auto dtype = Pothos::DType(typeid(std::complex<Type>));
     std::cout << "Testing rotate with type " << dtype.toString() << ", phase " << (phase/M_PI) << "*pi" << std::endl;
 
-    auto feeder = registry.callProxy("/blocks/feeder_source", dtype);
-    auto rotate = registry.callProxy("/comms/rotate", dtype);
+    auto feeder = Pothos::BlockRegistry::make("/blocks/feeder_source", dtype);
+    auto rotate = Pothos::BlockRegistry::make("/comms/rotate", dtype);
     rotate.callVoid("setPhase", phase);
-    auto collector = registry.callProxy("/blocks/collector_sink", dtype);
+    auto collector = Pothos::BlockRegistry::make("/blocks/collector_sink", dtype);
 
     //load the feeder
     auto buffIn = Pothos::BufferChunk(typeid(std::complex<Type>), NUM_POINTS);

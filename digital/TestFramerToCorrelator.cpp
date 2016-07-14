@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2015 Josh Blum
+// Copyright (c) 2015-2016 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Testing.hpp>
@@ -10,20 +10,17 @@
 
 POTHOS_TEST_BLOCK("/comms/tests", test_framer_to_correlator)
 {
-    auto env = Pothos::ProxyEnvironment::make("managed");
-    auto registry = env->findProxy("Pothos/BlockRegistry");
-
-    auto feeder = registry.callProxy("/blocks/feeder_source", "uint8");
-    auto generator = registry.callProxy("/blocks/packet_to_stream");
-    auto framer = registry.callProxy("/comms/preamble_framer");
-    auto correlator = registry.callProxy("/comms/preamble_correlator");
-    auto deframer = registry.callProxy("/blocks/stream_to_packet");
-    auto collector = registry.callProxy("/blocks/collector_sink", "uint8");
+    auto feeder = Pothos::BlockRegistry::make("/blocks/feeder_source", "uint8");
+    auto generator = Pothos::BlockRegistry::make("/blocks/packet_to_stream");
+    auto framer = Pothos::BlockRegistry::make("/comms/preamble_framer");
+    auto correlator = Pothos::BlockRegistry::make("/comms/preamble_correlator");
+    auto deframer = Pothos::BlockRegistry::make("/blocks/stream_to_packet");
+    auto collector = Pothos::BlockRegistry::make("/blocks/collector_sink", "uint8");
 
     //Copy block provides the loopback path:
     //Copy can cause buffer boundaries to change,
     //which helps to aid in robust testing.
-    auto copier = registry.callProxy("/blocks/copier");
+    auto copier = Pothos::BlockRegistry::make("/blocks/copier");
 
     //configuration constants
     const size_t mtu = 107;

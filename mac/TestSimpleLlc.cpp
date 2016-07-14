@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2015 Josh Blum
+// Copyright (c) 2015-2016 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Testing.hpp>
@@ -9,33 +9,31 @@
 
 POTHOS_TEST_BLOCK("/comms/tests", test_simple_llc)
 {
-    auto env = Pothos::ProxyEnvironment::make("managed");
-    auto registry = env->findProxy("Pothos/BlockRegistry");
     const uint8_t port = 123;
 
     //create side A test blocks
-    auto feederA = registry.callProxy("/blocks/feeder_source", "uint8");
+    auto feederA = Pothos::BlockRegistry::make("/blocks/feeder_source", "uint8");
     feederA.callVoid("setName", "feederA");
-    auto collectorA = registry.callProxy("/blocks/collector_sink", "uint8");
+    auto collectorA = Pothos::BlockRegistry::make("/blocks/collector_sink", "uint8");
     collectorA.callVoid("setName", "collectorA");
-    auto llcA = registry.callProxy("/comms/simple_llc");
+    auto llcA = Pothos::BlockRegistry::make("/comms/simple_llc");
     llcA.callVoid("setName", "llcA");
     llcA.callVoid("setRecipient", 0xB); //sends to size B
     llcA.callVoid("setPort", port);
-    auto macA = registry.callProxy("/comms/simple_mac");
+    auto macA = Pothos::BlockRegistry::make("/comms/simple_mac");
     macA.callVoid("setName", "macA");
     macA.callVoid("setMacId", 0xA);
 
     //create side B test blocks
-    auto feederB = registry.callProxy("/blocks/feeder_source", "uint8");
+    auto feederB = Pothos::BlockRegistry::make("/blocks/feeder_source", "uint8");
     feederB.callVoid("setName", "feederB");
-    auto collectorB = registry.callProxy("/blocks/collector_sink", "uint8");
+    auto collectorB = Pothos::BlockRegistry::make("/blocks/collector_sink", "uint8");
     collectorB.callVoid("setName", "collectorB");
-    auto llcB = registry.callProxy("/comms/simple_llc");
+    auto llcB = Pothos::BlockRegistry::make("/comms/simple_llc");
     llcB.callVoid("setName", "llcB");
     llcB.callVoid("setRecipient", 0xA); //sends to size A
     llcB.callVoid("setPort", port);
-    auto macB = registry.callProxy("/comms/simple_mac");
+    auto macB = Pothos::BlockRegistry::make("/comms/simple_mac");
     macB.callVoid("setName", "macB");
     macB.callVoid("setMacId", 0xB);
 
@@ -111,45 +109,43 @@ POTHOS_TEST_BLOCK("/comms/tests", test_simple_llc_harsh)
      */
     return;
 
-    auto env = Pothos::ProxyEnvironment::make("managed");
-    auto registry = env->findProxy("Pothos/BlockRegistry");
     const uint8_t port = 123;
 
     //create side A test blocks
-    auto feederA = registry.callProxy("/blocks/feeder_source", "uint8");
+    auto feederA = Pothos::BlockRegistry::make("/blocks/feeder_source", "uint8");
     feederA.callVoid("setName", "feederA");
-    auto collectorA = registry.callProxy("/blocks/collector_sink", "uint8");
+    auto collectorA = Pothos::BlockRegistry::make("/blocks/collector_sink", "uint8");
     collectorA.callVoid("setName", "collectorA");
-    auto llcA = registry.callProxy("/comms/simple_llc");
+    auto llcA = Pothos::BlockRegistry::make("/comms/simple_llc");
     llcA.callVoid("setName", "llcA");
     llcA.callVoid("setRecipient", 0xB); //sends to size B
     llcA.callVoid("setPort", port);
     llcA.callVoid("setResendTimeout", 0.1);
     llcA.callVoid("setExpireTimeout", 1.0);
-    auto macA = registry.callProxy("/comms/simple_mac");
+    auto macA = Pothos::BlockRegistry::make("/comms/simple_mac");
     macA.callVoid("setName", "macA");
     macA.callVoid("setMacId", 0xA);
 
     //create side B test blocks
-    auto feederB = registry.callProxy("/blocks/feeder_source", "uint8");
+    auto feederB = Pothos::BlockRegistry::make("/blocks/feeder_source", "uint8");
     feederB.callVoid("setName", "feederB");
-    auto collectorB = registry.callProxy("/blocks/collector_sink", "uint8");
+    auto collectorB = Pothos::BlockRegistry::make("/blocks/collector_sink", "uint8");
     collectorB.callVoid("setName", "collectorB");
-    auto llcB = registry.callProxy("/comms/simple_llc");
+    auto llcB = Pothos::BlockRegistry::make("/comms/simple_llc");
     llcB.callVoid("setName", "llcB");
     llcB.callVoid("setRecipient", 0xA); //sends to size A
     llcB.callVoid("setPort", port);
     llcB.callVoid("setResendTimeout", 0.1);
     llcB.callVoid("setExpireTimeout", 1.0);
-    auto macB = registry.callProxy("/comms/simple_mac");
+    auto macB = Pothos::BlockRegistry::make("/comms/simple_mac");
     macB.callVoid("setName", "macB");
     macB.callVoid("setMacId", 0xB);
 
     //create dropper blocks for connection
     const double dropChance = 0.05; //chance of dropping out of 1.0
-    auto dropperA2B = registry.callProxy("/blocks/sporadic_dropper");
+    auto dropperA2B = Pothos::BlockRegistry::make("/blocks/sporadic_dropper");
     dropperA2B.callVoid("setProbability", dropChance); //chance of drop
-    auto dropperB2A = registry.callProxy("/blocks/sporadic_dropper");
+    auto dropperB2A = Pothos::BlockRegistry::make("/blocks/sporadic_dropper");
     dropperB2A.callVoid("setProbability", dropChance); //chance of drop
 
     //create the test plan for both feeders

@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2015 Josh Blum
+// Copyright (c) 2015-2016 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Testing.hpp>
@@ -138,26 +138,24 @@ static void testFIRDesignerResponse(
 {
     std::cout << ">>> " << filterType << "::" << bandType
         << "(rate=" << sampRate/1e3 << "kHz, low=" << lowerFreq/1e3 << "kHz, high=" << upperFreq/1e3 << "kHz) <<<" << std::endl;
-    auto env = Pothos::ProxyEnvironment::make("managed");
-    auto registry = env->findProxy("Pothos/BlockRegistry");
     const auto dtype = Pothos::DType(typeid(std::complex<double>));
 
     //generate impulse with unit power (1.0)
     std::vector<double> impulse(fftSize, 0.0);
     impulse[fftSize-1] = double(fftSize);
 
-    auto source = registry.callProxy("/blocks/vector_source", dtype);
+    auto source = Pothos::BlockRegistry::make("/blocks/vector_source", dtype);
     source.callVoid("setMode", "ONCE");
     source.callVoid("setElements", impulse);
     source.callVoid("setStartId", "START");
 
-    auto filter = registry.callProxy("/comms/fir_filter", dtype, "COMPLEX");
+    auto filter = Pothos::BlockRegistry::make("/comms/fir_filter", dtype, "COMPLEX");
     filter.callVoid("setDecimation", 1);
     filter.callVoid("setInterpolation", 1);
     filter.callVoid("setWaitTaps", true);
     filter.callVoid("setFrameStartId", "START");
 
-    auto designer = registry.callProxy("/comms/fir_designer");
+    auto designer = Pothos::BlockRegistry::make("/comms/fir_designer");
     designer.callVoid("setSampleRate", sampRate);
     designer.callVoid("setFilterType", filterType);
     designer.callVoid("setBandType", bandType);
@@ -166,8 +164,8 @@ static void testFIRDesignerResponse(
     designer.callVoid("setBandwidthTrans", sampRate/20);
     designer.callVoid("setNumTaps", numTaps);
 
-    auto fft = registry.callProxy("/comms/fft", dtype, fftSize, false);
-    auto collector = registry.callProxy("/blocks/collector_sink", dtype);
+    auto fft = Pothos::BlockRegistry::make("/comms/fft", dtype, fftSize, false);
+    auto collector = Pothos::BlockRegistry::make("/blocks/collector_sink", dtype);
 
     //run the topology
     {

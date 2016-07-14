@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2015 Josh Blum
+// Copyright (c) 2014-2016 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Testing.hpp>
@@ -16,24 +16,21 @@ static double filterToneGetRMS(
     const size_t interp
 )
 {
-    auto env = Pothos::ProxyEnvironment::make("managed");
-    auto registry = env->findProxy("Pothos/BlockRegistry");
-
-    auto waveSource = registry.callProxy("/comms/waveform_source", dtype);
+    auto waveSource = Pothos::BlockRegistry::make("/comms/waveform_source", dtype);
     waveSource.callVoid("setAmplitude", amplitude);
     waveSource.callVoid("setWaveform", "SINE");
     waveSource.callVoid("setFrequency", waveFreq);
     waveSource.callVoid("setSampleRate", sampRate);
 
-    auto finiteRelease = registry.callProxy("/blocks/finite_release");
+    auto finiteRelease = Pothos::BlockRegistry::make("/blocks/finite_release");
     finiteRelease.callVoid("setTotalElements", 4096);
 
-    auto filter = registry.callProxy("/comms/fir_filter", dtype, "COMPLEX");
+    auto filter = Pothos::BlockRegistry::make("/comms/fir_filter", dtype, "COMPLEX");
     filter.callVoid("setDecimation", decim);
     filter.callVoid("setInterpolation", interp);
     filter.callVoid("setWaitTaps", true);
 
-    auto designer = registry.callProxy("/comms/fir_designer");
+    auto designer = Pothos::BlockRegistry::make("/comms/fir_designer");
     designer.callVoid("setSampleRate", (sampRate*interp)/decim);
     designer.callVoid("setFilterType", "SINC");
     designer.callVoid("setBandType", "COMPLEX_BAND_PASS");
@@ -42,7 +39,7 @@ static double filterToneGetRMS(
     designer.callVoid("setBandwidthTrans", waveFreq+0.1*sampRate);
     designer.callVoid("setNumTaps", 101);
 
-    auto probe = registry.callProxy("/comms/signal_probe", dtype);
+    auto probe = Pothos::BlockRegistry::make("/comms/signal_probe", dtype);
     probe.callVoid("setMode", "RMS");
 
     //run the topology

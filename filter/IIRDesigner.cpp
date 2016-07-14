@@ -1,3 +1,7 @@
+// Copyright (c) 2015-2015 Tony Kirke
+// Copyright (c) 2016-2016 Josh Blum
+// SPDX-License-Identifier: BSL-1.0
+
 #include <Pothos/Framework.hpp>
 #include <Pothos/Proxy.hpp>
 #include <complex>

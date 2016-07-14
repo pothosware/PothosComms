@@ -17,15 +17,12 @@ static const double FXPT_ERROR = ALLOWED_ERROR*FXPT_SCALE;
 template <typename Type>
 void testRotateTmpl(void)
 {
-    auto env = Pothos::ProxyEnvironment::make("managed");
-    auto registry = env->findProxy("Pothos/BlockRegistry");
-
     auto dtype = Pothos::DType(typeid(std::complex<Type>));
     std::cout << "Testing angle with type " << dtype.toString() << std::endl;
 
-    auto feeder = registry.callProxy("/blocks/feeder_source", dtype);
-    auto angle = registry.callProxy("/comms/angle", dtype);
-    auto collector = registry.callProxy("/blocks/collector_sink", Pothos::DType(typeid(Type)));
+    auto feeder = Pothos::BlockRegistry::make("/blocks/feeder_source", dtype);
+    auto angle = Pothos::BlockRegistry::make("/comms/angle", dtype);
+    auto collector = Pothos::BlockRegistry::make("/blocks/collector_sink", Pothos::DType(typeid(Type)));
 
     //load the feeder
     auto buffIn = Pothos::BufferChunk(typeid(std::complex<Type>), NUM_POINTS);

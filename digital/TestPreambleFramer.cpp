@@ -9,12 +9,9 @@
 
 POTHOS_TEST_BLOCK("/comms/tests", test_preamble_framer)
 {
-    auto env = Pothos::ProxyEnvironment::make("managed");
-    auto registry = env->findProxy("Pothos/BlockRegistry");
-
-    auto feeder = registry.callProxy("/blocks/feeder_source", "unsigned char");
-    auto framer = registry.callProxy("/comms/preamble_framer");
-    auto collector = registry.callProxy("/blocks/collector_sink", "unsigned char");
+    auto feeder = Pothos::BlockRegistry::make("/blocks/feeder_source", "unsigned char");
+    auto framer = Pothos::BlockRegistry::make("/comms/preamble_framer");
+    auto collector = Pothos::BlockRegistry::make("/blocks/collector_sink", "unsigned char");
 
     const std::vector<unsigned char> preamble{0, 1, 1, 1, 1, 0};
     size_t testLength = 40;
