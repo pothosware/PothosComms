@@ -216,7 +216,7 @@ void IIRDesigner::recalculate(void) {
   for (size_t i=0;i<a.size();i++) b.push_back(a[i]);
   
   delete filt;
-  this->callVoid("tapsChanged", b);
+  this->emitSignal("tapsChanged", b);
 }
 
 static Pothos::BlockRegistry registerIIRDesigner("/comms/iir_designer", &IIRDesigner::make);

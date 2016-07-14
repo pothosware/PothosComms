@@ -469,10 +469,10 @@ void FIRDesigner::recalculate(void)
     // Apply window & emit taps
     if (not complexTaps.empty()) {
       for (size_t i=0;i<_numTaps;i++) complexTaps[i] *= window[i];
-      this->callVoid("tapsChanged", complexTaps);
+      this->emitSignal("tapsChanged", complexTaps);
     } else if (not taps.empty()) {
       for (size_t i=0;i<_numTaps;i++) taps[i] *= window[i];
-      this->callVoid("tapsChanged", taps);
+      this->emitSignal("tapsChanged", taps);
     }
 }
 

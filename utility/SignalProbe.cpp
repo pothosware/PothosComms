@@ -158,7 +158,7 @@ public:
             _value = mean;
         }
 
-        this->callVoid("valueChanged", _value);
+        this->emitSignal("valueChanged", _value);
     }
 
 private:
