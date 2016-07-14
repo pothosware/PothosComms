@@ -23,7 +23,6 @@
  *
  */
 
-#include <Pothos/Util/MathCompat.hpp>
 #include <math.h>
 #include <stdint.h>
 
@@ -34,7 +33,7 @@
  * @return Q15 value representing d; same range
  */
 static inline int16_t q15_from_double(const double d) {
-    return std::lround(d * 32768);
+    return lround(d * 32768);
 }
 
 /**

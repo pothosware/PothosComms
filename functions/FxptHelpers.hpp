@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: BSL-1.0
 
 #pragma once
-#include <Pothos/Util/MathCompat.hpp>
 #include <cmath>
 #include <complex>
 #include <cstdint>

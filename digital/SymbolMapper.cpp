@@ -1,8 +1,7 @@
-// Copyright (c) 2015-2015 Josh Blum
+// Copyright (c) 2015-2016 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
-#include <Pothos/Util/MathCompat.hpp>
 #include <cstdint>
 #include <iostream>
 #include <complex>
