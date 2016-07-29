@@ -3,6 +3,7 @@ This this the changelog file for the Pothos Comms toolkit.
 Release 0.1.4 (pending)
 ==========================
 
+- Switch to 0.4.0 API BlockRegistry factory, and emitSignal()
 - Added configurable rate and automatic event to signal probe
 - Tweaks for kissfft use of alloca and platform specific checks
 - Support dimension through dtype in basic math blocks
