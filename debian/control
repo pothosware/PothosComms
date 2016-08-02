@@ -13,7 +13,15 @@ Homepage: https://github.com/pothosware/pothos-comms/wiki
 Vcs-Git: https://github.com/pothosware/pothos-comms.git
 Vcs-Browser: https://github.com/pothosware/pothos-comms
 
-Package: pothos-comms
+Package: pothos-modules-comms
+Section: libs
+Architecture: all
+Pre-Depends: ${misc:Pre-Depends}
+Depends: pothos-modules0.4-3-comms, ${misc:Depends}
+Description: communications blocks - metapackage
+ The Pothos data-flow software suite.
+
+Package: pothos-modules0.4-3-comms
 Section: libs
 Architecture: any
 Pre-Depends: ${misc:Pre-Depends}
