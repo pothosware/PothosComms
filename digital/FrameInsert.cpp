@@ -36,7 +36,7 @@
  *
  * |param dtype[Data Type] The input data type consumed by the slicer.
  * |widget DTypeChooser(cfloat=1)
- * |default "complex_float64"
+ * |default "complex_float32"
  * |preview disable
  *
  * |param preamble A vector of symbols representing the preamble.

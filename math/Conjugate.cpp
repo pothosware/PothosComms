@@ -19,7 +19,7 @@
  *
  * |param dtype[Data Type] The data type.
  * |widget DTypeChooser(cfloat=1,cint=1,dim=1)
- * |default "complex_float64"
+ * |default "complex_float32"
  * |preview disable
  *
  * |factory /comms/conjugate(dtype)

@@ -25,7 +25,7 @@
  *
  * |param dtype[Data Type] The input data type consumed by the slicer.
  * |widget DTypeChooser(float=1,cfloat=1,int=1,cint=1)
- * |default "complex_float64"
+ * |default "complex_float32"
  * |preview disable
  *
  * |param map[Symbol Map] The symbol map is a list of arbitrary slicer values

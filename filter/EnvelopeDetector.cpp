@@ -25,7 +25,7 @@
  *
  * |param dtype[Input Type] The data type of the input stream.
  * |widget DTypeChooser(float=1,cfloat=1,int=1,cint=1)
- * |default "complex_float64"
+ * |default "complex_float32"
  * |preview disable
  *
  * |param attack The run-up time constant in samples.

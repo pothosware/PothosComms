@@ -25,7 +25,7 @@ static const size_t minimumTableStepSize = 16;
  *
  * |param dtype[Data Type] The data type produced by the waveform source.
  * |widget DTypeChooser(float=1,cfloat=1,int=1,cint=1)
- * |default "complex_float64"
+ * |default "complex_float32"
  * |preview disable
  *
  * |param wave[Wave Type] The type of the waveform produced.

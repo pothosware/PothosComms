@@ -23,7 +23,7 @@ using Pothos::Util::floatToQ;
  *
  * |param dtype[Data Type] The data type used in the arithmetic.
  * |widget DTypeChooser(cint=1, cfloat=1,dim=1)
- * |default "complex_float64"
+ * |default "complex_float32"
  * |preview disable
  *
  * |param phase[Phase] The phase rotation in radians.

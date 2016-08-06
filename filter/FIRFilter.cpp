@@ -42,7 +42,7 @@ using Pothos::Util::floatToQ;
  *
  * |param dtype[Data Type] The data type of the input and output element stream.
  * |widget DTypeChooser(float=1,cfloat=1,int=1,cint=1)
- * |default "complex_float64"
+ * |default "complex_float32"
  * |preview disable
  *
  * |param tapsType[Taps Type] The type of the filter taps (real or complex).

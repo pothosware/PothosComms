@@ -28,7 +28,7 @@
  *
  * |param dtype[Data Type] The data type consumed by the stream probe.
  * |widget DTypeChooser(float=1,cfloat=1,int=1,cint=1)
- * |default "complex_float64"
+ * |default "complex_float32"
  * |preview disable
  *
  * |param mode The calculation mode for the value.

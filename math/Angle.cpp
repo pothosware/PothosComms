@@ -25,7 +25,7 @@
  * The fixed point outputs use a signed 16-bit range to represent -pi
  * through +pi (non-inclusive).
  * |widget DTypeChooser(cfloat=1,cint=1,dim=1)
- * |default "complex_float64"
+ * |default "complex_float32"
  * |preview disable
  *
  * |factory /comms/angle(dtype)

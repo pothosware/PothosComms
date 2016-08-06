@@ -19,7 +19,7 @@
  *
  * |param dtype[Data Type] The data type of the input and output element stream.
  * |widget DTypeChooser(cfloat=1, cint=1)
- * |default "complex_float64"
+ * |default "complex_float32"
  * |preview disable
  *
  * |param numBins[Num FFT Bins] The number of bins per fourier transform.

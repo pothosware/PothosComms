@@ -25,7 +25,7 @@ static const size_t waveTableSize = 4096;
  *
  * |param dtype[Data Type] The data type produced by the noise source.
  * |widget DTypeChooser(float=1,cfloat=1,int=1,cint=1)
- * |default "complex_float64"
+ * |default "complex_float32"
  * |preview disable
  *
  * |param wave[Wave Type] The type of the pseudorandom noise produced.
