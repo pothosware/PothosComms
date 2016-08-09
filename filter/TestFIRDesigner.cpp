@@ -46,7 +46,7 @@ static void printFFTPowerSpectrum(
     std::vector<double> powerBinsColMin(numCols);
     for (size_t col = 0; col < numCols; col++)
     {
-        const size_t hi = size_t(double(powerBins.size()*(col+1))/(numCols));
+        const size_t hi = std::min(size_t(double(powerBins.size()*(col+1))/(numCols)), powerBins.size()-1);
         const size_t lo = size_t(double(powerBins.size()*col)/(numCols));
         powerBinsColMax[col] = *std::max_element(&powerBins[lo], &powerBins[hi]);
         powerBinsColMin[col] = *std::min_element(&powerBins[lo], &powerBins[hi]);

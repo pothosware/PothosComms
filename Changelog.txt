@@ -3,7 +3,8 @@ This this the changelog file for the Pothos Comms toolkit.
 Release 0.2.1 (pending)
 ==========================
 
-* Use complex float32 for default type for most blocks
+- Fixed out of bounds range issue for FIR designer test
+- Use complex float32 for default type for most blocks
 - Added _USE_MATH_DEFINES to fxpt_atan2.cpp for MSVC M_PI
 
 Release 0.2.0 (2016-08-02)
