@@ -1,6 +1,6 @@
 This this the changelog file for the Pothos Comms toolkit.
 
-Release 0.2.1 (pending)
+Release 0.2.1 (2016-09-24)
 ==========================
 
 - Fixed out of bounds range issue for FIR designer test
