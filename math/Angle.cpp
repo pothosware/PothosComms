@@ -71,7 +71,8 @@ public:
 static Pothos::Block *angleFactory(const Pothos::DType &dtype)
 {
     #define ifTypeDeclareFactory_(intype, outtype) \
-        if (dtype == Pothos::DType(typeid(intype))) return new Angle<intype, outtype>(dtype.dimension());
+        if (Pothos::DType::fromDType(dtype, 1) == Pothos::DType(typeid(intype))) \
+            return new Angle<intype, outtype>(dtype.dimension());
     #define ifTypeDeclareFactory(type) \
         ifTypeDeclareFactory_(std::complex<type>, type)
     ifTypeDeclareFactory(double);

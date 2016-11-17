@@ -135,7 +135,8 @@ private:
 static Pothos::Block *scaleFactory(const Pothos::DType &dtype)
 {
     #define ifTypeDeclareFactory_(type, qtype, scaleType) \
-        if (dtype == Pothos::DType(typeid(type))) return new Scale<type, qtype, scaleType>(dtype.dimension());
+        if (Pothos::DType::fromDType(dtype, 1) == Pothos::DType(typeid(type))) \
+            return new Scale<type, qtype, scaleType>(dtype.dimension());
     #define ifTypeDeclareFactory(type, qtype) \
         ifTypeDeclareFactory_(type, qtype, qtype) \
         ifTypeDeclareFactory_(std::complex<type>, std::complex<qtype>, qtype)

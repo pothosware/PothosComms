@@ -182,7 +182,8 @@ void divArray(const Type *in0, const Type *in1, Type *out, const size_t num)
 static Pothos::Block *arithmeticFactory(const Pothos::DType &dtype, const std::string &operation)
 {
     #define ifTypeDeclareFactory__(type, opKey, opVal) \
-        if (dtype == Pothos::DType(typeid(type)) and operation == opKey) return new Arithmetic<type, opVal<type>>(dtype.dimension());
+        if (Pothos::DType::fromDType(dtype, 1) == Pothos::DType(typeid(type)) and operation == opKey) \
+            return new Arithmetic<type, opVal<type>>(dtype.dimension());
     #define ifTypeDeclareFactory_(type) \
         ifTypeDeclareFactory__(type, "ADD", addArray) \
         ifTypeDeclareFactory__(type, "SUB", subArray) \

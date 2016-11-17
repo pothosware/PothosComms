@@ -108,7 +108,8 @@ void notEqualTo(const Type *in0, const Type *in1, char *out, const size_t num)
 static Pothos::Block *comparatorFactory(const Pothos::DType &dtype, const std::string &operation)
 {
     #define ifTypeDeclareFactory__(type, opKey, opVal) \
-        if (dtype == Pothos::DType(typeid(type)) and operation == opKey) return new Comparator<type, opVal<type>>(dtype.dimension());
+        if (Pothos::DType::fromDType(dtype, 1) == Pothos::DType(typeid(type)) and operation == opKey) \
+            return new Comparator<type, opVal<type>>(dtype.dimension());
     #define ifTypeDeclareFactory(type) \
         ifTypeDeclareFactory__(type, ">", greaterThan) \
         ifTypeDeclareFactory__(type, "<", lessThan) \

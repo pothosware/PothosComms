@@ -136,7 +136,8 @@ private:
 static Pothos::Block *rotateFactory(const Pothos::DType &dtype)
 {
     #define ifTypeDeclareFactory_(type, qtype) \
-        if (dtype == Pothos::DType(typeid(type))) return new Rotate<type, qtype>(dtype.dimension());
+        if (Pothos::DType::fromDType(dtype, 1) == Pothos::DType(typeid(type))) \
+            return new Rotate<type, qtype>(dtype.dimension());
     #define ifTypeDeclareFactory(type, qtype) \
         ifTypeDeclareFactory_(std::complex<type>, std::complex<qtype>)
     ifTypeDeclareFactory(double, double);

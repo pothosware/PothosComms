@@ -65,7 +65,8 @@ public:
 static Pothos::Block *conjugateFactory(const Pothos::DType &dtype)
 {
     #define ifTypeDeclareFactory_(type) \
-        if (dtype == Pothos::DType(typeid(type))) return new Conjugate<type>(dtype.dimension());
+        if (Pothos::DType::fromDType(dtype, 1) == Pothos::DType(typeid(type))) \
+            return new Conjugate<type>(dtype.dimension());
     #define ifTypeDeclareFactory(type) \
         ifTypeDeclareFactory_(std::complex<type>)
     ifTypeDeclareFactory(double);
