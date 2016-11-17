@@ -172,7 +172,7 @@ private:
 /***********************************************************************
  * registration
  **********************************************************************/
-static Pothos::Block *valueProbeFactory(const Pothos::DType &dtype)
+static Pothos::Block *signalProbeFactory(const Pothos::DType &dtype)
 {
     #define ifTypeDeclareFactory(type) \
         if (dtype == Pothos::DType(typeid(type))) return new SignalProbe<type, double>(); \
@@ -183,11 +183,11 @@ static Pothos::Block *valueProbeFactory(const Pothos::DType &dtype)
     ifTypeDeclareFactory(int32_t);
     ifTypeDeclareFactory(int16_t);
     ifTypeDeclareFactory(int8_t);
-    throw Pothos::InvalidArgumentException("valueProbeFactory("+dtype.toString()+")", "unsupported type");
+    throw Pothos::InvalidArgumentException("signalProbeFactory("+dtype.toString()+")", "unsupported type");
 }
 
 static Pothos::BlockRegistry registerSignalProbe(
-    "/comms/signal_probe", &valueProbeFactory);
+    "/comms/signal_probe", &signalProbeFactory);
 
 static Pothos::BlockRegistry registerSignalProbeOldPath(
-    "/blocks/stream_probe", &valueProbeFactory);
+    "/blocks/stream_probe", &signalProbeFactory);
