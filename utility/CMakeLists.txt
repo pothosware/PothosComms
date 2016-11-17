@@ -18,6 +18,7 @@ POTHOS_MODULE_UTIL(
         WaveTrigger.cpp
         SplitComplex.cpp
         CombineComplex.cpp
+        TestComplex.cpp
     DESTINATION comms
     ENABLE_DOCS
 )
