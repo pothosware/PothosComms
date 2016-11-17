@@ -35,8 +35,27 @@ public:
     void work(void)
     {
         //number of elements to work with
-        auto elems = this->workInfo().minElements;
+        auto elems = this->workInfo().minAllElements;
         if (elems == 0) return;
+
+        //buffers
+        auto inPort = this->input(0);
+        auto in = inPort->buffer().template as<const std::complex<Type> *>();
+        auto re = _rePort->buffer().template as<Type *>();
+        auto im = _imPort->buffer().template as<Type *>();
+
+        //convert
+        const size_t N = elems*inPort->dtype().dimension();
+        for (size_t i = 0; i < N; i++)
+        {
+            re[i] = in[i].real();
+            im[i] = in[i].imag();
+        }
+
+        //produce/consume
+        inPort->consume(elems);
+        _rePort->produce(elems);
+        _imPort->produce(elems);
     }
 
 private:
