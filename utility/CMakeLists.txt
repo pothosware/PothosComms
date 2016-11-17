@@ -16,6 +16,8 @@ POTHOS_MODULE_UTIL(
         SignalProbe.cpp
         Threshold.cpp
         WaveTrigger.cpp
+        SplitComplex.cpp
+        CombineComplex.cpp
     DESTINATION comms
     ENABLE_DOCS
 )
