@@ -17,11 +17,11 @@ Package: pothos-modules-comms
 Section: libs
 Architecture: all
 Pre-Depends: ${misc:Pre-Depends}
-Depends: pothos0.4-3-modules-comms, ${misc:Depends}
+Depends: pothos0.5-modules-comms, ${misc:Depends}
 Description: communications blocks - metapackage
  The Pothos data-flow software suite.
 
-Package: pothos0.4-3-modules-comms
+Package: pothos0.5-modules-comms
 Section: libs
 Architecture: any
 Multi-Arch: same
