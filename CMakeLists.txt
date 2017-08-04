@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 2.8.9)
 project(PothosComms CXX C)
 
 if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
-    find_package(Pothos "0.4.0" CONFIG REQUIRED)
+    find_package(Pothos "0.6.0" CONFIG REQUIRED)
 else()
     find_package(Pothos CONFIG REQUIRED) #in-tree build
 endif()
@@ -17,6 +17,15 @@ include(FeatureSummary)
 include(CMakeDependentOption)
 cmake_dependent_option(ENABLE_COMMS "Enable Pothos Comms component" ON "Pothos_FOUND" OFF)
 add_feature_info(Comms ENABLE_COMMS "A collection of DSP/communications blocks")
+
+########################################################################
+# json.hpp header
+########################################################################
+find_path(JSON_HPP_INCLUDE_DIR NAMES json.hpp PATH_SUFFIXES nlohmann)
+
+if (NOT JSON_HPP_INCLUDE_DIR)
+    message(WARNING "Pothos Comms toolkit requires json.hpp, skipping...")
+endif (NOT JSON_HPP_INCLUDE_DIR)
 
 ########################################################################
 # Spuce library
