@@ -1,12 +1,14 @@
-// Copyright (c) 2016-2016 Josh Blum
+// Copyright (c) 2016-2017 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Testing.hpp>
 #include <Pothos/Framework.hpp>
 #include <Pothos/Proxy.hpp>
 #include <Pothos/Remote.hpp>
-#include <Poco/JSON/Object.h>
 #include <iostream>
+#include <json.hpp>
+
+using json = nlohmann::json;
 
 POTHOS_TEST_BLOCK("/comms/tests", test_complex_split_combine)
 {
@@ -19,12 +21,12 @@ POTHOS_TEST_BLOCK("/comms/tests", test_complex_split_combine)
 
     //create a test plan
     //fix the size of the buffers since we use the plan on both channels
-    Poco::JSON::Object::Ptr testPlan(new Poco::JSON::Object());
-    testPlan->set("enableBuffers", true);
-    testPlan->set("minBuffers", 3);
-    testPlan->set("maxBuffers", 3);
-    testPlan->set("minBufferSize", 100);
-    testPlan->set("maxBufferSize", 100);
+    json testPlan;
+    testPlan["enableBuffers"] = true;
+    testPlan["minBuffers"] = 3;
+    testPlan["maxBuffers"] = 3;
+    testPlan["minBufferSize"] = 100;
+    testPlan["maxBufferSize"] = 100;
 
     //run the topology
     std::cout << "run the topology\n";
@@ -37,8 +39,8 @@ POTHOS_TEST_BLOCK("/comms/tests", test_complex_split_combine)
         topology.connect(splitComplex, "im", collectorIm, 0);
         topology.commit();
 
-        auto expectedRe = feederRe.callProxy("feedTestPlan", testPlan);
-        auto expectedIm = feederIm.callProxy("feedTestPlan", testPlan);
+        auto expectedRe = feederRe.callProxy("feedTestPlan", testPlan.dump());
+        auto expectedIm = feederIm.callProxy("feedTestPlan", testPlan.dump());
         POTHOS_TEST_TRUE(topology.waitInactive());
 
         std::cout << "verifyTestPlan!\n";

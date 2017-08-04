@@ -1,13 +1,15 @@
 // Copyright (c) 2015-2015 Rinat Zakirov
-// Copyright (c) 2016-2016 Josh Blum
+// Copyright (c) 2016-2017 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Testing.hpp>
 #include <Pothos/Framework.hpp>
 #include <Pothos/Proxy.hpp>
 #include <Pothos/Remote.hpp>
-#include <Poco/JSON/Object.h>
 #include <iostream>
+#include <json.hpp>
+
+using json = nlohmann::json;
 
 POTHOS_TEST_BLOCK("/comms/tests", test_differential_coding)
 {
@@ -22,10 +24,10 @@ POTHOS_TEST_BLOCK("/comms/tests", test_differential_coding)
         auto decoder = Pothos::BlockRegistry::make("/comms/differential_decoder");
 
         //create a test plan
-        Poco::JSON::Object::Ptr testPlan(new Poco::JSON::Object());
-        testPlan->set("enableBuffers", true);
-        testPlan->set("minValue", 0);
-        testPlan->set("maxValue", symbols - 1);
+        json testPlan;
+        testPlan["enableBuffers"] = true;
+        testPlan["minValue"] = 0;
+        testPlan["maxValue"] = symbols - 1;
 
         encoder.callProxy("setSymbols", symbols);
         decoder.callProxy("setSymbols", symbols);
@@ -36,7 +38,7 @@ POTHOS_TEST_BLOCK("/comms/tests", test_differential_coding)
         topology.connect(decoder, 0, collector, 0);
         topology.commit();
 
-        auto expected = feeder.callProxy("feedTestPlan", testPlan);
+        auto expected = feeder.callProxy("feedTestPlan", testPlan.dump());
         POTHOS_TEST_TRUE(topology.waitInactive());
 
         std::cout << "verifyTestPlan!\n";

@@ -1,12 +1,14 @@
-// Copyright (c) 2015-2016 Josh Blum
+// Copyright (c) 2015-2017 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Testing.hpp>
 #include <Pothos/Framework.hpp>
 #include <Pothos/Proxy.hpp>
-#include <Poco/JSON/Object.h>
 #include <iostream>
 #include <complex>
+#include <json.hpp>
+
+using json = nlohmann::json;
 
 POTHOS_TEST_BLOCK("/comms/tests", test_symbol_mapper_slicer_float)
 {
@@ -41,11 +43,11 @@ POTHOS_TEST_BLOCK("/comms/tests", test_symbol_mapper_slicer_float)
 
     //try random test plan
     collector.callVoid("clear");
-    Poco::JSON::Object::Ptr testPlan(new Poco::JSON::Object());
-    testPlan->set("enableBuffers", true);
-    testPlan->set("minValue", 0);
-    testPlan->set("maxValue", map.size()-1);
-    auto expected = feeder.callProxy("feedTestPlan", testPlan);
+    json testPlan;
+    testPlan["enableBuffers"] = true;
+    testPlan["minValue"] = 0;
+    testPlan["maxValue"] = map.size()-1;
+    auto expected = feeder.callProxy("feedTestPlan", testPlan.dump());
     topology.commit();
     POTHOS_TEST_TRUE(topology.waitInactive());
     collector.callVoid("verifyTestPlan", expected);
@@ -90,11 +92,11 @@ POTHOS_TEST_BLOCK("/comms/tests", test_symbol_mapper_slicer_complex)
 
     //try random test plan
     collector.callVoid("clear");
-    Poco::JSON::Object::Ptr testPlan(new Poco::JSON::Object());
-    testPlan->set("enableBuffers", true);
-    testPlan->set("minValue", 0);
-    testPlan->set("maxValue", map.size()-1);
-    auto expected = feeder.callProxy("feedTestPlan", testPlan);
+    json testPlan;
+    testPlan["enableBuffers"] = true;
+    testPlan["minValue"] = 0;
+    testPlan["maxValue"] = map.size()-1;
+    auto expected = feeder.callProxy("feedTestPlan", testPlan.dump());
     topology.commit();
     POTHOS_TEST_TRUE(topology.waitInactive());
     collector.callVoid("verifyTestPlan", expected);
@@ -120,11 +122,11 @@ POTHOS_TEST_BLOCK("/comms/tests", test_symbol_mapper_gray_code)
     decode.callVoid("setMap", grayCode);
 
     //create test plan
-    Poco::JSON::Object::Ptr testPlan(new Poco::JSON::Object());
-    testPlan->set("enableBuffers", true);
-    testPlan->set("minValue", 0);
-    testPlan->set("maxValue", grayCode.size()-1);
-    auto expected = feeder.callProxy("feedTestPlan", testPlan);
+    json testPlan;
+    testPlan["enableBuffers"] = true;
+    testPlan["minValue"] = 0;
+    testPlan["maxValue"] = grayCode.size()-1;
+    auto expected = feeder.callProxy("feedTestPlan", testPlan.dump());
 
     //run the topology
     {

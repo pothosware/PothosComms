@@ -1,13 +1,15 @@
 // Copyright (c) 2015-2015 Rinat Zakirov
-// Copyright (c) 2015-2016 Josh Blum
+// Copyright (c) 2015-2017 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Testing.hpp>
 #include <Pothos/Framework.hpp>
 #include <Pothos/Proxy.hpp>
 #include <Pothos/Remote.hpp>
-#include <Poco/JSON/Object.h>
 #include <iostream>
+#include <json.hpp>
+
+using json = nlohmann::json;
 
 POTHOS_TEST_BLOCK("/comms/tests", test_symbol_byte_conversions)
 {
@@ -77,12 +79,12 @@ POTHOS_TEST_BLOCK("/comms/tests", test_symbol_byte_conversions)
         //total multiple required to flush out complete stream
         std::cout << "Perform stream-based test plan..." << std::endl;
         {
-            Poco::JSON::Object::Ptr testPlan(new Poco::JSON::Object());
-            testPlan->set("enableBuffers", true);
-            testPlan->set("totalMultiple", 8);
-            testPlan->set("minValue", 0);
-            testPlan->set("maxValue", (1 << mod) - 1);
-            auto expected = feeder.callProxy("feedTestPlan", testPlan);
+            json testPlan;
+            testPlan["enableBuffers"] = true;
+            testPlan["totalMultiple"] = 8;
+            testPlan["minValue"] = 0;
+            testPlan["maxValue"] = (1 << mod) - 1;
+            auto expected = feeder.callProxy("feedTestPlan", testPlan.dump());
             topology.commit();
             POTHOS_TEST_TRUE(topology.waitInactive(0.01));
 
@@ -98,12 +100,12 @@ POTHOS_TEST_BLOCK("/comms/tests", test_symbol_byte_conversions)
         //buffer multiple required to avoid padding packets in loopback test
         std::cout << "Perform packet-based test plan..." << std::endl;
         {
-            Poco::JSON::Object::Ptr testPlan(new Poco::JSON::Object());
-            testPlan->set("enablePackets", true);
-            testPlan->set("bufferMultiple", 8);
-            testPlan->set("minValue", 0);
-            testPlan->set("maxValue", (1 << mod) - 1);
-            auto expected = feeder.callProxy("feedTestPlan", testPlan);
+            json testPlan;
+            testPlan["enablePackets"] = true;
+            testPlan["bufferMultiple"] = 8;
+            testPlan["minValue"] = 0;
+            testPlan["maxValue"] = (1 << mod) - 1;
+            auto expected = feeder.callProxy("feedTestPlan", testPlan.dump());
             topology.commit();
             POTHOS_TEST_TRUE(topology.waitInactive(0.01));
 

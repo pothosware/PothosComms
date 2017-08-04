@@ -1,11 +1,13 @@
-// Copyright (c) 2015-2016 Josh Blum
+// Copyright (c) 2015-2017 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Testing.hpp>
 #include <Pothos/Framework.hpp>
 #include <Pothos/Proxy.hpp>
-#include <Poco/JSON/Object.h>
 #include <iostream>
+#include <json.hpp>
+
+using json = nlohmann::json;
 
 POTHOS_TEST_BLOCK("/comms/tests", test_simple_llc)
 {
@@ -149,12 +151,12 @@ POTHOS_TEST_BLOCK("/comms/tests", test_simple_llc_harsh)
     dropperB2A.callVoid("setProbability", dropChance); //chance of drop
 
     //create the test plan for both feeders
-    Poco::JSON::Object::Ptr testPlan(new Poco::JSON::Object());
-    testPlan->set("enablePackets", true);
-    testPlan->set("minBuffers", 500); //many packets
-    testPlan->set("maxBuffers", 500); //many packets
-    auto expectedA2B = feederA.callProxy("feedTestPlan", testPlan);
-    auto expectedB2A = feederB.callProxy("feedTestPlan", testPlan);
+    json testPlan;
+    testPlan["enablePackets"] = true;
+    testPlan["minBuffers"] = 500; //many packets
+    testPlan["maxBuffers"] = 500; //many packets
+    auto expectedA2B = feederA.callProxy("feedTestPlan", testPlan.dump());
+    auto expectedB2A = feederB.callProxy("feedTestPlan", testPlan.dump());
 
     //setup the topology
     Pothos::Topology topology;

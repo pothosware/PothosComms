@@ -1,10 +1,9 @@
-// Copyright (c) 2015-2016 Josh Blum
+// Copyright (c) 2015-2017 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Testing.hpp>
 #include <Pothos/Framework.hpp>
 #include <Pothos/Proxy.hpp>
-#include <Poco/JSON/Object.h>
 #include <iostream>
 
 POTHOS_TEST_BLOCK("/comms/tests", test_simple_mac)

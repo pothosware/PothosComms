@@ -1,12 +1,14 @@
-// Copyright (c) 2015-2016 Josh Blum
+// Copyright (c) 2015-2017 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Testing.hpp>
 #include <Pothos/Framework.hpp>
 #include <Pothos/Proxy.hpp>
 #include <Pothos/Remote.hpp>
-#include <Poco/JSON/Object.h>
 #include <iostream>
+#include <json.hpp>
+
+using json = nlohmann::json;
 
 POTHOS_TEST_BLOCK("/comms/tests", test_framer_to_correlator)
 {
@@ -46,13 +48,13 @@ POTHOS_TEST_BLOCK("/comms/tests", test_framer_to_correlator)
     deframer.callVoid("setMTU", mtu);
 
     //create a test plan
-    Poco::JSON::Object::Ptr testPlan(new Poco::JSON::Object());
-    testPlan->set("enablePackets", true);
-    testPlan->set("minValue", 0);
-    testPlan->set("maxValue", maxValue);
-    testPlan->set("minBufferSize", mtu);
-    testPlan->set("maxBufferSize", mtu);
-    auto expected = feeder.callProxy("feedTestPlan", testPlan);
+    json testPlan;
+    testPlan["enablePackets"] = true;
+    testPlan["minValue"] = 0;
+    testPlan["maxValue"] = maxValue;
+    testPlan["minBufferSize"] = mtu;
+    testPlan["maxBufferSize"] = mtu;
+    auto expected = feeder.callProxy("feedTestPlan", testPlan.dump());
 
     //because of correlation window, pad feeder to flush through last message
     Pothos::Packet paddingPacket;

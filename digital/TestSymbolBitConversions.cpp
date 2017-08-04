@@ -1,13 +1,15 @@
 // Copyright (c) 2015-2015 Rinat Zakirov
-// Copyright (c) 2015-2016 Josh Blum
+// Copyright (c) 2015-2017 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Testing.hpp>
 #include <Pothos/Framework.hpp>
 #include <Pothos/Proxy.hpp>
 #include <Pothos/Remote.hpp>
-#include <Poco/JSON/Object.h>
 #include <iostream>
+#include <json.hpp>
+
+using json = nlohmann::json;
 
 POTHOS_TEST_BLOCK("/comms/tests", test_symbol_bit_conversions)
 {
@@ -37,24 +39,24 @@ POTHOS_TEST_BLOCK("/comms/tests", test_symbol_bit_conversions)
 
         //create a test plan for streams
         std::cout << "Perform stream-based test plan..." << std::endl;
-        Poco::JSON::Object::Ptr testPlan0(new Poco::JSON::Object());
-        testPlan0->set("enableBuffers", true);
-        testPlan0->set("enableLabels", true);
-        testPlan0->set("minValue", 0);
-        testPlan0->set("maxValue", (1 << mod) - 1);
-        auto expected0 = feeder.callProxy("feedTestPlan", testPlan0);
+        json testPlan0;
+        testPlan0["enableBuffers"] = true;
+        testPlan0["enableLabels"] = true;
+        testPlan0["minValue"] = 0;
+        testPlan0["maxValue"] = (1 << mod) - 1;
+        auto expected0 = feeder.callProxy("feedTestPlan", testPlan0.dump());
         topology.commit();
         POTHOS_TEST_TRUE(topology.waitInactive(0.01));
         collector.callVoid("verifyTestPlan", expected0);
 
         //create a test plan for packets
         std::cout << "Perform packet-based test plan..." << std::endl;
-        Poco::JSON::Object::Ptr testPlan1(new Poco::JSON::Object());
-        testPlan1->set("enablePackets", true);
-        testPlan1->set("enableLabels", true);
-        testPlan1->set("minValue", 0);
-        testPlan1->set("maxValue", (1 << mod) - 1);
-        auto expected1 = feeder.callProxy("feedTestPlan", testPlan1);
+        json testPlan1;
+        testPlan1["enablePackets"] = true;
+        testPlan1["enableLabels"] = true;
+        testPlan1["minValue"] = 0;
+        testPlan1["maxValue"] = (1 << mod) - 1;
+        auto expected1 = feeder.callProxy("feedTestPlan", testPlan1.dump());
         topology.commit();
         POTHOS_TEST_TRUE(topology.waitInactive(0.01));
         collector.callVoid("verifyTestPlan", expected1);
