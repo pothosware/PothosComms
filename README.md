@@ -6,7 +6,7 @@ encoding/decoding, frame synchronization, error correction, and MAC layer suppor
 
 ## Documentation
 
-* https://github.com/pothosware/pothos-comms/wiki
+* https://github.com/pothosware/PothosComms/wiki
 
 ## Licensing information
 

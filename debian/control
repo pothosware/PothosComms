@@ -10,9 +10,9 @@ Build-Depends:
     libpothos-dev,
     libspuce-dev
 Standards-Version: 3.9.8
-Homepage: https://github.com/pothosware/pothos-comms/wiki
-Vcs-Git: https://github.com/pothosware/pothos-comms.git
-Vcs-Browser: https://github.com/pothosware/pothos-comms
+Homepage: https://github.com/pothosware/PothosComms/wiki
+Vcs-Git: https://github.com/pothosware/PothosComms.git
+Vcs-Browser: https://github.com/pothosware/PothosComms
 
 Package: pothos-modules-comms
 Section: libs
