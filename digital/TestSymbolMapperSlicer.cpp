@@ -18,14 +18,14 @@ POTHOS_TEST_BLOCK("/comms/tests", test_symbol_mapper_slicer_float)
     auto collector = Pothos::BlockRegistry::make("/blocks/collector_sink", "unsigned char");
 
     const std::vector<float> map{-3, -1, 1, 3};
-    mapper.callProxy("setMap", map);
-    slicer.callProxy("setMap", map);
+    mapper.call("setMap", map);
+    slicer.call("setMap", map);
 
     //load feeder blocks
     auto b0 = Pothos::BufferChunk(10*sizeof(unsigned char));
     auto p0 = b0.as<unsigned char *>();
     for (size_t i = 0; i < 10; i++) p0[i] = i&3;
-    feeder.callProxy("feedBuffer", b0);
+    feeder.call("feedBuffer", b0);
 
     //run the topology
     Pothos::Topology topology;
@@ -36,21 +36,21 @@ POTHOS_TEST_BLOCK("/comms/tests", test_symbol_mapper_slicer_float)
     POTHOS_TEST_TRUE(topology.waitInactive());
 
     //check the collector
-    auto buff = collector.call<Pothos::BufferChunk>("getBuffer");
+    Pothos::BufferChunk buff = collector.call("getBuffer");
     POTHOS_TEST_EQUAL(buff.length, 10*sizeof(unsigned char));
     auto pb = buff.as<const unsigned char *>();
     POTHOS_TEST_EQUALA(pb, p0, 10);
 
     //try random test plan
-    collector.callVoid("clear");
+    collector.call("clear");
     json testPlan;
     testPlan["enableBuffers"] = true;
     testPlan["minValue"] = 0;
     testPlan["maxValue"] = map.size()-1;
-    auto expected = feeder.callProxy("feedTestPlan", testPlan.dump());
+    auto expected = feeder.call("feedTestPlan", testPlan.dump());
     topology.commit();
     POTHOS_TEST_TRUE(topology.waitInactive());
-    collector.callVoid("verifyTestPlan", expected);
+    collector.call("verifyTestPlan", expected);
 }
 
 POTHOS_TEST_BLOCK("/comms/tests", test_symbol_mapper_slicer_complex)
@@ -67,14 +67,14 @@ POTHOS_TEST_BLOCK("/comms/tests", test_symbol_mapper_slicer_complex)
     map.emplace_back(-1.0, 1.0);
     map.emplace_back(1.0, -1.0);
     map.emplace_back(1.0, 1.0);
-    mapper.callProxy("setMap", map);
-    slicer.callProxy("setMap", map);
+    mapper.call("setMap", map);
+    slicer.call("setMap", map);
 
     //load feeder blocks
     auto b0 = Pothos::BufferChunk(10*sizeof(unsigned char));
     auto p0 = b0.as<unsigned char *>();
     for (size_t i = 0; i < 10; i++) p0[i] = i&3;
-    feeder.callProxy("feedBuffer", b0);
+    feeder.call("feedBuffer", b0);
 
     //run the topology
     Pothos::Topology topology;
@@ -85,21 +85,21 @@ POTHOS_TEST_BLOCK("/comms/tests", test_symbol_mapper_slicer_complex)
     POTHOS_TEST_TRUE(topology.waitInactive());
 
     //check the collector
-    auto buff = collector.call<Pothos::BufferChunk>("getBuffer");
+    Pothos::BufferChunk buff = collector.call("getBuffer");
     POTHOS_TEST_EQUAL(buff.length, 10*sizeof(unsigned char));
     auto pb = buff.as<const unsigned char *>();
     POTHOS_TEST_EQUALA(pb, p0, 10);
 
     //try random test plan
-    collector.callVoid("clear");
+    collector.call("clear");
     json testPlan;
     testPlan["enableBuffers"] = true;
     testPlan["minValue"] = 0;
     testPlan["maxValue"] = map.size()-1;
-    auto expected = feeder.callProxy("feedTestPlan", testPlan.dump());
+    auto expected = feeder.call("feedTestPlan", testPlan.dump());
     topology.commit();
     POTHOS_TEST_TRUE(topology.waitInactive());
-    collector.callVoid("verifyTestPlan", expected);
+    collector.call("verifyTestPlan", expected);
 }
 
 POTHOS_TEST_BLOCK("/comms/tests", test_symbol_mapper_gray_code)
@@ -118,15 +118,15 @@ POTHOS_TEST_BLOCK("/comms/tests", test_symbol_mapper_gray_code)
     grayCode.push_back(7);
     grayCode.push_back(5);
     grayCode.push_back(4);
-    encode.callVoid("setMap", grayCode);
-    decode.callVoid("setMap", grayCode);
+    encode.call("setMap", grayCode);
+    decode.call("setMap", grayCode);
 
     //create test plan
     json testPlan;
     testPlan["enableBuffers"] = true;
     testPlan["minValue"] = 0;
     testPlan["maxValue"] = grayCode.size()-1;
-    auto expected = feeder.callProxy("feedTestPlan", testPlan.dump());
+    auto expected = feeder.call("feedTestPlan", testPlan.dump());
 
     //run the topology
     {
@@ -139,6 +139,6 @@ POTHOS_TEST_BLOCK("/comms/tests", test_symbol_mapper_gray_code)
     }
 
     //verify the test plan
-    collector.callVoid("verifyTestPlan", expected);
+    collector.call("verifyTestPlan", expected);
 }
 

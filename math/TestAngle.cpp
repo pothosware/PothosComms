@@ -33,7 +33,7 @@ void testRotateTmpl(void)
         double angle = i*(M_PI/5);
         pIn[i] = mag*std::polar(1.0, angle);
     }
-    feeder.callProxy("feedBuffer", buffIn);
+    feeder.call("feedBuffer", buffIn);
 
     //run the topology
     {
@@ -45,7 +45,7 @@ void testRotateTmpl(void)
     }
 
     //check the collector
-    auto buffOut = collector.call<Pothos::BufferChunk>("getBuffer");
+    Pothos::BufferChunk buffOut = collector.call("getBuffer");
     POTHOS_TEST_EQUAL(buffOut.elements(), buffIn.elements());
     auto pOut = buffOut.as<const Type *>();
     for (size_t i = 0; i < buffOut.elements(); i++)

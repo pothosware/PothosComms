@@ -13,7 +13,7 @@ POTHOS_TEST_BLOCK("/comms/tests", test_simple_mac)
     auto collector = Pothos::BlockRegistry::make("/blocks/collector_sink", "uint8");
     auto mac = Pothos::BlockRegistry::make("/comms/simple_mac");
     const unsigned short macId = std::rand() & 0xffff;
-    mac.callVoid("setMacId", macId);
+    mac.call("setMacId", macId);
 
     //create a test packet
     Pothos::Packet pkt0;
@@ -21,7 +21,7 @@ POTHOS_TEST_BLOCK("/comms/tests", test_simple_mac)
     for (size_t i = 0; i < pkt0.payload.elements(); i++)
         pkt0.payload.as<unsigned char *>()[i] = std::rand() & 0xff;
     pkt0.metadata["recipient"] = Pothos::Object(macId);
-    feeder.callVoid("feedPacket", pkt0);
+    feeder.call("feedPacket", pkt0);
 
     //setup the topology
     Pothos::Topology topology;
@@ -35,7 +35,7 @@ POTHOS_TEST_BLOCK("/comms/tests", test_simple_mac)
 
     //check the result
     POTHOS_TEST_EQUAL(mac.call<unsigned long long>("getErrorCount"), 0);
-    const auto packets = collector.call<std::vector<Pothos::Packet>>("getPackets");
+    const std::vector<Pothos::Packet> packets = collector.call("getPackets");
     POTHOS_TEST_EQUAL(packets.size(), 1);
     const auto pktOut0 = packets.at(0);
     POTHOS_TEST_EQUAL(pktOut0.metadata.count("sender"), 1);
@@ -50,7 +50,7 @@ POTHOS_TEST_BLOCK("/comms/tests", test_simple_mac)
     //now try a packet with the wrong recipient -- should cause an error
     const unsigned short otherId = ~macId;
     pkt0.metadata["recipient"] = Pothos::Object(otherId);
-    feeder.callVoid("feedPacket", pkt0);
+    feeder.call("feedPacket", pkt0);
     topology.commit();
     POTHOS_TEST_TRUE(topology.waitInactive());
     POTHOS_TEST_EQUAL(mac.call<unsigned long long>("getErrorCount"), 1);

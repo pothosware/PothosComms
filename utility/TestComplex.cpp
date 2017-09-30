@@ -39,13 +39,13 @@ POTHOS_TEST_BLOCK("/comms/tests", test_complex_split_combine)
         topology.connect(splitComplex, "im", collectorIm, 0);
         topology.commit();
 
-        auto expectedRe = feederRe.callProxy("feedTestPlan", testPlan.dump());
-        auto expectedIm = feederIm.callProxy("feedTestPlan", testPlan.dump());
+        auto expectedRe = feederRe.call("feedTestPlan", testPlan.dump());
+        auto expectedIm = feederIm.call("feedTestPlan", testPlan.dump());
         POTHOS_TEST_TRUE(topology.waitInactive());
 
         std::cout << "verifyTestPlan!\n";
-        collectorRe.callVoid("verifyTestPlan", expectedRe);
-        collectorIm.callVoid("verifyTestPlan", expectedIm);
+        collectorRe.call("verifyTestPlan", expectedRe);
+        collectorIm.call("verifyTestPlan", expectedIm);
     }
 
     std::cout << "done!\n";

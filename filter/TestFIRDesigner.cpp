@@ -145,24 +145,24 @@ static void testFIRDesignerResponse(
     impulse[fftSize-1] = double(fftSize);
 
     auto source = Pothos::BlockRegistry::make("/blocks/vector_source", dtype);
-    source.callVoid("setMode", "ONCE");
-    source.callVoid("setElements", impulse);
-    source.callVoid("setStartId", "START");
+    source.call("setMode", "ONCE");
+    source.call("setElements", impulse);
+    source.call("setStartId", "START");
 
     auto filter = Pothos::BlockRegistry::make("/comms/fir_filter", dtype, "COMPLEX");
-    filter.callVoid("setDecimation", 1);
-    filter.callVoid("setInterpolation", 1);
-    filter.callVoid("setWaitTaps", true);
-    filter.callVoid("setFrameStartId", "START");
+    filter.call("setDecimation", 1);
+    filter.call("setInterpolation", 1);
+    filter.call("setWaitTaps", true);
+    filter.call("setFrameStartId", "START");
 
     auto designer = Pothos::BlockRegistry::make("/comms/fir_designer");
-    designer.callVoid("setSampleRate", sampRate);
-    designer.callVoid("setFilterType", filterType);
-    designer.callVoid("setBandType", bandType);
-    designer.callVoid("setFrequencyLower", lowerFreq);
-    designer.callVoid("setFrequencyUpper", upperFreq);
-    designer.callVoid("setBandwidthTrans", sampRate/20);
-    designer.callVoid("setNumTaps", numTaps);
+    designer.call("setSampleRate", sampRate);
+    designer.call("setFilterType", filterType);
+    designer.call("setBandType", bandType);
+    designer.call("setFrequencyLower", lowerFreq);
+    designer.call("setFrequencyUpper", upperFreq);
+    designer.call("setBandwidthTrans", sampRate/20);
+    designer.call("setNumTaps", numTaps);
 
     auto fft = Pothos::BlockRegistry::make("/comms/fft", dtype, fftSize, false);
     auto collector = Pothos::BlockRegistry::make("/blocks/collector_sink", dtype);
@@ -179,7 +179,7 @@ static void testFIRDesignerResponse(
     }
 
     //check the buffer
-    auto buff = collector.call<Pothos::BufferChunk>("getBuffer");
+    Pothos::BufferChunk buff = collector.call("getBuffer");
     POTHOS_TEST_EQUAL(buff.elements(), fftSize);
 
     //calculate power bins

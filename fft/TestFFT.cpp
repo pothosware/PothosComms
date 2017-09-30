@@ -31,8 +31,8 @@ POTHOS_TEST_BLOCK("/comms/tests", test_fft_float)
     //create blocks
     const auto dtype = Pothos::DType(typeid(std::complex<float>));
     auto source = Pothos::BlockRegistry::make("/blocks/vector_source", dtype);
-    source.callVoid("setElements", input);
-    source.callVoid("setMode", "ONCE");
+    source.call("setElements", input);
+    source.call("setMode", "ONCE");
     auto collector = Pothos::BlockRegistry::make("/blocks/collector_sink", dtype);
     auto fft = Pothos::BlockRegistry::make("/comms/fft", dtype, input.size(), false);
 
@@ -46,7 +46,7 @@ POTHOS_TEST_BLOCK("/comms/tests", test_fft_float)
     }
 
     //check the buffer
-    auto buff = collector.call<Pothos::BufferChunk>("getBuffer");
+    Pothos::BufferChunk buff = collector.call("getBuffer");
     POTHOS_TEST_EQUAL(buff.elements(), result.size());
     auto pb = buff.as<const std::complex<float> *>();
     for (size_t i = 0; i < buff.elements(); i++)
@@ -57,9 +57,9 @@ POTHOS_TEST_BLOCK("/comms/tests", test_fft_float)
     }
 
     //perform the ifft and check the result
-    source.callVoid("setElements", result);
-    source.callVoid("setMode", "ONCE");
-    collector.callVoid("clear");
+    source.call("setElements", result);
+    source.call("setMode", "ONCE");
+    collector.call("clear");
     auto ifft = Pothos::BlockRegistry::make("/comms/fft", dtype, result.size(), true);
     {
         Pothos::Topology topology;
@@ -107,8 +107,8 @@ POTHOS_TEST_BLOCK("/comms/tests", test_fft_short)
     //create blocks
     const auto dtype = Pothos::DType(typeid(std::complex<short>));
     auto source = Pothos::BlockRegistry::make("/blocks/vector_source", dtype);
-    source.callVoid("setElements", input);
-    source.callVoid("setMode", "ONCE");
+    source.call("setElements", input);
+    source.call("setMode", "ONCE");
     auto collector = Pothos::BlockRegistry::make("/blocks/collector_sink", dtype);
     auto fft = Pothos::BlockRegistry::make("/comms/fft", dtype, input.size(), false);
 
@@ -122,7 +122,7 @@ POTHOS_TEST_BLOCK("/comms/tests", test_fft_short)
     }
 
     //check the buffer
-    auto buff = collector.call<Pothos::BufferChunk>("getBuffer");
+    Pothos::BufferChunk buff = collector.call("getBuffer");
     POTHOS_TEST_EQUAL(buff.elements(), result.size());
     auto pb = buff.as<const std::complex<short> *>();
     for (size_t i = 0; i < buff.elements(); i++)
@@ -133,9 +133,9 @@ POTHOS_TEST_BLOCK("/comms/tests", test_fft_short)
     }
 
     //perform the ifft and check the result
-    source.callVoid("setElements", result);
-    source.callVoid("setMode", "ONCE");
-    collector.callVoid("clear");
+    source.call("setElements", result);
+    source.call("setMode", "ONCE");
+    collector.call("clear");
     auto ifft = Pothos::BlockRegistry::make("/comms/fft", dtype, result.size(), true);
     {
         Pothos::Topology topology;

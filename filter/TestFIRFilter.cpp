@@ -17,30 +17,30 @@ static double filterToneGetRMS(
 )
 {
     auto waveSource = Pothos::BlockRegistry::make("/comms/waveform_source", dtype);
-    waveSource.callVoid("setAmplitude", amplitude);
-    waveSource.callVoid("setWaveform", "SINE");
-    waveSource.callVoid("setFrequency", waveFreq);
-    waveSource.callVoid("setSampleRate", sampRate);
+    waveSource.call("setAmplitude", amplitude);
+    waveSource.call("setWaveform", "SINE");
+    waveSource.call("setFrequency", waveFreq);
+    waveSource.call("setSampleRate", sampRate);
 
     auto finiteRelease = Pothos::BlockRegistry::make("/blocks/finite_release");
-    finiteRelease.callVoid("setTotalElements", 4096);
+    finiteRelease.call("setTotalElements", 4096);
 
     auto filter = Pothos::BlockRegistry::make("/comms/fir_filter", dtype, "COMPLEX");
-    filter.callVoid("setDecimation", decim);
-    filter.callVoid("setInterpolation", interp);
-    filter.callVoid("setWaitTaps", true);
+    filter.call("setDecimation", decim);
+    filter.call("setInterpolation", interp);
+    filter.call("setWaitTaps", true);
 
     auto designer = Pothos::BlockRegistry::make("/comms/fir_designer");
-    designer.callVoid("setSampleRate", (sampRate*interp)/decim);
-    designer.callVoid("setFilterType", "SINC");
-    designer.callVoid("setBandType", "COMPLEX_BAND_PASS");
-    designer.callVoid("setFrequencyLower", waveFreq-0.1*sampRate);
-    designer.callVoid("setFrequencyUpper", waveFreq+0.1*sampRate);
-    designer.callVoid("setBandwidthTrans", waveFreq+0.1*sampRate);
-    designer.callVoid("setNumTaps", 101);
+    designer.call("setSampleRate", (sampRate*interp)/decim);
+    designer.call("setFilterType", "SINC");
+    designer.call("setBandType", "COMPLEX_BAND_PASS");
+    designer.call("setFrequencyLower", waveFreq-0.1*sampRate);
+    designer.call("setFrequencyUpper", waveFreq+0.1*sampRate);
+    designer.call("setBandwidthTrans", waveFreq+0.1*sampRate);
+    designer.call("setNumTaps", 101);
 
     auto probe = Pothos::BlockRegistry::make("/comms/signal_probe", dtype);
-    probe.callVoid("setMode", "RMS");
+    probe.call("setMode", "RMS");
 
     //run the topology
     {

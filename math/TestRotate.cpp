@@ -19,7 +19,7 @@ void testRotateTmpl(const double phase)
 
     auto feeder = Pothos::BlockRegistry::make("/blocks/feeder_source", dtype);
     auto rotate = Pothos::BlockRegistry::make("/comms/rotate", dtype);
-    rotate.callVoid("setPhase", phase);
+    rotate.call("setPhase", phase);
     auto collector = Pothos::BlockRegistry::make("/blocks/collector_sink", dtype);
 
     //load the feeder
@@ -29,7 +29,7 @@ void testRotateTmpl(const double phase)
     {
         pIn[i] = std::complex<Type>(Type(10*i), Type(-20*i));
     }
-    feeder.callProxy("feedBuffer", buffIn);
+    feeder.call("feedBuffer", buffIn);
 
     //run the topology
     {
@@ -41,7 +41,7 @@ void testRotateTmpl(const double phase)
     }
 
     //check the collector
-    auto buffOut = collector.call<Pothos::BufferChunk>("getBuffer");
+    Pothos::BufferChunk buffOut = collector.call("getBuffer");
     POTHOS_TEST_EQUAL(buffOut.elements(), buffIn.elements());
     auto pOut = buffOut.as<const std::complex<Type> *>();
     for (size_t i = 0; i < buffOut.elements(); i++)

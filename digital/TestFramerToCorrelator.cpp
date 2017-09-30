@@ -34,18 +34,18 @@ POTHOS_TEST_BLOCK("/comms/tests", test_framer_to_correlator)
     for (size_t i = 0; i < 32; i++) preamble.push_back(std::rand() % (maxValue+1));
 
     //configure
-    generator.callVoid("setFrameStartId", txFrameStartId);
-    generator.callVoid("setFrameEndId", txFrameEndId);
-    generator.callVoid("setName", "frameGenerator");
-    framer.callVoid("setPreamble", preamble);
-    framer.callVoid("setFrameStartId", txFrameStartId);
-    framer.callVoid("setFrameEndId", txFrameEndId);
-    framer.callVoid("setPaddingSize", 10);
-    correlator.callVoid("setPreamble", preamble);
-    correlator.callVoid("setThreshold", 0); //expect perfect match
-    correlator.callVoid("setFrameStartId", rxFrameStartId);
-    deframer.callVoid("setFrameStartId", rxFrameStartId);
-    deframer.callVoid("setMTU", mtu);
+    generator.call("setFrameStartId", txFrameStartId);
+    generator.call("setFrameEndId", txFrameEndId);
+    generator.call("setName", "frameGenerator");
+    framer.call("setPreamble", preamble);
+    framer.call("setFrameStartId", txFrameStartId);
+    framer.call("setFrameEndId", txFrameEndId);
+    framer.call("setPaddingSize", 10);
+    correlator.call("setPreamble", preamble);
+    correlator.call("setThreshold", 0); //expect perfect match
+    correlator.call("setFrameStartId", rxFrameStartId);
+    deframer.call("setFrameStartId", rxFrameStartId);
+    deframer.call("setMTU", mtu);
 
     //create a test plan
     json testPlan;
@@ -54,12 +54,12 @@ POTHOS_TEST_BLOCK("/comms/tests", test_framer_to_correlator)
     testPlan["maxValue"] = maxValue;
     testPlan["minBufferSize"] = mtu;
     testPlan["maxBufferSize"] = mtu;
-    auto expected = feeder.callProxy("feedTestPlan", testPlan.dump());
+    auto expected = feeder.call("feedTestPlan", testPlan.dump());
 
     //because of correlation window, pad feeder to flush through last message
     Pothos::Packet paddingPacket;
     paddingPacket.payload = Pothos::BufferChunk("uint8", preamble.size());
-    feeder.callVoid("feedPacket", paddingPacket);
+    feeder.call("feedPacket", paddingPacket);
 
     //create tester topology
     {
@@ -76,5 +76,5 @@ POTHOS_TEST_BLOCK("/comms/tests", test_framer_to_correlator)
     }
 
     std::cout << "verifyTestPlan" << std::endl;
-    collector.callVoid("verifyTestPlan", expected);
+    collector.call("verifyTestPlan", expected);
 }

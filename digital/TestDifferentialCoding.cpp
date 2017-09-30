@@ -29,8 +29,8 @@ POTHOS_TEST_BLOCK("/comms/tests", test_differential_coding)
         testPlan["minValue"] = 0;
         testPlan["maxValue"] = symbols - 1;
 
-        encoder.callProxy("setSymbols", symbols);
-        decoder.callProxy("setSymbols", symbols);
+        encoder.call("setSymbols", symbols);
+        decoder.call("setSymbols", symbols);
 
         Pothos::Topology topology;
         topology.connect(feeder, 0, encoder, 0);
@@ -38,11 +38,11 @@ POTHOS_TEST_BLOCK("/comms/tests", test_differential_coding)
         topology.connect(decoder, 0, collector, 0);
         topology.commit();
 
-        auto expected = feeder.callProxy("feedTestPlan", testPlan.dump());
+        auto expected = feeder.call("feedTestPlan", testPlan.dump());
         POTHOS_TEST_TRUE(topology.waitInactive());
 
         std::cout << "verifyTestPlan!\n";
-        collector.callVoid("verifyTestPlan", expected);
+        collector.call("verifyTestPlan", expected);
     }
 
     std::cout << "done!\n";

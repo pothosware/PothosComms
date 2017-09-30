@@ -34,8 +34,8 @@ void testComparatorTmpl(const double val, const std::string op_string)
         pIn1[i] = Type(val);
     }
     
-    feeder0.callProxy("feedBuffer", buffIn0);
-    feeder1.callProxy("feedBuffer", buffIn1);
+    feeder0.call("feedBuffer", buffIn0);
+    feeder1.call("feedBuffer", buffIn1);
 
     //run the topology
     {
@@ -48,7 +48,7 @@ void testComparatorTmpl(const double val, const std::string op_string)
     }
 
     //check the collector
-    auto buffOut = collector.call<Pothos::BufferChunk>("getBuffer");
+    Pothos::BufferChunk buffOut = collector.call("getBuffer");
     POTHOS_TEST_EQUAL(buffOut.length, NUM_POINTS*sizeof(char));
     auto pOut = buffOut.as<const char *>();
     for (size_t i = 0; i < NUM_POINTS; i++)

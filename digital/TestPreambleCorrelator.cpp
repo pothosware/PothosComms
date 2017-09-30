@@ -17,15 +17,15 @@ POTHOS_TEST_BLOCK("/comms/tests", test_preamble_correlator)
     size_t testLength = 10 + preamble.size();
     size_t preambleIndex = 4;
 
-    correlator.callProxy("setPreamble", preamble);
-    correlator.callProxy("setThreshold", 0);
+    correlator.call("setPreamble", preamble);
+    correlator.call("setThreshold", 0);
 
     //load feeder blocks
     auto b0 = Pothos::BufferChunk(testLength + preamble.size());
     auto p0 = b0.as<unsigned char *>();
     for (size_t i = 0; i < testLength; i++) p0[i] = i % 2;
     for (size_t i = 0; i < preamble.size(); i++) p0[i + preambleIndex] = preamble[i];
-    feeder.callVoid("feedBuffer", b0);
+    feeder.call("feedBuffer", b0);
 
     //run the topology
     {
@@ -38,13 +38,13 @@ POTHOS_TEST_BLOCK("/comms/tests", test_preamble_correlator)
 
     //check the collector buffer matches input
     //the last preamble-sized window of elements is left in the correlator
-    auto buff = collector.call<Pothos::BufferChunk>("getBuffer");
+    Pothos::BufferChunk buff = collector.call("getBuffer");
     POTHOS_TEST_EQUAL(testLength, buff.elements());
     auto pb = buff.as<const unsigned char *>();
     POTHOS_TEST_EQUALA(pb, p0, testLength);
 
     //check for the preamble label
-    auto labels = collector.call<std::vector<Pothos::Label>>("getLabels");
+    std::vector<Pothos::Label> labels = collector.call("getLabels");
     POTHOS_TEST_EQUAL(labels.size(), 1);
     POTHOS_TEST_EQUAL(labels[0].index, preambleIndex + preamble.size());
 }

@@ -24,11 +24,11 @@ POTHOS_TEST_BLOCK("/comms/tests", test_symbol_bit_conversions)
         //create the blocks
         auto feeder = Pothos::BlockRegistry::make("/blocks/feeder_source", "uint8");
         auto symsToBits = Pothos::BlockRegistry::make("/comms/symbols_to_bits");
-        symsToBits.callProxy("setModulus", mod);
-        symsToBits.callProxy("setBitOrder", order);
+        symsToBits.call("setModulus", mod);
+        symsToBits.call("setBitOrder", order);
         auto bitsToSyms = Pothos::BlockRegistry::make("/comms/bits_to_symbols");
-        bitsToSyms.callProxy("setModulus", mod);
-        bitsToSyms.callProxy("setBitOrder", order);
+        bitsToSyms.call("setModulus", mod);
+        bitsToSyms.call("setBitOrder", order);
         auto collector = Pothos::BlockRegistry::make("/blocks/collector_sink", "uint8");
 
         //setup the topology
@@ -44,10 +44,10 @@ POTHOS_TEST_BLOCK("/comms/tests", test_symbol_bit_conversions)
         testPlan0["enableLabels"] = true;
         testPlan0["minValue"] = 0;
         testPlan0["maxValue"] = (1 << mod) - 1;
-        auto expected0 = feeder.callProxy("feedTestPlan", testPlan0.dump());
+        auto expected0 = feeder.call("feedTestPlan", testPlan0.dump());
         topology.commit();
         POTHOS_TEST_TRUE(topology.waitInactive(0.01));
-        collector.callVoid("verifyTestPlan", expected0);
+        collector.call("verifyTestPlan", expected0);
 
         //create a test plan for packets
         std::cout << "Perform packet-based test plan..." << std::endl;
@@ -56,10 +56,10 @@ POTHOS_TEST_BLOCK("/comms/tests", test_symbol_bit_conversions)
         testPlan1["enableLabels"] = true;
         testPlan1["minValue"] = 0;
         testPlan1["maxValue"] = (1 << mod) - 1;
-        auto expected1 = feeder.callProxy("feedTestPlan", testPlan1.dump());
+        auto expected1 = feeder.call("feedTestPlan", testPlan1.dump());
         topology.commit();
         POTHOS_TEST_TRUE(topology.waitInactive(0.01));
-        collector.callVoid("verifyTestPlan", expected1);
+        collector.call("verifyTestPlan", expected1);
     }
 
     std::cout << "done!\n";

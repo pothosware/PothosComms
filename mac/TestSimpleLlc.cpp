@@ -15,43 +15,43 @@ POTHOS_TEST_BLOCK("/comms/tests", test_simple_llc)
 
     //create side A test blocks
     auto feederA = Pothos::BlockRegistry::make("/blocks/feeder_source", "uint8");
-    feederA.callVoid("setName", "feederA");
+    feederA.call("setName", "feederA");
     auto collectorA = Pothos::BlockRegistry::make("/blocks/collector_sink", "uint8");
-    collectorA.callVoid("setName", "collectorA");
+    collectorA.call("setName", "collectorA");
     auto llcA = Pothos::BlockRegistry::make("/comms/simple_llc");
-    llcA.callVoid("setName", "llcA");
-    llcA.callVoid("setRecipient", 0xB); //sends to size B
-    llcA.callVoid("setPort", port);
+    llcA.call("setName", "llcA");
+    llcA.call("setRecipient", 0xB); //sends to size B
+    llcA.call("setPort", port);
     auto macA = Pothos::BlockRegistry::make("/comms/simple_mac");
-    macA.callVoid("setName", "macA");
-    macA.callVoid("setMacId", 0xA);
+    macA.call("setName", "macA");
+    macA.call("setMacId", 0xA);
 
     //create side B test blocks
     auto feederB = Pothos::BlockRegistry::make("/blocks/feeder_source", "uint8");
-    feederB.callVoid("setName", "feederB");
+    feederB.call("setName", "feederB");
     auto collectorB = Pothos::BlockRegistry::make("/blocks/collector_sink", "uint8");
-    collectorB.callVoid("setName", "collectorB");
+    collectorB.call("setName", "collectorB");
     auto llcB = Pothos::BlockRegistry::make("/comms/simple_llc");
-    llcB.callVoid("setName", "llcB");
-    llcB.callVoid("setRecipient", 0xA); //sends to size A
-    llcB.callVoid("setPort", port);
+    llcB.call("setName", "llcB");
+    llcB.call("setRecipient", 0xA); //sends to size A
+    llcB.call("setPort", port);
     auto macB = Pothos::BlockRegistry::make("/comms/simple_mac");
-    macB.callVoid("setName", "macB");
-    macB.callVoid("setMacId", 0xB);
+    macB.call("setName", "macB");
+    macB.call("setMacId", 0xB);
 
     //create a test packet
     Pothos::Packet pktA2B;
     pktA2B.payload = Pothos::BufferChunk("uint8", 100);
     for (size_t i = 0; i < pktA2B.payload.elements(); i++)
         pktA2B.payload.as<unsigned char *>()[i] = std::rand() & 0xff;
-    feederA.callVoid("feedPacket", pktA2B);
+    feederA.call("feedPacket", pktA2B);
 
     //create a test packet
     Pothos::Packet pktB2A;
     pktB2A.payload = Pothos::BufferChunk("uint8", 100);
     for (size_t i = 0; i < pktB2A.payload.elements(); i++)
         pktB2A.payload.as<unsigned char *>()[i] = std::rand() & 0xff;
-    feederB.callVoid("feedPacket", pktB2A);
+    feederB.call("feedPacket", pktB2A);
 
     //setup the topology
     Pothos::Topology topology;
@@ -83,7 +83,7 @@ POTHOS_TEST_BLOCK("/comms/tests", test_simple_llc)
 
     //check side A
     POTHOS_TEST_EQUAL(macA.call<unsigned long long>("getErrorCount"), 0);
-    const auto packetsA = collectorA.call<std::vector<Pothos::Packet>>("getPackets");
+    const std::vector<Pothos::Packet> packetsA = collectorA.call("getPackets");
     POTHOS_TEST_EQUAL(packetsA.size(), 1);
     const auto pktOutA0 = packetsA.at(0);
     POTHOS_TEST_EQUAL(pktB2A.payload.dtype, pktOutA0.payload.dtype);
@@ -93,7 +93,7 @@ POTHOS_TEST_BLOCK("/comms/tests", test_simple_llc)
 
     //check side B
     POTHOS_TEST_EQUAL(macB.call<unsigned long long>("getErrorCount"), 0);
-    const auto packetsB = collectorB.call<std::vector<Pothos::Packet>>("getPackets");
+    const std::vector<Pothos::Packet> packetsB = collectorB.call("getPackets");
     POTHOS_TEST_EQUAL(packetsB.size(), 1);
     const auto pktOutB0 = packetsB.at(0);
     POTHOS_TEST_EQUAL(pktA2B.payload.dtype, pktOutB0.payload.dtype);
@@ -115,48 +115,48 @@ POTHOS_TEST_BLOCK("/comms/tests", test_simple_llc_harsh)
 
     //create side A test blocks
     auto feederA = Pothos::BlockRegistry::make("/blocks/feeder_source", "uint8");
-    feederA.callVoid("setName", "feederA");
+    feederA.call("setName", "feederA");
     auto collectorA = Pothos::BlockRegistry::make("/blocks/collector_sink", "uint8");
-    collectorA.callVoid("setName", "collectorA");
+    collectorA.call("setName", "collectorA");
     auto llcA = Pothos::BlockRegistry::make("/comms/simple_llc");
-    llcA.callVoid("setName", "llcA");
-    llcA.callVoid("setRecipient", 0xB); //sends to size B
-    llcA.callVoid("setPort", port);
-    llcA.callVoid("setResendTimeout", 0.1);
-    llcA.callVoid("setExpireTimeout", 1.0);
+    llcA.call("setName", "llcA");
+    llcA.call("setRecipient", 0xB); //sends to size B
+    llcA.call("setPort", port);
+    llcA.call("setResendTimeout", 0.1);
+    llcA.call("setExpireTimeout", 1.0);
     auto macA = Pothos::BlockRegistry::make("/comms/simple_mac");
-    macA.callVoid("setName", "macA");
-    macA.callVoid("setMacId", 0xA);
+    macA.call("setName", "macA");
+    macA.call("setMacId", 0xA);
 
     //create side B test blocks
     auto feederB = Pothos::BlockRegistry::make("/blocks/feeder_source", "uint8");
-    feederB.callVoid("setName", "feederB");
+    feederB.call("setName", "feederB");
     auto collectorB = Pothos::BlockRegistry::make("/blocks/collector_sink", "uint8");
-    collectorB.callVoid("setName", "collectorB");
+    collectorB.call("setName", "collectorB");
     auto llcB = Pothos::BlockRegistry::make("/comms/simple_llc");
-    llcB.callVoid("setName", "llcB");
-    llcB.callVoid("setRecipient", 0xA); //sends to size A
-    llcB.callVoid("setPort", port);
-    llcB.callVoid("setResendTimeout", 0.1);
-    llcB.callVoid("setExpireTimeout", 1.0);
+    llcB.call("setName", "llcB");
+    llcB.call("setRecipient", 0xA); //sends to size A
+    llcB.call("setPort", port);
+    llcB.call("setResendTimeout", 0.1);
+    llcB.call("setExpireTimeout", 1.0);
     auto macB = Pothos::BlockRegistry::make("/comms/simple_mac");
-    macB.callVoid("setName", "macB");
-    macB.callVoid("setMacId", 0xB);
+    macB.call("setName", "macB");
+    macB.call("setMacId", 0xB);
 
     //create dropper blocks for connection
     const double dropChance = 0.05; //chance of dropping out of 1.0
     auto dropperA2B = Pothos::BlockRegistry::make("/blocks/sporadic_dropper");
-    dropperA2B.callVoid("setProbability", dropChance); //chance of drop
+    dropperA2B.call("setProbability", dropChance); //chance of drop
     auto dropperB2A = Pothos::BlockRegistry::make("/blocks/sporadic_dropper");
-    dropperB2A.callVoid("setProbability", dropChance); //chance of drop
+    dropperB2A.call("setProbability", dropChance); //chance of drop
 
     //create the test plan for both feeders
     json testPlan;
     testPlan["enablePackets"] = true;
     testPlan["minBuffers"] = 500; //many packets
     testPlan["maxBuffers"] = 500; //many packets
-    auto expectedA2B = feederA.callProxy("feedTestPlan", testPlan.dump());
-    auto expectedB2A = feederB.callProxy("feedTestPlan", testPlan.dump());
+    auto expectedA2B = feederA.call("feedTestPlan", testPlan.dump());
+    auto expectedB2A = feederB.call("feedTestPlan", testPlan.dump());
 
     //setup the topology
     Pothos::Topology topology;
@@ -195,6 +195,6 @@ POTHOS_TEST_BLOCK("/comms/tests", test_simple_llc_harsh)
     std::cout << "llcB expired count " << llcB.call<unsigned long long>("getExpiredCount") << std::endl;
     POTHOS_TEST_EQUAL(llcA.call<unsigned long long>("getExpiredCount"), 0);
     POTHOS_TEST_EQUAL(llcB.call<unsigned long long>("getExpiredCount"), 0);
-    collectorA.callVoid("verifyTestPlan", expectedB2A);
-    collectorB.callVoid("verifyTestPlan", expectedA2B);
+    collectorA.call("verifyTestPlan", expectedB2A);
+    collectorB.call("verifyTestPlan", expectedA2B);
 }

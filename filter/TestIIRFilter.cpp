@@ -14,25 +14,25 @@ static double iirfilterToneGetRMS(
 )
 {
     auto waveSource = Pothos::BlockRegistry::make("/comms/waveform_source", "complex128");
-    waveSource.callVoid("setWaveform", "SINE");
-    waveSource.callVoid("setFrequency", waveFreq);
-    waveSource.callVoid("setSampleRate", sampRate);
+    waveSource.call("setWaveform", "SINE");
+    waveSource.call("setFrequency", waveFreq);
+    waveSource.call("setSampleRate", sampRate);
 
     auto finiteRelease = Pothos::BlockRegistry::make("/blocks/finite_release");
-    finiteRelease.callVoid("setTotalElements", 4096);
+    finiteRelease.call("setTotalElements", 4096);
 
     auto filter = Pothos::BlockRegistry::make("/comms/iir_filter", "complex128");
-		filter.callVoid("setWaitTaps", true);
+		filter.call("setWaitTaps", true);
 
     auto designer = Pothos::BlockRegistry::make("/comms/iir_designer");
-    designer.callVoid("setSampleRate", sampRate);
-    designer.callVoid("setIIRType", "butterworth");
-    designer.callVoid("setFilterType", "LOW_PASS");
-    designer.callVoid("setFrequencyLower", 0.1*sampRate);
-    designer.callVoid("setOrder", 4);
+    designer.call("setSampleRate", sampRate);
+    designer.call("setIIRType", "butterworth");
+    designer.call("setFilterType", "LOW_PASS");
+    designer.call("setFrequencyLower", 0.1*sampRate);
+    designer.call("setOrder", 4);
 
     auto probe = Pothos::BlockRegistry::make("/comms/signal_probe", "complex128");
-    probe.callVoid("setMode", "RMS");
+    probe.call("setMode", "RMS");
 
     //run the topology
     {

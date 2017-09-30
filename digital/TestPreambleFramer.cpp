@@ -19,18 +19,18 @@ POTHOS_TEST_BLOCK("/comms/tests", test_preamble_framer)
     size_t endIndex = 33;
     size_t paddingSize = 13;
 
-    framer.callProxy("setPreamble", preamble);
-    framer.callProxy("setFrameStartId", "myFrameStart");
-    framer.callProxy("setFrameEndId", "myFrameEnd");
-    framer.callProxy("setPaddingSize", paddingSize);
+    framer.call("setPreamble", preamble);
+    framer.call("setFrameStartId", "myFrameStart");
+    framer.call("setFrameEndId", "myFrameEnd");
+    framer.call("setPaddingSize", paddingSize);
 
     //load feeder blocks
     auto b0 = Pothos::BufferChunk(typeid(unsigned char), testLength);
     auto p0 = b0.as<unsigned char *>();
     for (size_t i = 0; i < testLength; i++) p0[i] = i % 2;
-    feeder.callVoid("feedBuffer", b0);
-    feeder.callVoid("feedLabel", Pothos::Label("myFrameStart", Pothos::Object(), startIndex));
-    feeder.callVoid("feedLabel", Pothos::Label("myFrameEnd", Pothos::Object(), endIndex));
+    feeder.call("feedBuffer", b0);
+    feeder.call("feedLabel", Pothos::Label("myFrameStart", Pothos::Object(), startIndex));
+    feeder.call("feedLabel", Pothos::Label("myFrameEnd", Pothos::Object(), endIndex));
 
     //run the topology
     {
@@ -42,7 +42,7 @@ POTHOS_TEST_BLOCK("/comms/tests", test_preamble_framer)
     }
 
     //check the collector buffer matches input with preamble inserted
-    auto buff = collector.call<Pothos::BufferChunk>("getBuffer");
+    Pothos::BufferChunk buff = collector.call("getBuffer");
     POTHOS_TEST_EQUAL(buff.elements(), testLength + preamble.size() + paddingSize);
     auto pb = buff.as<const unsigned char *>();
     POTHOS_TEST_EQUALA(pb, p0, startIndex); //check data before frame
@@ -51,7 +51,7 @@ POTHOS_TEST_BLOCK("/comms/tests", test_preamble_framer)
     POTHOS_TEST_EQUALA(pb+endIndex+preamble.size()+paddingSize+1, p0+endIndex+1, testLength-(endIndex+1)); //check data after frame
 
     //check the label positions
-    auto labels = collector.call<std::vector<Pothos::Label>>("getLabels");
+    std::vector<Pothos::Label> labels = collector.call("getLabels");
     POTHOS_TEST_EQUAL(labels.size(), 2);
     POTHOS_TEST_EQUAL(labels[0].id, "myFrameStart");
     POTHOS_TEST_EQUAL(labels[0].index, startIndex);
