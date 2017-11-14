@@ -1,7 +1,8 @@
-// Copyright (c) 2015-2016 Josh Blum
+// Copyright (c) 2015-2017 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
+#include <Poco/Logger.h>
 #include <chrono>
 #include <complex>
 #include <iostream>
@@ -168,6 +169,7 @@ public:
     }
 
     WaveTrigger(void):
+        _logger(Poco::Logger::get("WaveTrigger")),
         _numPoints(0),
         _numWindows(1),
         _eventRate(1.0),
@@ -424,9 +426,16 @@ private:
 
     bool searchTriggerPointReal(const Pothos::BufferChunk &buff, const size_t numElems, double &pos);
 
-    bool searchTriggerPointComplex(const Pothos::BufferChunk &buff, const size_t numElems,  double &pos);
+    bool searchTriggerPointComplex(const Pothos::BufferChunk &buff, const size_t numElems, double &pos);
 
     void triggerWork(void);
+
+    //logging
+    Poco::Logger &_logger;
+    void _logDataTypeError(const std::string &portName, const std::string &what)
+    {
+        _logger.error("%s[%s] dropped %s with unspecified type", this->getName(), portName, what);
+    }
 
     //configuration settings
     size_t _numPoints;
@@ -476,12 +485,21 @@ void WaveTrigger::work(void)
             {
                 auto pkt = msg.extract<Pothos::Packet>();
                 pkt.metadata["index"] = Pothos::Object(port->index());
-                outPort->postMessage(pkt);
+                if (pkt.payload.dtype) outPort->postMessage(pkt);
+                else _logDataTypeError(port->name(), "packet payload");
             }
             else
             {
                 outPort->postMessage(msg);
             }
+        }
+
+        //while iterating across ports, check for buffers with unspecified types
+        if (port->buffer().length != 0 and not port->buffer().dtype)
+        {
+            _logDataTypeError(port->name(), "stream buffer");
+            port->consume(port->elements());
+            return;
         }
     }
 
