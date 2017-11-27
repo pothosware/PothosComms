@@ -40,9 +40,9 @@ public:
 
         //buffers
         auto outPort = this->output(0);
-        auto out = outPort->buffer().template as<std::complex<Type> *>();
-        auto re = _rePort->buffer().template as<const Type *>();
-        auto im = _imPort->buffer().template as<const Type *>();
+        std::complex<Type> *out = outPort->buffer();
+        const Type *re = _rePort->buffer();
+        const Type *im = _imPort->buffer();
 
         //convert
         const size_t N = elems*outPort->dtype().dimension();

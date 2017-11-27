@@ -94,8 +94,8 @@ public:
         const size_t N = this->workInfo().minElements;
 
         //cast the input and output buffers
-        const auto in = inPort->buffer().template as<const Type *>();
-        const auto out = outPort->buffer().template as<Type *>();
+        const Type *in = inPort->buffer();
+        Type *out = outPort->buffer();
 
         //remove DC from each point
         for (size_t i = 0; i < N; i++)

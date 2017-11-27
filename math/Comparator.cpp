@@ -54,9 +54,9 @@ public:
         auto inPort0 = this->input(0);
         auto inPort1 = this->input(1);
         auto outPort = this->output(0);
-        auto in0 = inPort0->buffer().template as<const Type *>();
-        auto in1 = inPort1->buffer().template as<const Type *>();
-        auto out = outPort->buffer().template as<char *>();
+        const Type *in0 = inPort0->buffer();
+        const Type *in1 = inPort1->buffer();
+        char *out = outPort->buffer();
 
         //perform operation
         Operator(in0, in1, out, elems*outPort->dtype().dimension());

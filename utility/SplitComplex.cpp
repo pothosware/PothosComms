@@ -40,9 +40,9 @@ public:
 
         //buffers
         auto inPort = this->input(0);
-        auto in = inPort->buffer().template as<const std::complex<Type> *>();
-        auto re = _rePort->buffer().template as<Type *>();
-        auto im = _imPort->buffer().template as<Type *>();
+        const std::complex<Type> *in = inPort->buffer();
+        Type *re = _rePort->buffer();
+        Type *im = _imPort->buffer();
 
         //convert
         const size_t N = elems*inPort->dtype().dimension();

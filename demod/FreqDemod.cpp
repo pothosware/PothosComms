@@ -54,8 +54,8 @@ public:
         const size_t N = this->workInfo().minElements;
 
         //cast the input and output buffers
-        const auto in = inPort->buffer().template as<const InType *>();
-        const auto out = outPort->buffer().template as<OutType *>();
+        const InType *in = inPort->buffer();
+        OutType *out = outPort->buffer();
 
         for (size_t i = 0; i < N; i++)
         {

@@ -157,8 +157,8 @@ void Descrambler::work(void)
     auto outPort = this->output(0);
 
     size_t n = std::min(inPort->elements(), outPort->elements());
-    auto in = inPort->buffer().as<const unsigned char *>();
-    auto out = outPort->buffer().as<unsigned char *>();
+    const unsigned char *in = inPort->buffer();
+    unsigned char *out = outPort->buffer();
 
     //The main work loop deals with input bit by bit.
     if (_mode == MODE_ADD)

@@ -91,8 +91,8 @@ template <typename Type> class IIRFilter : public Pothos::Block {
 	const size_t N = this->workInfo().minElements;
 	
 	//cast the input and output buffers
-	const auto in = inPort->buffer().template as<const Type *>();
-	const auto out = outPort->buffer().template as<Type *>();
+	const Type *in = inPort->buffer();
+	Type *out = outPort->buffer();
 
 	try {
 	  for (size_t n = 0; n < N; n++) {

@@ -99,7 +99,7 @@ public:
     {
         _index += _waveIndex(_gen); //lookup into table is random each work()
         auto outPort = this->output(0);
-        auto out = outPort->buffer().template as<Type *>();
+        Type *out = outPort->buffer();
         for (size_t i = 0; i < outPort->elements(); i++)
         {
             out[i] = _table[_index % waveTableSize];

@@ -129,8 +129,8 @@ public:
         if (numSyms == 0) return;
 
         //perform conversion
-        auto in = inPort->buffer().as<const unsigned char *>();
-        auto out = outPort->buffer().as<unsigned char *>();
+        const unsigned char *in = inPort->buffer();
+        unsigned char *out = outPort->buffer();
         switch (_order)
         {
         case MSBit: ::symbolsToBitsMSBit(_mod, in, out, numSyms); break;

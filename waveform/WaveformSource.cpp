@@ -98,7 +98,7 @@ public:
     void work(void)
     {
         auto outPort = this->output(0);
-        auto out = outPort->buffer().template as<Type *>();
+        Type *out = outPort->buffer();
         for (size_t i = 0; i < outPort->elements(); i++)
         {
             out[i] = _table[_index & _mask];

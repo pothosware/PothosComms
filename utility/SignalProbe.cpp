@@ -122,7 +122,7 @@ public:
     void work(void)
     {
         auto inPort = this->input(0);
-        auto x = inPort->buffer().template as<const Type *>();
+        const Type *x = inPort->buffer();
         const auto N = std::min(_window, inPort->elements());
         inPort->consume(N);
 

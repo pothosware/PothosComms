@@ -124,8 +124,8 @@ public:
         if (N == 0) return;
 
         //cast the input and output buffers
-        const auto in = inPort->buffer().template as<const InType *>();
-        const auto out = outPort->buffer().template as<OutType *>();
+        const InType *in = inPort->buffer();
+        OutType *out = outPort->buffer();
 
         //perform envelope calculation operation
         for (size_t i = 0; i < N; i++)

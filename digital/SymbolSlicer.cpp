@@ -79,8 +79,8 @@ public:
         auto inPort = this->input(0);
         auto outPort = this->output(0);
 
-        auto in  = inPort-> buffer().template as<const InType *>();
-        auto out = outPort->buffer().template as<unsigned char *>();
+        const InType *in = inPort-> buffer();
+        unsigned char *out = outPort->buffer();
 
         unsigned int N = std::min(inPort->elements(), outPort->elements());
 

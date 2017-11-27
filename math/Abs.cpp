@@ -48,8 +48,8 @@ public:
         //get pointers to in and out buffer
         auto inPort = this->input(0);
         auto outPort = this->output(0);
-        auto in = inPort->buffer().template as<const InType *>();
-        auto out = outPort->buffer().template as<OutType *>();
+        const InType *in = inPort->buffer();
+        OutType *out = outPort->buffer();
 
         //perform abs operation
         const size_t N = elems*inPort->dtype().dimension();

@@ -279,7 +279,7 @@ public:
 
         //grab pointers
         auto x = inBuff.template as<const InType *>() + (K-1);
-        auto y = outPort->buffer().template as<OutType *>();
+        OutType *y = outPort->buffer();
 
         //for each decimated input
         for (size_t n = 0; n < N; n++)

@@ -43,8 +43,8 @@ public:
         //get pointers to in and out buffer
         auto inPort = this->input(0);
         auto outPort = this->output(0);
-        auto in = inPort->buffer().template as<const Type *>();
-        auto out = outPort->buffer().template as<Type *>();
+        const Type *in = inPort->buffer();
+        Type *out = outPort->buffer();
 
         //perform conjugate operation
         const size_t N = elems*inPort->dtype().dimension();
