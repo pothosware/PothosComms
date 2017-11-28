@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2015 Josh Blum
+// Copyright (c) 2015-2017 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
@@ -119,18 +119,17 @@ public:
 
         //require preamble size + 1 elements to perform processing
         inputPort->setReserve(_preamble.size()+1);
-        auto buffer = inputPort->buffer();
+        auto buffer = inputPort->takeBuffer();
         if (buffer.length <= (size_t) _preamble.size()) return;
 
         //due to search window, the last preamble size elements are used
         //consume and forward all processable elements of the input buffer
         buffer.length -= _preamble.size();
-        outputPort->postBuffer(buffer);
         inputPort->consume(buffer.length);
 
         // Calculate Hamming distance at each position looking for match
         // When a match is found a label is created after the preamble
-        auto in = buffer.as<unsigned char *>();
+        unsigned char *in = buffer;
         //auto distance = outputDistance->buffer().template as<unsigned *>();
         for (size_t n = 0; n < buffer.length; n++)
         {
@@ -145,12 +144,13 @@ public:
             // Emit a label if within the distance threshold
             if (dist <= _threshold)
             {
-                outputPort->postLabel(Pothos::Label(_frameStartId, Pothos::Object(), n + _preamble.size()));
+                outputPort->postLabel(_frameStartId, Pothos::Object(), n + _preamble.size());
             }
 
             //distance[n] = dist;
         }
         //outputDistance->produce(N);
+        outputPort->postBuffer(std::move(buffer));
     }
 
 private:

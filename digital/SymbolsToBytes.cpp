@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 Josh Blum
+// Copyright (c) 2015-2017 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include "SymbolHelpers.hpp"
@@ -118,7 +118,7 @@ public:
         }
 
         //post the output packet
-        outPort->postMessage(outPkt);
+        outPort->postMessage(std::move(outPkt));
     }
 
     void work(void)
@@ -133,7 +133,7 @@ public:
             auto msg = inPort->popMessage();
             if (msg.type() == typeid(Pothos::Packet))
                 this->msgWork(msg.extract<Pothos::Packet>());
-            else outPort->postMessage(msg);
+            else outPort->postMessage(std::move(msg));
             return; //output buffer used, return now
         }
 

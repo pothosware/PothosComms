@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2015 Josh Blum
+// Copyright (c) 2015-2017 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
@@ -135,7 +135,7 @@ public:
             {
                 pktOut.metadata["recipient"] = Pothos::Object(recipientId);
                 pktOut.metadata["sender"] = Pothos::Object(senderId);
-                _macOut->postMessage(pktOut);
+                _macOut->postMessage(std::move(pktOut));
             }
             else
                 _errorCount++;
@@ -145,8 +145,8 @@ public:
         if (_macIn->hasMessage())
         {
             auto msg = _macIn->popMessage();
-            auto pktIn = msg.extract<Pothos::Packet>();
-            auto data = pktIn.payload;
+            const auto &pktIn = msg.extract<Pothos::Packet>();
+            const auto &data = pktIn.payload;
 
             auto recipientIdIter = pktIn.metadata.find("recipient");
             if (recipientIdIter == pktIn.metadata.end())
@@ -172,7 +172,7 @@ public:
             std::memcpy(byteBuf + 7, data.as<const uint8_t*>(), data.length);
             byteBuf[0] = Crc8(byteBuf + 1, packetLength - 1);
 
-            _phyOut->postMessage(pktOut);
+            _phyOut->postMessage(std::move(pktOut));
         }
     }
 

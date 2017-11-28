@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2015 Josh Blum
+// Copyright (c) 2015-2017 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include "FrameHelper.hpp"
@@ -569,15 +569,15 @@ void FrameSync<Type>::work(void)
 
         //produce a phase offset label at the first payload index
         if (not _phaseOffsetId.empty()) outPort->postLabel(
-            Pothos::Label(_phaseOffsetId, _phase, labelStart, labelWidth));
+            _phaseOffsetId, _phase, labelStart, labelWidth);
 
         //produce a start of frame label at the first payload index
         if (not _frameStartId.empty()) outPort->postLabel(
-            Pothos::Label(_frameStartId, length, labelStart, labelWidth));
+            _frameStartId, length, labelStart, labelWidth);
 
         //produce an end of frame label at the last payload index
         if (not _frameEndId.empty()) outPort->postLabel(
-            Pothos::Label(_frameEndId, length, labelEnd, labelWidth));
+            _frameEndId, length, labelEnd, labelWidth);
 
         inPort->setReserve(0);
         inPort->consume(payloadOffset);

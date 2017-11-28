@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2015 Josh Blum
+// Copyright (c) 2015-2017 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
@@ -213,9 +213,9 @@ public:
             }
 
             //extract the packet
-            auto pkt = msg.extract<Pothos::Packet>();
+            const auto &pkt = msg.extract<Pothos::Packet>();
             if (pkt.payload.length < 4) continue;
-            const auto byteBuf = pkt.payload.as<const uint8_t *>();
+            const uint8_t *byteBuf = pkt.payload;
 
             //parse the header
             uint8_t port = 0;
@@ -235,9 +235,10 @@ public:
                 //got the expected sequence, forward the packet
                 if (nonce == _reqSeq)
                 {
-                    pkt.payload.address += 4;
-                    pkt.payload.length -= 4;
-                    _dataOut->postMessage(pkt);
+                    auto pktOut = pkt;
+                    pktOut.payload.address += 4;
+                    pktOut.payload.length -= 4;
+                    _dataOut->postMessage(std::move(pktOut));
                     _reqSeq++;
                 }
 
@@ -275,29 +276,26 @@ public:
         {
             //extract the packet
             auto msg = _dataIn->popMessage();
-            auto pktIn = msg.extract<Pothos::Packet>();
-            auto data = pktIn.payload;
+            const auto &pktIn = msg.extract<Pothos::Packet>();
+            const auto &data = pktIn.payload;
 
             //append the LLC header
             Pothos::Packet pktOut = pktIn;
             pktOut.metadata = _metadata;
             pktOut.payload = Pothos::BufferChunk(data.length + 4);
             pktOut.payload.dtype = pktIn.payload.dtype;
-            auto byteBuf = pktOut.payload.as<uint8_t *>();
+            uint8_t *byteBuf = pktOut.payload;
             fillHeader(byteBuf, _seqOut++, PSH);
             std::memcpy(byteBuf + 4, data.as<const uint8_t*>(), data.length);
             _macOut->postMessage(pktOut);
 
             //save the packet for resending
-            PacketItem item;
-            item.packet = pktOut;
             const auto timeNow = std::chrono::high_resolution_clock::now();
-            item.lastSentTime = timeNow;
-            item.expiredTime = timeNow + _expireTimeout;
+            PacketItem item {std::move(pktOut), timeNow + _expireTimeout, timeNow};
 
             //stash the packet and check capacity (locked)
             std::lock_guard<Pothos::Util::SpinLock> lock(_lock);
-            _sentPackets.push_back(item);
+            _sentPackets.push_back(std::move(item));
             if (_sentPackets.full()) break;
         }
     }
@@ -328,7 +326,7 @@ private:
         packet.metadata = _metadata;
         packet.payload = Pothos::BufferChunk(4);
         fillHeader(packet.payload.as<uint8_t *>(), nonce, control);
-        _macOut->postMessage(packet);
+        _macOut->postMessage(std::move(packet));
     }
 
     void resendPackets(void)

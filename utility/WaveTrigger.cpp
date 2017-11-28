@@ -485,12 +485,12 @@ void WaveTrigger::work(void)
             {
                 auto pkt = msg.extract<Pothos::Packet>();
                 pkt.metadata["index"] = Pothos::Object(port->index());
-                if (pkt.payload.dtype) outPort->postMessage(pkt);
+                if (pkt.payload.dtype) outPort->postMessage(std::move(pkt));
                 else _logDataTypeError(port->name(), "packet payload");
             }
             else
             {
-                outPort->postMessage(msg);
+                outPort->postMessage(std::move(msg));
             }
         }
 
@@ -537,12 +537,12 @@ void WaveTrigger::work(void)
         buff.length = _pointsRemaining*buff.dtype.size();
 
         //append new labels
-        for (const auto &inLabel : port->labels())
+        for (auto label : port->labels())
         {
-            auto label = inLabel.toAdjusted(1, buff.dtype.size()); //bytes to elements
+            label.adjust(1, buff.dtype.size()); //bytes to elements
             if (label.index >= buff.elements()) break;
             label.index += packet.payload.elements();
-            packet.labels.push_back(label);
+            packet.labels.push_back(std::move(label));
         }
 
         //if the trigger point was found, record this in the metadata
@@ -585,9 +585,7 @@ void WaveTrigger::work(void)
     //produce the entire packet on the last window
     if (lastWindow) for (auto port : this->inputs())
     {
-        auto &packet = _packets[port->index()];
-        outPort->postMessage(packet);
-        packet = Pothos::Packet();
+        outPort->postMessage(std::move(_packets[port->index()]));
     }
 
     //reset for next trigger

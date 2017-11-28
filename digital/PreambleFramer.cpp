@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2015 Josh Blum
+// Copyright (c) 2015-2017 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
@@ -142,7 +142,7 @@ public:
         size_t consumed = 0;
 
         //get input buffer
-        auto inBuff = inputPort->buffer();
+        auto inBuff = inputPort->takeBuffer();
         if (inBuff.length == 0) return;
 
         //label propagation offset incremented as preambles are posted
@@ -151,7 +151,7 @@ public:
         //track the index of the last found frame start label
         int lastFoundIndex = -1;
 
-        for (auto &label : inputPort->labels())
+        for (const auto &label : inputPort->labels())
         {
             // Skip any label that doesn't yet appear in the data buffer
             if (label.index >= inputPort->elements()) continue;
@@ -205,11 +205,11 @@ public:
             //propagate labels here with the offset
             Pothos::Label newLabel(label);
             newLabel.index += labelIndexOffset;
-            outputPort->postLabel(newLabel);
+            outputPort->postLabel(std::move(newLabel));
         }
 
         //post the remaining bytes
-        if (inBuff.length != 0) outputPort->postBuffer(inBuff);
+        if (inBuff.length != 0) outputPort->postBuffer(std::move(inBuff));
 
         //consume the entire buffer
         inputPort->consume(inputPort->elements());

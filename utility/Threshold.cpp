@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2015 Josh Blum
+// Copyright (c) 2015-2017 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
@@ -121,8 +121,8 @@ public:
         auto outPort = this->output(0);
 
         //get input buffer
-        const auto &buff = inPort->buffer();
-        const auto in = buff.template as<const Type *>();
+        auto buff = inPort->takeBuffer();
+        const Type *in = buff;
         const size_t N = buff.elements();
         if (N == 0) return;
 
@@ -133,19 +133,19 @@ public:
             {
                 _activeState = true;
                 if (_activationId.empty()) continue;
-                outPort->postLabel(Pothos::Label(_activationId, Pothos::Object(), i));
+                outPort->postLabel(_activationId, Pothos::Object(), i);
             }
             else if (_activeState and in[i] < _deactivationLevel)
             {
                 _activeState = false;
                 if (_deactivationId.empty()) continue;
-                outPort->postLabel(Pothos::Label(_deactivationId, Pothos::Object(), i));
+                outPort->postLabel(_deactivationId, Pothos::Object(), i);
             }
         }
 
         //consume input and forward buffer
         inPort->consume(N);
-        outPort->postBuffer(buff);
+        outPort->postBuffer(std::move(buff));
     }
 
 private:
