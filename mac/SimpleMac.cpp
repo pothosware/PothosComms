@@ -133,8 +133,8 @@ public:
             pktOut.payload = this->unpack(pktIn, recipientId, senderId);
             if (pktOut.payload)
             {
-                pktOut.metadata["recipient"] = Pothos::Object(recipientId);
-                pktOut.metadata["sender"] = Pothos::Object(senderId);
+                pktOut.metadata.emplace("recipient", recipientId);
+                pktOut.metadata.emplace("sender", senderId);
                 _macOut->postMessage(std::move(pktOut));
             }
             else

@@ -484,7 +484,7 @@ void WaveTrigger::work(void)
             if (msg.type() == typeid(Pothos::Packet))
             {
                 auto pkt = msg.extract<Pothos::Packet>();
-                pkt.metadata["index"] = Pothos::Object(port->index());
+                pkt.metadata.emplace("index", port->index());
                 if (pkt.payload.dtype) outPort->postMessage(std::move(pkt));
                 else _logDataTypeError(port->name(), "packet payload");
             }
@@ -525,7 +525,7 @@ void WaveTrigger::work(void)
         }
 
         //require that we have enough elements in the buffer
-        auto buff = port->buffer();
+        auto buff = port->takeBuffer();
         if (buff.elements() < _pointsRemaining)
         {
             port->setReserve(_pointsRemaining*buff.dtype.size());
@@ -549,19 +549,24 @@ void WaveTrigger::work(void)
         if (_triggerEventFromLevel and size_t(port->index()) == _source)
         {
             const auto index = _position+packet.payload.elements();
-            packet.labels.push_back(Pothos::Label("T", Pothos::Object(), index));
+            packet.labels.emplace_back("T", Pothos::Object(), index);
         }
 
         //set metadata on the first window
         if (firstWindow)
         {
-            packet.metadata["index"] = Pothos::Object(port->index());
-            packet.metadata["position"] = Pothos::Object(_triggerEventOffset);
-            packet.metadata["level"] = Pothos::Object(_level);
+            packet.metadata.emplace("index", port->index());
+            packet.metadata.emplace("position", _triggerEventOffset);
+            packet.metadata.emplace("level", _level);
         }
 
+        //consume from the input buffer
+        if (_alignment) port->consume(buff.length);
+        else port->consume(port->elements());
+        port->setReserve(0);
+
         //append the buffer to the end of the packet
-        if (_numWindows == 1) packet.payload = buff;
+        if (_numWindows == 1) packet.payload = std::move(buff);
         else
         {
             if (not packet.payload)
@@ -572,11 +577,6 @@ void WaveTrigger::work(void)
             std::memcpy((void *)packet.payload.getEnd(), buff.as<const void *>(), buff.length);
             packet.payload.length += buff.length;
         }
-
-        //consume from the input buffer
-        if (_alignment) port->consume(buff.length);
-        else port->consume(port->elements());
-        port->setReserve(0);
     }
 
     //collected buffers for every port?
