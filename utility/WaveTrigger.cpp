@@ -484,7 +484,7 @@ void WaveTrigger::work(void)
             if (msg.type() == typeid(Pothos::Packet))
             {
                 auto pkt = msg.extract<Pothos::Packet>();
-                pkt.metadata.emplace("index", port->index());
+                pkt.metadata["index"] = Pothos::Object(port->index());
                 if (pkt.payload.dtype) outPort->postMessage(std::move(pkt));
                 else _logDataTypeError(port->name(), "packet payload");
             }
@@ -555,9 +555,9 @@ void WaveTrigger::work(void)
         //set metadata on the first window
         if (firstWindow)
         {
-            packet.metadata.emplace("index", port->index());
-            packet.metadata.emplace("position", _triggerEventOffset);
-            packet.metadata.emplace("level", _level);
+            packet.metadata["index"] = Pothos::Object(port->index());
+            packet.metadata["position"] = Pothos::Object(_triggerEventOffset);
+            packet.metadata["level"] = Pothos::Object(_level);
         }
 
         //consume from the input buffer
