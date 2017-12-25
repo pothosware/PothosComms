@@ -1,6 +1,6 @@
 This this the changelog file for the Pothos Comms toolkit.
 
-Release 0.3.0 (pending)
+Release 0.3.0 (2017-12-25)
 ==========================
 
 - Use resource moves and emplacement with Pothos 0.6 port API
