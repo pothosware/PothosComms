@@ -5,8 +5,7 @@
 #include <cstdint>
 #include <complex>
 #include <cmath>
-#include "kissfft.hh"
-#include "kiss_fft.h"
+#include "FFTAux.h"
 
 /***********************************************************************
  * |PothosDoc FFT
@@ -44,35 +43,11 @@ public:
     FFT(const size_t numBins, const bool inverse):
         _numBins(numBins),
         _inverse(inverse),
-        _fftFloat64(nullptr),
-        _fftFloat32(nullptr),
-        _fftFixedXX(nullptr)
+        _fftAux(numBins, inverse)
     {
         this->setupInput(0, typeid(Type));
         this->setupOutput(0, typeid(Type));
         this->input(0)->setReserve(_numBins);
-
-        if (std::is_same<typename Type::value_type, double>::value)
-        {
-            _fftFloat64 = new kissfft<double>(numBins, inverse);
-        }
-
-        if (std::is_same<typename Type::value_type, float>::value)
-        {
-            _fftFloat32 = new kissfft<float>(numBins, inverse);
-        }
-
-        if (std::is_same<typename Type::value_type, kiss_fft_scalar>::value)
-        {
-            _fftFixedXX = kiss_fft_alloc(numBins, inverse, nullptr, nullptr);
-        }
-    }
-
-    ~FFT(void)
-    {
-        delete _fftFloat64;
-        delete _fftFloat32;
-        kiss_fft_free(_fftFixedXX);
     }
 
     //! Custom output buffer manager with slabs large enough for the fft result
@@ -88,17 +63,9 @@ public:
         auto inPort = this->input(0);
         auto outPort = this->output(0);
 
-        if (_fftFloat64 != nullptr) _fftFloat64->transform(
-            inPort->buffer().template as<const std::complex<double> *>(),
-            outPort->buffer().template as<std::complex<double> *>());
-
-        else if (_fftFloat32 != nullptr) _fftFloat32->transform(
-            inPort->buffer().template as<const std::complex<float> *>(),
-            outPort->buffer().template as<std::complex<float> *>());
-
-        else if (_fftFixedXX != nullptr) kiss_fft(_fftFixedXX,
-            inPort->buffer().template as<const kiss_fft_cpx *>(),
-            outPort->buffer().template as<kiss_fft_cpx *>());
+        _fftAux.transform(
+            inPort->buffer().template as<const Type*>(),
+            outPort->buffer().template as<Type*>());
 
         inPort->consume(_numBins);
         outPort->produce(_numBins);
@@ -107,9 +74,7 @@ public:
 private:
     const size_t _numBins;
     const bool _inverse;
-    kissfft<double> *_fftFloat64;
-    kissfft<float> *_fftFloat32;
-    kiss_fft_cfg _fftFixedXX;
+    FFTAux<Type> _fftAux;
 };
 
 /***********************************************************************
