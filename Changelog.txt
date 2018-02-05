@@ -1,5 +1,10 @@
 This this the changelog file for the Pothos Comms toolkit.
 
+Release 0.3.1 (pending)
+==========================
+
+- Cleanup for implementation of templated FFT block
+
 Release 0.3.0 (2017-12-25)
 ==========================
 
