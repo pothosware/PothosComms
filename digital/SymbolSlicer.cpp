@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2015 Josh Blum
+// Copyright (c) 2015-2018 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
@@ -33,6 +33,7 @@
  * |default [-1, 1]
  * |option [BPSK] \[-1, 1\]
  * |option [QPSK] \[-1.0-1.0*j, -1.0+1.0*j, 1.0+1.0*j, 1.0-1.0*j\]
+ * |widget ComboBox(editable=true)
  *
  * |factory /comms/symbol_slicer(dtype)
  * |setter setMap(map)
