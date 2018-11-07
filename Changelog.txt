@@ -1,5 +1,10 @@
 This this the changelog file for the Pothos Comms toolkit.
 
+Release 0.3.2 (pending)
+==========================
+
+- Fixed rotate test for 64-bit integers on 32-bit platforms
+
 Release 0.3.1 (2018-04-18)
 ==========================
 

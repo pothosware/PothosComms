@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 Josh Blum
+// Copyright (c) 2015-2018 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Testing.hpp>
@@ -27,7 +27,8 @@ void testRotateTmpl(const double phase)
     auto pIn = buffIn.as<std::complex<Type> *>();
     for (size_t i = 0; i < buffIn.elements(); i++)
     {
-        pIn[i] = std::complex<Type>(Type(10*i), Type(-20*i));
+        const auto f = Type(i); //cast prevents unsigned type promotion in multiplication
+        pIn[i] = std::complex<Type>(Type(10*f), Type(-20*f));
     }
     feeder.call("feedBuffer", buffIn);
 
