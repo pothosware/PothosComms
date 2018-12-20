@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 Josh Blum
+// Copyright (c) 2014-2018 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
@@ -452,7 +452,7 @@ void FIRDesigner::recalculate(void)
         taps = design_fir(filt_type, _bandType, _numTaps, _freqLower/_sampRate, _freqUpper/_sampRate, _alpha, _weight);
       }
     }
-    catch (const std::runtime_error error) {
+    catch (const std::runtime_error &error) {
       throw Pothos::InvalidArgumentException("Problem with creating taps for FIRDesigner("+_filterType+"/"+_bandType+"):"+error.what(), "problem with input parameters?");
     }
       
