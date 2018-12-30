@@ -9,7 +9,7 @@ Build-Depends:
     nlohmann-json-dev,
     libpothos-dev,
     libspuce-dev
-Standards-Version: 4.1.1
+Standards-Version: 4.1.4
 Homepage: https://github.com/pothosware/PothosComms/wiki
 Vcs-Git: https://github.com/pothosware/PothosComms.git
 Vcs-Browser: https://github.com/pothosware/PothosComms

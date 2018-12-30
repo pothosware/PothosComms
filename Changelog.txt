@@ -1,6 +1,6 @@
 This this the changelog file for the Pothos Comms toolkit.
 
-Release 0.3.2 (pending)
+Release 0.3.2 (2018-12-29)
 ==========================
 
 - Fix catch exception syntax in FIR designer
