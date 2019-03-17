@@ -43,7 +43,7 @@ using namespace spuce;
  * |option [Disabled] false
  *
  * |factory /comms/iir_filter(dtype)
- * |setter setTaps(taps, taps)
+ * |setter setTaps(taps)
  * |setter setWaitTaps(waitTaps)
  **********************************************************************/
 template <typename Type> class IIRFilter : public Pothos::Block {
