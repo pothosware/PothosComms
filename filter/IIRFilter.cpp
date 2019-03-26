@@ -29,6 +29,10 @@ using namespace spuce;
  * |param taps The IIR filter taps used in convolution.
  * Manually enter or paste in IIR filter taps or leave this entry blank
  * and use the IIR Designer taps signal to configure the filter taps at runtime.
+ * <ul>
+ * <li>The first half of the taps are the feedforward filter coefficients.</li>
+ * <li>The second half of the taps are the feedback filter coefficients.</li>
+ * </ul>
  * |default [0.0676, 0.135, 0.0676, 1, -1.142, 0.412]
  *
  * |param waitTaps[Wait Taps] Wait for the taps to be set before allowing operation.
@@ -39,7 +43,7 @@ using namespace spuce;
  * |option [Disabled] false
  *
  * |factory /comms/iir_filter(dtype)
- * |setter setTaps(taps, taps)
+ * |setter setTaps(taps)
  * |setter setWaitTaps(waitTaps)
  **********************************************************************/
 template <typename Type> class IIRFilter : public Pothos::Block {
@@ -50,25 +54,18 @@ template <typename Type> class IIRFilter : public Pothos::Block {
     this->registerCall(this, POTHOS_FCN_TUPLE(IIRFilter, setTaps));
     this->registerCall(this, POTHOS_FCN_TUPLE(IIRFilter, setWaitTaps));
     this->registerCall(this, POTHOS_FCN_TUPLE(IIRFilter, getWaitTaps));
-    const double taps[] = {0.0676, 0.135, 0.0676, 1, -1.142, 0.412};
-    this->setTaps(std::vector<double>(taps, taps+6)); // initial update
+    this->setTaps({0.0676, 0.135, 0.0676, 1, -1.142, 0.412}); // initial update
   }
 
   void setWaitTaps(const bool waitTaps) { _waitTapsMode = waitTaps; }
 
   bool getWaitTaps(void) const { return _waitTapsMode; }
 
-  void setTaps(const std::vector<double>& taps) {
+  void setTaps(const std::vector<double>& taps){
     if (taps.size() == 0) throw Pothos::InvalidArgumentException("IIRFilter::setTaps()", "Order cannot 0");
-#ifdef DEBUG
-	std::cout << "Called SetIIR with taps A :";
-	for (int i=0;i<taps.size()/2;i++) std::cout << taps[i] << " ";
-	std::cout <<", B :";
-	for (int i=0;i<taps.size()/2;i++) std::cout << taps[i+taps.size()/2] << " ";
-	std::cout <<"\n";
-#endif
 	IIR.set_taps(taps);
 	IIR.reset();
+	IIR.print();
     _waitTapsArmed = false;  // got taps
   }
 
@@ -94,13 +91,8 @@ template <typename Type> class IIRFilter : public Pothos::Block {
 	const Type *in = inPort->buffer();
 	Type *out = outPort->buffer();
 
-	try {
-	  for (size_t n = 0; n < N; n++) {
+	for (size_t n = 0; n < N; n++) {
 		out[n] = IIR.clock(in[n]);
-	  }
-	}
-	catch (...) {
-	  std::cout << "Exception in IIR clock process\n";
 	}
 	inPort->consume(N);
 	outPort->produce(N);
