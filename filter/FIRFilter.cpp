@@ -275,33 +275,37 @@ public:
          * Normal FIR filter operation
          **************************************************************/
         //how many iterations?
-        const auto N = std::min((inBuff.elements()-(K-1))/M, outPort->elements()/L);
+        const auto N = std::min((inBuff.elements()-(K-1))/M, outPort->elements()/L)*M;
 
         //grab pointers
         auto x = inBuff.template as<const InType *>() + (K-1);
         OutType *y = outPort->buffer();
+        size_t decim = M;
 
-        //for each decimated input
+        //for each input
         for (size_t n = 0; n < N; n++)
         {
             //interpolation loop
             for (size_t j = 0; j < L; j++)
             {
+                if (--decim != 0) continue;
+                decim = M;
+
                 //convolution loop
                 QType y_n = 0;
                 for (size_t k = 0; k < _interpTaps[j].size(); k++)
                 {
-                    y_n += _interpTaps[j][k] * QType(x[n*M-k]);
+                    y_n += _interpTaps[j][k] * QType(x[n-k]);
                 }
-                y[j+n*L] = fromQ<OutType>(y_n);
+                *y++ = fromQ<OutType>(y_n);
             }
         }
 
         //consume decimated, produce interpolated
         //K-1 elements are left in the input buffer for filter history
-        if (_eobSampsLeft != 0) _eobSampsLeft -= N*M;
-        inPort->consume(N*M);
-        outPort->produce(N*L);
+        if (_eobSampsLeft != 0) _eobSampsLeft -= N;
+        inPort->consume(N);
+        outPort->produce((N/M)*L);
     }
 
     void propagateLabels(const Pothos::InputPort *port)
