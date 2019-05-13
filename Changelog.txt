@@ -1,5 +1,11 @@
 This this the changelog file for the Pothos Comms toolkit.
 
+Release 0.3.3 (pending)
+==========================
+
+- Fix FIR filter to support arbitrary re-sampling
+- Document IIR filter taps usage in IIR Filter block
+
 Release 0.3.2 (2018-12-29)
 ==========================
 
