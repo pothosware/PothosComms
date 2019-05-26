@@ -313,7 +313,12 @@ public:
         auto outputPort = this->output(0);
         for (const auto &label : port->labels())
         {
-            outputPort->postLabel(label.toAdjusted(L, M));
+            auto newLabel = label.toAdjusted(L, M);
+            if (label.id == "rxRate" and label.data.type() == typeid(double))
+            {
+                newLabel.data = Pothos::Object((double(label.data)*L)/M);
+            }
+            outputPort->postLabel(std::move(newLabel));
         }
     }
 
