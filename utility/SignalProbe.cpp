@@ -1,7 +1,8 @@
-// Copyright (c) 2014-2016 Josh Blum
+// Copyright (c) 2014-2019 Josh Blum
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
+#include <Pothos/Util/QFormat.hpp>
 #include <cstdint>
 #include <complex>
 #include <iostream>
@@ -153,7 +154,7 @@ public:
         else if (_mode == "MEAN")
         {
             ProbeType mean = 0;
-            for (size_t n = 0; n < N; n++) mean += x[n];
+            for (size_t n = 0; n < N; n++) mean += Pothos::Util::fromQ<ProbeType>(x[n], 0);
             mean /= N;
             _value = mean;
         }
