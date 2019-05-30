@@ -138,14 +138,14 @@ public:
             _nextCalc += std::chrono::duration_cast<std::chrono::high_resolution_clock::duration>(tps);
         }
 
-        if (_mode == "VALUE") _value = x[N-1];
+        if (_mode == "VALUE") _value = Pothos::Util::fromQ<ProbeType>(x[N-1], 0);
         else if (_mode == "RMS")
         {
             double accumulator = 0.0;
             ProbeType x_n;
             for (size_t n = 0; n < N; n++)
             {
-                x_n = x[n];
+                x_n = Pothos::Util::fromQ<ProbeType>(x[n], 0);
                 const double v = std::abs(x_n);
                 accumulator += v*v;
             }
