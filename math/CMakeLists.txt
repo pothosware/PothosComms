@@ -24,6 +24,8 @@ POTHOS_MODULE_UTIL(
         TestComparatorBlocks.cpp
         Comparator.cpp
         Conjugate.cpp
+        Log10.cpp
+        TestLog10.cpp
         TestArithmeticBlocks.cpp
         Scale.cpp
         TestScale.cpp
