@@ -3,6 +3,7 @@ This this the changelog file for the Pothos Comms toolkit.
 Release 0.3.3 (pending)
 ==========================
 
+- Added log10 math block for scalar and vector input
 - Fix SignalProbe for missing complex overload GCC 9.1
 - Fix FIR filter to support arbitrary re-sampling
 - Document IIR filter taps usage in IIR Filter block
