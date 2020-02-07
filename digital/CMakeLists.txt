@@ -40,6 +40,8 @@ POTHOS_MODULE_UTIL(
         Descrambler.cpp
         FrameInsert.cpp
         FrameSync.cpp
+        ByteOrder.cpp
+        TestByteOrder.cpp
     DESTINATION comms
     ENABLE_DOCS
 )
