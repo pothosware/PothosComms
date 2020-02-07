@@ -25,12 +25,14 @@ POTHOS_MODULE_UTIL(
         Comparator.cpp
         Conjugate.cpp
         Log10.cpp
+        WaveConversion.cpp
         TestLog10.cpp
         TestArithmeticBlocks.cpp
         Scale.cpp
         TestScale.cpp
         Rotate.cpp
         TestRotate.cpp
+        TestWaveConversion.cpp
     LIBRARIES CommsFunctions
     DESTINATION comms
     ENABLE_DOCS
