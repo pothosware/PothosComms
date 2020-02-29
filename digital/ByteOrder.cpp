@@ -87,9 +87,9 @@ struct BufferType<double>
     static inline T toBigEndianBase(T val)
     {
 #if defined(POCO_ARCH_BIGENDIAN)
-        return T;
+        return val;
 #else
-        return byteswap(T);
+        return byteswap(val);
 #endif
     }
 
@@ -97,9 +97,9 @@ struct BufferType<double>
     static inline T toLittleEndianBase(T val)
     {
 #if defined(POCO_ARCH_BIGENDIAN)
-        return byteswap(T);
+        return byteswap(val);
 #else
-        return T;
+        return val;
 #endif
     }
 
@@ -107,9 +107,9 @@ struct BufferType<double>
     static inline T toNetworkBase(T val)
     {
 #if defined(POCO_ARCH_BIGENDIAN)
-        return T;
+        return val;
 #else
-        return byteswap(T);
+        return byteswap(val);
 #endif
     }
 
@@ -117,9 +117,9 @@ struct BufferType<double>
     static inline T fromNetworkBase(T val)
     {
 #if defined(POCO_ARCH_BIGENDIAN)
-        return T;
+        return val;
 #else
-        return byteswap(T);
+        return byteswap(val);
 #endif
     }
 
@@ -145,7 +145,7 @@ struct BufferType<double>
     template <typename T> \
     static inline typename std::enable_if<!IsComplex<T>::value && std::is_floating_point<T>::value, T>::type func(T val) \
     { \
-        static_assert(sizeof(T) == sizeof(typename BufferType<T>::Type)); \
+        static_assert(sizeof(T) == sizeof(typename BufferType<T>::Type), "type size mismatch"); \
         const auto* pCastedVal = reinterpret_cast<const typename BufferType<T>::Type*>(&val); \
         const auto ret = func ## Base(*pCastedVal); \
         const auto* pCastedRet = reinterpret_cast<const T*>(&ret); \
@@ -308,7 +308,7 @@ public:
         outPkt.payload = outPort->getBuffer(numElements);
 
         bufferWork(
-            outPkt.payload.as<T*>(),
+            outPkt.payload.template as<T*>(),
             inPkt.payload.as<const T*>(),
             numElements);
 
@@ -329,7 +329,7 @@ public:
         {
             auto msg = inPort->popMessage();
             if (msg.type() == typeid(Pothos::Packet))
-                this->msgWork(msg.extract<Pothos::Packet>());
+                this->msgWork(msg.template extract<Pothos::Packet>());
             else outPort->postMessage(std::move(msg));
             return;
         }
@@ -341,8 +341,8 @@ public:
         }
 
         bufferWork(
-            outPort->buffer().as<T*>(),
-            inPort->buffer().as<const T*>(),
+            outPort->buffer().template as<T*>(),
+            inPort->buffer().template as<const T*>(),
             numElements);
 
         inPort->consume(numElements);
