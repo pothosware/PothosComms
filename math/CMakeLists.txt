@@ -34,6 +34,7 @@ POTHOS_MODULE_UTIL(
         ConstArithmetic.cpp
         Sinc.cpp
         TestSinc.cpp
+        Trigonometric.cpp
     LIBRARIES CommsFunctions
     DESTINATION comms
     ENABLE_DOCS
