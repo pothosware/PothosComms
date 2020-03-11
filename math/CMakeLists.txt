@@ -31,6 +31,7 @@ POTHOS_MODULE_UTIL(
         TestScale.cpp
         Rotate.cpp
         TestRotate.cpp
+        ConstArithmetic.cpp
     LIBRARIES CommsFunctions
     DESTINATION comms
     ENABLE_DOCS
