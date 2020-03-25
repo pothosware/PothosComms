@@ -133,11 +133,11 @@ POTHOS_TEST_BLOCK("/comms/tests", test_inline_buffer)
 
 static void testConstArithmetic(
     std::int32_t constant,
-    size_t constOperandPosition,
+    const std::string& operation,
     const std::vector<std::int32_t>& inputs,
     const std::vector<std::int32_t>& expectedOutputs)
 {
-    std::cout << "constOperandPosition = " << constOperandPosition << "..." << std::endl;
+    std::cout << "operation = " << operation << "..." << std::endl;
     POTHOS_TEST_EQUAL(inputs.size(), expectedOutputs.size());
 
     static const Pothos::DType dtype("int32");
@@ -160,14 +160,11 @@ static void testConstArithmetic(
     auto constArithmetic = Pothos::BlockRegistry::make(
                                "/comms/const_arithmetic",
                                dtype,
-                               "SUB",
+                               operation,
                                0);
 
     constArithmetic.call("setConstant", constant);
-    POTHOS_TEST_EQUAL(constant, constArithmetic.call("constant"));
-
-    constArithmetic.call("setConstOperandPosition", constOperandPosition);
-    POTHOS_TEST_EQUAL(constOperandPosition, constArithmetic.call("constOperandPosition"));
+    POTHOS_TEST_EQUAL(constant, constArithmetic.call<std::int32_t>("constant"));
 
     {
         Pothos::Topology topology;
@@ -194,20 +191,50 @@ static void testConstArithmetic(
 POTHOS_TEST_BLOCK("/comms/tests", test_const_arithmetic)
 {
     const std::int32_t constant = 5;
-    const std::vector<std::int32_t> inputs = {0,1,2,3,4,5,6,7,8,9};
+    const std::vector<std::int32_t> inputs = {1,2,3,4,5,6,7,8,9,10};
 
-    std::vector<std::int32_t> outputs0, outputs1;
+    std::vector<std::int32_t> XPlusKOutputs;
+    std::vector<std::int32_t> XSubKOutputs;
+    std::vector<std::int32_t> KSubXOutputs;
+    std::vector<std::int32_t> XMultKOutputs;
+    std::vector<std::int32_t> XDivKOutputs;
+    std::vector<std::int32_t> KDivXOutputs;
+    
     std::transform(
         inputs.begin(),
         inputs.end(),
-        std::back_inserter(outputs0),
+        std::back_inserter(XPlusKOutputs),
+        [&constant](std::int32_t val){return val+constant;});
+    std::transform(
+        inputs.begin(),
+        inputs.end(),
+        std::back_inserter(XSubKOutputs),
+        [&constant](std::int32_t val){return val-constant;});
+    std::transform(
+        inputs.begin(),
+        inputs.end(),
+        std::back_inserter(KSubXOutputs),
         [&constant](std::int32_t val){return constant-val;});
     std::transform(
         inputs.begin(),
         inputs.end(),
-        std::back_inserter(outputs1),
-        [&constant](std::int32_t val){return val-constant;});
+        std::back_inserter(XMultKOutputs),
+        [&constant](std::int32_t val){return val*constant;});
+    std::transform(
+        inputs.begin(),
+        inputs.end(),
+        std::back_inserter(XDivKOutputs),
+        [&constant](std::int32_t val){return val/constant;});
+    std::transform(
+        inputs.begin(),
+        inputs.end(),
+        std::back_inserter(KDivXOutputs),
+        [&constant](std::int32_t val){return constant/val;});
     
-    testConstArithmetic(constant, 0, inputs, outputs0);
-    testConstArithmetic(constant, 1, inputs, outputs1);
+    testConstArithmetic(constant, "X+K", inputs, XPlusKOutputs);
+    testConstArithmetic(constant, "X-K", inputs, XSubKOutputs);
+    testConstArithmetic(constant, "K-X", inputs, KSubXOutputs);
+    testConstArithmetic(constant, "X*K", inputs, XMultKOutputs);
+    testConstArithmetic(constant, "X/K", inputs, XDivKOutputs);
+    testConstArithmetic(constant, "K/X", inputs, KDivXOutputs);
 }
