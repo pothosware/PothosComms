@@ -1,9 +1,12 @@
 // Copyright (c) 2014-2016 Josh Blum
+//                    2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Testing.hpp>
 #include <Pothos/Framework.hpp>
 #include <Pothos/Proxy.hpp>
+
+#include <algorithm>
 #include <iostream>
 
 POTHOS_TEST_BLOCK("/comms/tests", test_arithmetic_add)
@@ -126,4 +129,112 @@ POTHOS_TEST_BLOCK("/comms/tests", test_inline_buffer)
     size_t numInlines = adder.call("getNumInlineBuffers");
     std::cout << "NumInlineBuffers " << numInlines << std::endl;
     POTHOS_TEST_TRUE(numInlines > 0);
+}
+
+static void testConstArithmetic(
+    std::int32_t constant,
+    const std::string& operation,
+    const std::vector<std::int32_t>& inputs,
+    const std::vector<std::int32_t>& expectedOutputs)
+{
+    std::cout << "operation = " << operation << "..." << std::endl;
+    POTHOS_TEST_EQUAL(inputs.size(), expectedOutputs.size());
+
+    static const Pothos::DType dtype("int32");
+
+    Pothos::BufferChunk bufferChunk(dtype, inputs.size());
+    for(size_t i = 0; i < inputs.size(); ++i)
+    {
+        bufferChunk.as<std::int32_t*>()[i] = inputs[i];
+    }
+
+    auto feederSource = Pothos::BlockRegistry::make(
+                            "/blocks/feeder_source",
+                            dtype);
+    feederSource.call("feedBuffer", bufferChunk);
+
+    auto collectorSink = Pothos::BlockRegistry::make(
+                             "/blocks/collector_sink",
+                             dtype);
+
+    auto constArithmetic = Pothos::BlockRegistry::make(
+                               "/comms/const_arithmetic",
+                               dtype,
+                               operation,
+                               0);
+
+    constArithmetic.call("setConstant", constant);
+    POTHOS_TEST_EQUAL(constant, constArithmetic.call<std::int32_t>("constant"));
+
+    {
+        Pothos::Topology topology;
+
+        topology.connect(
+            feederSource, 0,
+            constArithmetic, 0);
+        topology.connect(
+            constArithmetic, 0,
+            collectorSink, 0);
+
+        topology.commit();
+        POTHOS_TEST_TRUE(topology.waitInactive());
+    }
+
+    Pothos::BufferChunk outputs = collectorSink.call("getBuffer");
+    POTHOS_TEST_EQUAL(expectedOutputs.size(), outputs.elements());
+    POTHOS_TEST_EQUALA(
+        expectedOutputs.data(),
+        outputs.as<const std::int32_t*>(),
+        expectedOutputs.size());
+}
+
+POTHOS_TEST_BLOCK("/comms/tests", test_const_arithmetic)
+{
+    const std::int32_t constant = 5;
+    const std::vector<std::int32_t> inputs = {1,2,3,4,5,6,7,8,9,10};
+
+    std::vector<std::int32_t> XPlusKOutputs;
+    std::vector<std::int32_t> XSubKOutputs;
+    std::vector<std::int32_t> KSubXOutputs;
+    std::vector<std::int32_t> XMultKOutputs;
+    std::vector<std::int32_t> XDivKOutputs;
+    std::vector<std::int32_t> KDivXOutputs;
+    
+    std::transform(
+        inputs.begin(),
+        inputs.end(),
+        std::back_inserter(XPlusKOutputs),
+        [&constant](std::int32_t val){return val+constant;});
+    std::transform(
+        inputs.begin(),
+        inputs.end(),
+        std::back_inserter(XSubKOutputs),
+        [&constant](std::int32_t val){return val-constant;});
+    std::transform(
+        inputs.begin(),
+        inputs.end(),
+        std::back_inserter(KSubXOutputs),
+        [&constant](std::int32_t val){return constant-val;});
+    std::transform(
+        inputs.begin(),
+        inputs.end(),
+        std::back_inserter(XMultKOutputs),
+        [&constant](std::int32_t val){return val*constant;});
+    std::transform(
+        inputs.begin(),
+        inputs.end(),
+        std::back_inserter(XDivKOutputs),
+        [&constant](std::int32_t val){return val/constant;});
+    std::transform(
+        inputs.begin(),
+        inputs.end(),
+        std::back_inserter(KDivXOutputs),
+        [&constant](std::int32_t val){return constant/val;});
+    
+    testConstArithmetic(constant, "X+K", inputs, XPlusKOutputs);
+    testConstArithmetic(constant, "X-K", inputs, XSubKOutputs);
+    testConstArithmetic(constant, "K-X", inputs, KSubXOutputs);
+    testConstArithmetic(constant, "X*K", inputs, XMultKOutputs);
+    testConstArithmetic(constant, "X/K", inputs, XDivKOutputs);
+    testConstArithmetic(constant, "K/X", inputs, KDivXOutputs);
 }
