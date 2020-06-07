@@ -339,6 +339,7 @@ public:
         _modeStr = mode;
         _triggerWindowTimerEnabled = (mode == "SEMIAUTOMATIC");
         _triggerTimerEnabled       = (mode == "AUTOMATIC" or mode == "PERIODIC");
+        _triggerPeriodic           = (mode == "PERIODIC");
         _triggerSearchEnabled      = (mode == "AUTOMATIC" or mode == "SEMIAUTOMATIC" or mode == "NORMAL");
     }
 
@@ -452,6 +453,7 @@ private:
     std::string _modeStr;
     bool _triggerTimerEnabled;
     bool _triggerWindowTimerEnabled;
+    bool _triggerPeriodic;
     bool _triggerSearchEnabled;
     double _level;
     size_t _position;
@@ -690,6 +692,10 @@ void WaveTrigger::triggerWork(void)
     {
         consumeElems = std::min(numElems, _holdOffRemaining);
         _holdOffRemaining -= consumeElems;
+    }
+    else if (_triggerPeriodic)
+    {
+        consumeElems = numElems;
     }
     else
     {
