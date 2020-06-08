@@ -17,7 +17,7 @@
 template <typename T1, typename T2>
 static std::vector<T2> reinterpretCastVector(const std::vector<T1>& input)
 {
-    static_assert(sizeof(T1) == sizeof(T2));
+    static_assert(sizeof(T1) == sizeof(T2), "size mismatch");
     
     return std::vector<T2>(
                reinterpret_cast<const T2*>(input.data()),
