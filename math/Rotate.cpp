@@ -1,4 +1,5 @@
 // Copyright (c) 2014-2016 Josh Blum
+//                    2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
@@ -10,6 +11,16 @@
 
 using Pothos::Util::fromQ;
 using Pothos::Util::floatToQ;
+
+template <typename Type, typename QType>
+static void arrayRotate(const Type *in, Type *out, const size_t num, const QType phasor)
+{
+    for(size_t i = 0; i < num; ++i)
+    {
+        const QType tmp = phasor*QType(in[i]);
+        out[i] = fromQ<Type>(tmp);
+    }
+}
 
 /***********************************************************************
  * |PothosDoc Rotate
@@ -113,11 +124,7 @@ public:
 
         //perform scale operation
         const size_t N = elems*inPort->dtype().dimension();
-        for (size_t i = 0; i < N; i++)
-        {
-            const QType tmp = _phasor*QType(in[i]);
-            out[i] = fromQ<Type>(tmp);
-        }
+        arrayRotate<Type, QType>(in, out, N, _phasor);
 
         //produce and consume on 0th ports
         inPort->consume(elems);

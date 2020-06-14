@@ -1,10 +1,20 @@
 // Copyright (c) 2016-2016 Josh Blum
+//                    2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
 #include <cstdint>
 #include <complex>
 #include <iostream>
+
+template <typename Type>
+static void arrayCombineComplex(const Type *re, const Type *im, std::complex<Type> *out, const size_t num)
+{
+    for (size_t i = 0; i < num; i++)
+    {
+        out[i] = std::complex<Type>(re[i], im[i]);
+    }
+}
 
 /***********************************************************************
  * |PothosDoc Combine Complex
@@ -46,10 +56,7 @@ public:
 
         //convert
         const size_t N = elems*outPort->dtype().dimension();
-        for (size_t i = 0; i < N; i++)
-        {
-            out[i] = std::complex<Type>(re[i], im[i]);
-        }
+        arrayCombineComplex(re, im, out, N);
 
         //produce/consume
         outPort->produce(elems);
