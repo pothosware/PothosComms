@@ -1,4 +1,5 @@
 // Copyright (c) 2015-2016 Josh Blum
+//                    2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
@@ -8,6 +9,15 @@
 #include <algorithm> //min/max
 #include <type_traits>
 #include "FxptHelpers.hpp"
+
+template <typename InType, typename OutType>
+static void arrayAbs(const InType *in, OutType *out, const size_t num)
+{
+    for (size_t i = 0; i < num; i++)
+    {
+        out[i] = getAbs<OutType>(in[i]);
+    }
+}
 
 /***********************************************************************
  * |PothosDoc Abs
@@ -53,10 +63,7 @@ public:
 
         //perform abs operation
         const size_t N = elems*inPort->dtype().dimension();
-        for (size_t i = 0; i < N; i++)
-        {
-            out[i] = getAbs<OutType>(in[i]);
-        }
+        arrayAbs(in, out, N);
 
         //produce and consume on 0th ports
         inPort->consume(elems);

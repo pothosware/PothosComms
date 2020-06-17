@@ -1,4 +1,5 @@
 // Copyright (c) 2019 Nick Foster
+//               2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
@@ -6,6 +7,15 @@
 #include <iostream>
 #include <algorithm> //min/max
 #include <cmath>
+
+template <typename Type>
+static void arrayLog10(const Type *in, Type *out, const size_t num)
+{
+    for (size_t i = 0; i < num; i++)
+    {
+        out[i] = std::log10(in[i]);
+    }
+}
 
 /***********************************************************************
  * |PothosDoc Log10
@@ -48,10 +58,7 @@ public:
 
         //do the needful
         const size_t N = elems*inPort->dtype().dimension();
-        for (size_t i = 0; i < N; i++)
-        {
-            out[i] = std::log10(in[i]);
-        }
+        arrayLog10(in, out, N);
 
         //produce and consume on 0th ports
         inPort->consume(elems);

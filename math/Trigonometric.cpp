@@ -10,80 +10,220 @@
 #include <cstdint>
 #include <string>
 
-//
-// Reciprocal functions
-//
-
 template <typename T>
-static T sec(T x)
+static void arrayCos(const T* in, T* out, size_t num)
 {
-    return T(1.0) / std::cos(x);
+    for(size_t i = 0; i < num; ++i)
+    {
+        out[i] = std::cos(in[i]);
+    }
 }
 
 template <typename T>
-static T csc(T x)
+static void arraySin(const T* in, T* out, size_t num)
 {
-    return T(1.0) / std::sin(x);
+    for(size_t i = 0; i < num; ++i)
+    {
+        out[i] = std::sin(in[i]);
+    }
 }
 
 template <typename T>
-static T cot(T x)
+static void arrayTan(const T* in, T* out, size_t num)
 {
-    return T(1.0) / std::tan(x);
+    for(size_t i = 0; i < num; ++i)
+    {
+        out[i] = std::tan(in[i]);
+    }
 }
 
 template <typename T>
-static T asec(T x)
+static void arraySec(const T* in, T* out, size_t num)
 {
-    return std::acos(T(1.0) / x);
+    for(size_t i = 0; i < num; ++i)
+    {
+        out[i] = T(1.0) / std::cos(in[i]);
+    }
 }
 
 template <typename T>
-static T acsc(T x)
+static void arrayCsc(const T* in, T* out, size_t num)
 {
-    return std::asin(T(1.0) / x);
+    for(size_t i = 0; i < num; ++i)
+    {
+        out[i] = T(1.0) / std::sin(in[i]);
+    }
 }
 
 template <typename T>
-static T acot(T x)
+static void arrayCot(const T* in, T* out, size_t num)
 {
-    return std::atan(T(1.0) / x);
+    for(size_t i = 0; i < num; ++i)
+    {
+        out[i] = T(1.0) / std::tan(in[i]);
+    }
 }
 
 template <typename T>
-static T sech(T x)
+static void arrayACos(const T* in, T* out, size_t num)
 {
-    return T(1.0) / std::cosh(x);
+    for(size_t i = 0; i < num; ++i)
+    {
+        out[i] = std::acos(in[i]);
+    }
 }
 
 template <typename T>
-static T csch(T x)
+static void arrayASin(const T* in, T* out, size_t num)
 {
-    return T(1.0) / std::sinh(x);
+    for(size_t i = 0; i < num; ++i)
+    {
+        out[i] = std::asin(in[i]);
+    }
 }
 
 template <typename T>
-static T coth(T x)
+static void arrayATan(const T* in, T* out, size_t num)
 {
-    return T(1.0) / std::tanh(x);
+    for(size_t i = 0; i < num; ++i)
+    {
+        out[i] = std::atan(in[i]);
+    }
 }
 
 template <typename T>
-static T asech(T x)
+static void arrayASec(const T* in, T* out, size_t num)
 {
-    return std::acosh(T(1.0) / x);
+    for(size_t i = 0; i < num; ++i)
+    {
+        out[i] = std::acos(T(1.0) / in[i]);
+    }
 }
 
 template <typename T>
-static T acsch(T x)
+static void arrayACsc(const T* in, T* out, size_t num)
 {
-    return std::asinh(T(1.0) / x);
+    for(size_t i = 0; i < num; ++i)
+    {
+        out[i] = std::asin(T(1.0) / in[i]);
+    }
 }
 
 template <typename T>
-static T acoth(T x)
+static void arrayACot(const T* in, T* out, size_t num)
 {
-    return std::atanh(T(1.0) / x);
+    for(size_t i = 0; i < num; ++i)
+    {
+        out[i] = std::atan(T(1.0) / in[i]);
+    }
+}
+
+template <typename T>
+static void arrayCosH(const T* in, T* out, size_t num)
+{
+    for(size_t i = 0; i < num; ++i)
+    {
+        out[i] = std::cosh(in[i]);
+    }
+}
+
+template <typename T>
+static void arraySinH(const T* in, T* out, size_t num)
+{
+    for(size_t i = 0; i < num; ++i)
+    {
+        out[i] = std::sinh(in[i]);
+    }
+}
+
+template <typename T>
+static void arrayTanH(const T* in, T* out, size_t num)
+{
+    for(size_t i = 0; i < num; ++i)
+    {
+        out[i] = std::tanh(in[i]);
+    }
+}
+
+template <typename T>
+static void arraySecH(const T* in, T* out, size_t num)
+{
+    for(size_t i = 0; i < num; ++i)
+    {
+        out[i] = T(1.0) / std::cosh(in[i]);
+    }
+}
+
+template <typename T>
+static void arrayCscH(const T* in, T* out, size_t num)
+{
+    for(size_t i = 0; i < num; ++i)
+    {
+        out[i] = T(1.0) / std::sinh(in[i]);
+    }
+}
+
+template <typename T>
+static void arrayCotH(const T* in, T* out, size_t num)
+{
+    for(size_t i = 0; i < num; ++i)
+    {
+        out[i] = T(1.0) / std::tanh(in[i]);
+    }
+}
+
+template <typename T>
+static void arrayACosH(const T* in, T* out, size_t num)
+{
+    for(size_t i = 0; i < num; ++i)
+    {
+        out[i] = std::acosh(in[i]);
+    }
+}
+
+template <typename T>
+static void arrayASinH(const T* in, T* out, size_t num)
+{
+    for(size_t i = 0; i < num; ++i)
+    {
+        out[i] = std::asinh(in[i]);
+    }
+}
+
+template <typename T>
+static void arrayATanH(const T* in, T* out, size_t num)
+{
+    for(size_t i = 0; i < num; ++i)
+    {
+        out[i] = std::atanh(in[i]);
+    }
+}
+
+template <typename T>
+static void arrayASecH(const T* in, T* out, size_t num)
+{
+    for(size_t i = 0; i < num; ++i)
+    {
+        out[i] = std::acosh(T(1.0) / in[i]);
+    }
+}
+
+template <typename T>
+static void arrayACscH(const T* in, T* out, size_t num)
+{
+    for(size_t i = 0; i < num; ++i)
+    {
+        out[i] = std::asinh(T(1.0) / in[i]);
+    }
+}
+
+template <typename T>
+static void arrayACotH(const T* in, T* out, size_t num)
+{
+    for(size_t i = 0; i < num; ++i)
+    {
+        out[i] = std::atanh(T(1.0) / in[i]);
+    }
 }
 
 /***********************************************************************
@@ -162,7 +302,7 @@ template <typename T>
 class Trigonometric: public Pothos::Block
 {
 public:
-    using Func = T(*)(T);
+    using Func = T(*)(const T*, T*, size_t);
     using Class = Trigonometric<T>;
 
     Trigonometric(const std::string& operation, size_t dimension)
@@ -179,32 +319,32 @@ public:
     void setOperation(const std::string& funcName)
     {
         #define ifNameSetFunc(name,func) \
-            if(name == funcName) _func = Func(func);
+            if(name == funcName) _func = Func(func<T>);
 
-        ifNameSetFunc(     "COS",   std::cos)
-        else ifNameSetFunc("SIN",   std::sin)
-        else ifNameSetFunc("TAN",   std::tan)
-        else ifNameSetFunc("SEC",   sec)
-        else ifNameSetFunc("CSC",   csc)
-        else ifNameSetFunc("COT",   cot)
-        else ifNameSetFunc("ACOS",  std::acos)
-        else ifNameSetFunc("ASIN",  std::asin)
-        else ifNameSetFunc("ATAN",  std::atan)
-        else ifNameSetFunc("ASEC",  asec)
-        else ifNameSetFunc("ACSC",  acsc)
-        else ifNameSetFunc("ACOT",  acot)
-        else ifNameSetFunc("COSH",  std::cosh)
-        else ifNameSetFunc("SINH",  std::sinh)
-        else ifNameSetFunc("TANH",  std::tanh)
-        else ifNameSetFunc("SECH",  sech)
-        else ifNameSetFunc("CSCH",  csch)
-        else ifNameSetFunc("COTH",  coth)
-        else ifNameSetFunc("ACOSH", std::acosh)
-        else ifNameSetFunc("ASINH", std::asinh)
-        else ifNameSetFunc("ATANH", std::atanh)
-        else ifNameSetFunc("ASECH", asech)
-        else ifNameSetFunc("ACSCH", acsch)
-        else ifNameSetFunc("ACOTH", acoth)
+        ifNameSetFunc(     "COS",   arrayCos)
+        else ifNameSetFunc("SIN",   arraySin)
+        else ifNameSetFunc("TAN",   arrayTan)
+        else ifNameSetFunc("SEC",   arraySec)
+        else ifNameSetFunc("CSC",   arrayCsc)
+        else ifNameSetFunc("COT",   arrayCot)
+        else ifNameSetFunc("ACOS",  arrayACos)
+        else ifNameSetFunc("ASIN",  arrayASin)
+        else ifNameSetFunc("ATAN",  arrayATan)
+        else ifNameSetFunc("ASEC",  arrayASec)
+        else ifNameSetFunc("ACSC",  arrayACsc)
+        else ifNameSetFunc("ACOT",  arrayACot)
+        else ifNameSetFunc("COSH",  arrayCosH)
+        else ifNameSetFunc("SINH",  arraySinH)
+        else ifNameSetFunc("TANH",  arrayTanH)
+        else ifNameSetFunc("SECH",  arraySecH)
+        else ifNameSetFunc("CSCH",  arrayCscH)
+        else ifNameSetFunc("COTH",  arrayCotH)
+        else ifNameSetFunc("ACOSH", arrayACosH)
+        else ifNameSetFunc("ASINH", arrayASinH)
+        else ifNameSetFunc("ATANH", arrayATanH)
+        else ifNameSetFunc("ASECH", arrayASecH)
+        else ifNameSetFunc("ACSCH", arrayACscH)
+        else ifNameSetFunc("ACOTH", arrayACotH)
         else throw Pothos::InvalidArgumentException("Invalid operation", funcName);
     }
 
@@ -222,10 +362,7 @@ public:
         const T* buffIn = input->buffer();
         T* buffOut = output->buffer();
 
-        for(size_t elem = 0; elem < elems; ++elem)
-        {
-            buffOut[elem] = _func(buffIn[elem]);
-        }
+        _func(buffIn, buffOut, elems);
 
         input->consume(elems);
         output->produce(elems);

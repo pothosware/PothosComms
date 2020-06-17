@@ -1,10 +1,21 @@
 // Copyright (c) 2016-2016 Josh Blum
+//                    2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
 #include <cstdint>
 #include <complex>
 #include <iostream>
+
+template <typename Type>
+static void arraySplitComplex(const std::complex<Type> *in, Type *re, Type *im, const size_t num)
+{
+    for (size_t i = 0; i < num; i++)
+    {
+        re[i] = in[i].real();
+        im[i] = in[i].imag();
+    }
+}
 
 /***********************************************************************
  * |PothosDoc Split Complex
@@ -46,11 +57,7 @@ public:
 
         //convert
         const size_t N = elems*inPort->dtype().dimension();
-        for (size_t i = 0; i < N; i++)
-        {
-            re[i] = in[i].real();
-            im[i] = in[i].imag();
-        }
+        arraySplitComplex(in, re, im, N);
 
         //produce/consume
         inPort->consume(elems);

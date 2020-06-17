@@ -1,4 +1,5 @@
 // Copyright (c) 2014-2016 Josh Blum
+//                    2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
@@ -10,6 +11,16 @@
 
 using Pothos::Util::fromQ;
 using Pothos::Util::floatToQ;
+
+template <typename Type, typename QType, typename ScaleType>
+static void arrayScale(const Type *in, Type *out, const size_t num, ScaleType factorScale)
+{
+    for (size_t i = 0; i < num; i++)
+    {
+        const QType tmp = factorScale*QType(in[i]);
+        out[i] = fromQ<Type>(tmp);
+    }
+}
 
 /***********************************************************************
  * |PothosDoc Scale
@@ -112,11 +123,7 @@ public:
 
         //perform scale operation
         const size_t N = elems*inPort->dtype().dimension();
-        for (size_t i = 0; i < N; i++)
-        {
-            const QType tmp = _factorScaled*QType(in[i]);
-            out[i] = fromQ<Type>(tmp);
-        }
+        arrayScale<Type, QType, ScaleType>(in, out, N, _factorScaled);
 
         //produce and consume on 0th ports
         inPort->consume(elems);

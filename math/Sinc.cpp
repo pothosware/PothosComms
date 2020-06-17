@@ -5,6 +5,16 @@
 
 #include <cmath>
 
+template <typename Type>
+static void arraySinc(const Type *in, Type *out, const size_t num)
+{
+    for (size_t i = 0; i < num; i++)
+    {
+        #define ZERO(x) (std::abs(x) < 1e-6)
+        out[i] = ZERO(in[i]) ? 1 : (std::sin(in[i]) / in[i]);
+    }
+}
+
 /***********************************************************************
  * |PothosDoc Sinc
  *
@@ -20,7 +30,7 @@
  * <b>sinc(0)</b> is the limit value 1.
  *
  * The name sinc is short for "sine cardinal" or "sinus cardinalis".
- * 
+ *
  * The sinc function is used in various signal processing applications,
  * including in anti-aliasing, in the construction of a Lanczos resampling
  * filter, and in interpolation.
@@ -40,7 +50,7 @@ class Sinc : public Pothos::Block
 {
 public:
     using Class = Sinc<Type>;
-    
+
     Sinc(const size_t dimension)
     {
         this->setupInput(0, Pothos::DType(typeid(Type), dimension));
@@ -60,11 +70,7 @@ public:
         Type *out = outPort->buffer();
 
         const size_t N = elems*inPort->dtype().dimension();
-        for (size_t i = 0; i < N; i++)
-        {
-            #define ZERO(x) (std::abs(x) < 1e-6)
-            out[i] = ZERO(in[i]) ? 1 : (std::sin(in[i]) / in[i]);
-        }
+        arraySinc(in, out, N);
 
         //produce and consume on 0th ports
         inPort->consume(elems);
