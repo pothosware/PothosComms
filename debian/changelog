@@ -1,3 +1,9 @@
+pothos-comms (0.3.4-1) unstable; urgency=low
+
+  * Release 0.3.4 (2020-07-19)
+
+ -- Josh Blum <josh@pothosware.com>  Sun, 19 Jul 2020 21:52:33 -0000
+
 pothos-comms (0.3.3-1) unstable; urgency=low
 
   * Release 0.3.3 (2019-06-22)

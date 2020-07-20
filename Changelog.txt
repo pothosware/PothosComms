@@ -1,6 +1,6 @@
 This this the changelog file for the Pothos Comms toolkit.
 
-Release 0.3.4 (pending)
+Release 0.3.4 (2020-07-19)
 ==========================
 
 New blocks:
