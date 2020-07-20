@@ -1,5 +1,22 @@
 This this the changelog file for the Pothos Comms toolkit.
 
+Release 0.3.4 (pending)
+==========================
+
+New blocks:
+
+- Added sinc and trig function blocks
+- Added constant arithmetic blocks
+- Added byte order swap block
+
+Improvements:
+
+- Refactor math blocks to use vectorized functions
+
+Fixes:
+
+- Fix wave trigger consume all on periodic input
+
 Release 0.3.3 (2019-06-22)
 ==========================
 
