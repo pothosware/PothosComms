@@ -7,6 +7,7 @@
 #include <Pothos/Proxy.hpp>
 
 #include <algorithm>
+#include <cstring>
 #include <iostream>
 
 POTHOS_TEST_BLOCK("/comms/tests", test_arithmetic_add)
@@ -237,4 +238,92 @@ POTHOS_TEST_BLOCK("/comms/tests", test_const_arithmetic)
     testConstArithmetic(constant, "X*K", inputs, XMultKOutputs);
     testConstArithmetic(constant, "X/K", inputs, XDivKOutputs);
     testConstArithmetic(constant, "K/X", inputs, KDivXOutputs);
+}
+
+//
+// /comms/vector_arithmetic
+//
+
+template <typename T>
+static Pothos::BufferChunk stdVectorToBufferChunk(const std::vector<T>& vec)
+{
+    static const Pothos::DType dtype(typeid(T));
+
+    Pothos::BufferChunk bufferChunk(dtype, vec.size());
+    std::memcpy(
+        reinterpret_cast<void*>(bufferChunk.address),
+        vec.data(),
+        bufferChunk.length);
+
+    return bufferChunk;
+}
+
+template <typename T>
+static void testVectorArithmetic(
+    const std::string& operation,
+    const std::vector<T>& input,
+    const std::vector<T>& kVector,
+    const std::vector<T>& expectedOutput)
+{
+    static const Pothos::DType dtype(typeid(T));
+
+    std::cout << " * " << operation << "..." << std::endl;
+
+    POTHOS_TEST_EQUAL(input.size(), expectedOutput.size());
+
+    const auto inputBuffer = stdVectorToBufferChunk(input);
+    const auto expectedOutputBuffer = stdVectorToBufferChunk(expectedOutput);
+
+    const auto feederSource = Pothos::BlockRegistry::make(
+                                  "/blocks/feeder_source",
+                                  dtype);
+    feederSource.call("feedBuffer", inputBuffer);
+
+    const auto vectorArithmetic = Pothos::BlockRegistry::make(
+                                      "/comms/vector_arithmetic",
+                                      dtype,
+                                      operation);
+    vectorArithmetic.call("setVector", kVector);
+    POTHOS_TEST_EQUAL(kVector, vectorArithmetic.call<std::vector<T>>("vector"));
+
+    const auto collectorSink = Pothos::BlockRegistry::make(
+                                   "/blocks/collector_sink",
+                                   dtype);
+
+    {
+        Pothos::Topology topology;
+
+        topology.connect(feederSource, 0, vectorArithmetic, 0);
+        topology.connect(vectorArithmetic, 0, collectorSink, 0);
+
+        topology.commit();
+        POTHOS_TEST_TRUE(topology.waitInactive(0.01));
+    }
+
+    const auto output = collectorSink.call<Pothos::BufferChunk>("getBuffer");
+    POTHOS_TEST_EQUAL(expectedOutputBuffer.dtype, output.dtype);
+    POTHOS_TEST_EQUAL(expectedOutputBuffer.elements(), output.elements());
+    POTHOS_TEST_EQUALA(
+        expectedOutputBuffer.template as<const T*>(),
+        output.as<const T*>(),
+        output.elements());
+}
+
+POTHOS_TEST_BLOCK("/comms/tests", test_vector_arithmetic)
+{
+    const auto input = std::vector<double>{1,2,3,4,5,6,7,8};
+    const auto vec   = std::vector<double>{2,4,6};
+    const auto expectedXPlusK = std::vector<double>{3,6,9,6,9,12,9,12};
+    const auto expectedXMinusK = std::vector<double>{-1,-2,-3,2,1,0,5,4};
+    const auto expectedKMinusX = std::vector<double>{1,2,3,-2,-1,0,-5,-4};
+    const auto expectedXMultK = std::vector<double>{2,8,18,8,20,36,14,32};
+    const auto expectedXDivK = std::vector<double>{0.5,0.5,0.5,2,5.0/4.0,1,7.0/2.0,2};
+    const auto expectedKDivX = std::vector<double>{2,2,2,0.5,0.8,1,2.0/7.0,0.5};
+
+    testVectorArithmetic("X+K", input, vec, expectedXPlusK);
+    testVectorArithmetic("X-K", input, vec, expectedXMinusK);
+    testVectorArithmetic("K-X", input, vec, expectedKMinusX);
+    testVectorArithmetic("X*K", input, vec, expectedXMultK);
+    testVectorArithmetic("X/K", input, vec, expectedXDivK);
+    testVectorArithmetic("K/X", input, vec, expectedKDivX);
 }
