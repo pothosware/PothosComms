@@ -302,7 +302,7 @@ template <typename T>
 class Trigonometric: public Pothos::Block
 {
 public:
-    using Func = T(*)(const T*, T*, size_t);
+    using Func = void(*)(const T*, T*, size_t);
     using Class = Trigonometric<T>;
 
     Trigonometric(const std::string& operation, size_t dimension)

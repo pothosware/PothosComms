@@ -1,4 +1,5 @@
 // Copyright (c) 2015-2017 Josh Blum
+//                    2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
 #include "FrameHelper.hpp"
@@ -299,7 +300,7 @@ private:
         _preambleBuff = Pothos::BufferChunk(typeid(Type), _syncWordWidth+NUM_HEADER_BITS);
 
         auto p = _preambleBuff.as<Type *>();
-        std::memset(p, 0, _preambleBuff.length);
+        std::memset((void*)p, 0, _preambleBuff.length);
         for (size_t i = 0; i < _preamble.size(); i++)
         {
             for (size_t j = 0; j < _symbolWidth; j++)
