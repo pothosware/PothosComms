@@ -18,7 +18,7 @@ template <typename T1, typename T2>
 static std::vector<T2> reinterpretCastVector(const std::vector<T1>& input)
 {
     static_assert(sizeof(T1) == sizeof(T2), "size mismatch");
-    
+
     return std::vector<T2>(
                reinterpret_cast<const T2*>(input.data()),
                reinterpret_cast<const T2*>(input.data()) + input.size());
@@ -64,7 +64,7 @@ void _getTestParameters(
     std::vector<std::uint32_t> uintInputs;
     std::vector<std::uint32_t> uintSwapped;
     _getTestParameters(&uintInputs, &uintSwapped);
-    
+
     (*pInputs)  = reinterpretCastVector<std::uint32_t, float>(uintInputs);
     (*pSwapped) = reinterpretCastVector<std::uint32_t, float>(uintSwapped);
 }
@@ -77,7 +77,7 @@ void _getTestParameters(
     std::vector<std::uint64_t> uintInputs;
     std::vector<std::uint64_t> uintSwapped;
     _getTestParameters(&uintInputs, &uintSwapped);
-    
+
     (*pInputs)  = reinterpretCastVector<std::uint64_t, double>(uintInputs);
     (*pSwapped) = reinterpretCastVector<std::uint64_t, double>(uintSwapped);
 }
@@ -97,12 +97,12 @@ void _getTestParameters(
     pSwapped->resize(scalarInputs.size()/2);
 
     std::memcpy(
-        pInputs->data(),
-        scalarInputs.data(),
+        (void*)pInputs->data(),
+        (const void*)scalarInputs.data(),
         sizeof(T) * scalarInputs.size());
     std::memcpy(
-        pSwapped->data(),
-        scalarSwapped.data(),
+        (void*)pSwapped->data(),
+        (const void*)scalarSwapped.data(),
         sizeof(T) * scalarSwapped.size());
 }
 
@@ -146,13 +146,13 @@ static void getTestParameters(
     (*pInputs) = Pothos::BufferChunk(dtype, inputsVec.size());
     std::memcpy(
         reinterpret_cast<void*>(pInputs->address),
-        inputsVec.data(),
+        (const void*)inputsVec.data(),
         pInputs->length);
 
     (*pSwapped) = Pothos::BufferChunk(dtype, swappedVec.size());
     std::memcpy(
         reinterpret_cast<void*>(pSwapped->address),
-        swappedVec.data(),
+        (const void*)swappedVec.data(),
         pSwapped->length);
 }
 
@@ -235,7 +235,7 @@ static void testSwapOrder(const Pothos::Proxy& byteOrder)
 
    blockTest<T>(
        byteOrder,
-       true /*expectSwap*/); 
+       true /*expectSwap*/);
 }
 
 template <typename T>
@@ -252,7 +252,7 @@ static void testBigEndian(const Pothos::Proxy& byteOrder)
 #else
        true /*expectSwap*/
 #endif
-       ); 
+       );
 }
 
 template <typename T>
@@ -269,7 +269,7 @@ static void testLittleEndian(const Pothos::Proxy& byteOrder)
 #else
        false /*expectSwap*/
 #endif
-       ); 
+       );
 }
 
 template <typename T>
@@ -286,7 +286,7 @@ static void testHostOrder(const Pothos::Proxy& byteOrder)
 #else
        true /*expectSwap*/
 #endif
-       ); 
+       );
 }
 
 template <typename T>
@@ -303,7 +303,7 @@ static void testNetworkOrder(const Pothos::Proxy& byteOrder)
 #else
        true /*expectSwap*/
 #endif
-       ); 
+       );
 }
 
 //
