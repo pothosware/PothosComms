@@ -65,7 +65,7 @@ static inline ArithFcn<Type> getDivFcn()
  * |alias /blocks/arithmetic
  *
  * |param dtype[Data Type] The data type used in the arithmetic.
- * |widget DTypeChooser(float=1,cfloat=1,int=1,cint=1,dim=1)
+ * |widget DTypeChooser(float=1,cfloat=1,int=1,cint=1,uint=1,cuint=1,dim=1)
  * |default "complex_float32"
  * |preview disable
  *
@@ -241,6 +241,10 @@ static Pothos::Block *arithmeticFactory(const Pothos::DType &dtype, const std::s
         ifTypeDeclareFactory_(std::complex<type>)
     ifTypeDeclareFactory(double);
     ifTypeDeclareFactory(float);
+    ifTypeDeclareFactory(uint64_t);
+    ifTypeDeclareFactory(uint32_t);
+    ifTypeDeclareFactory(uint16_t);
+    ifTypeDeclareFactory(uint8_t);
     ifTypeDeclareFactory(int64_t);
     ifTypeDeclareFactory(int32_t);
     ifTypeDeclareFactory(int16_t);
