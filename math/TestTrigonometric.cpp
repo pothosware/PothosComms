@@ -16,7 +16,7 @@
 // Utility code
 //
 
-constexpr size_t bufferLen = 64; // Long enough for any SIMD frame
+constexpr size_t bufferLen = 123; // Long enough for any SIMD frame, while having manual entries
 
 // https://gist.github.com/lorenzoriano/5414671
 template <typename T>

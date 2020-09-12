@@ -1,6 +1,10 @@
 // Copyright (c) 2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
+#ifdef POTHOS_XSIMD
+#include "SIMD/Trigonometric_SIMDDispatcher.hpp"
+#endif
+
 #include <Pothos/Callable.hpp>
 #include <Pothos/Exception.hpp>
 #include <Pothos/Framework.hpp>
@@ -9,15 +13,33 @@
 #include <complex>
 #include <cstdint>
 #include <string>
+#include <type_traits>
+
+#ifdef POTHOS_XSIMD
 
 template <typename T>
 static void arrayCos(const T* in, T* out, size_t num)
 {
-    for(size_t i = 0; i < num; ++i)
+    // Cache on the first call.
+    static auto cosFcn = PothosCommsSIMD::cosDispatch<T>();
+
+    cosFcn(in, out, num);
+}
+
+#else
+
+template <typename T>
+static void arrayCos(const T* in, T* out, size_t num)
+{
+    for (size_t i = 0; i < num; ++i)
     {
         out[i] = std::cos(in[i]);
     }
 }
+
+#endif
+
+
 
 template <typename T>
 static void arraySin(const T* in, T* out, size_t num)
