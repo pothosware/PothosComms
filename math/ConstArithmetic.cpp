@@ -1,6 +1,10 @@
 // Copyright (c) 2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
+#ifdef POTHOS_XSIMD
+#include "SIMD/ConstArithmetic_SIMDDispatcher.hpp"
+#endif
+
 #include <Pothos/Callable.hpp>
 #include <Pothos/Exception.hpp>
 #include <Pothos/Framework.hpp>
@@ -9,6 +13,13 @@
 #include <complex>
 #include <cstdint>
 #include <string>
+#include <type_traits>
+
+template <typename T>
+struct IsComplex : std::false_type {};
+
+template <typename T>
+struct IsComplex<std::complex<T>> : std::true_type {};
 
 /***********************************************************************
  * |PothosDoc Const Arithmetic
@@ -113,8 +124,21 @@ private:
 // Arithmetic functions
 //
 
+#ifdef POTHOS_XSIMD
 template <typename T>
-void XPlusK(const T* in, const T& k, T* out, size_t len)
+typename std::enable_if<!IsComplex<T>::value>::type XPlusK(const T* in, const T& k, T* out, size_t len)
+{
+    // Cache on the first call.
+    static auto XPlusKFcn = PothosCommsSIMD::XPlusKDispatch<T>();
+
+    XPlusKFcn(in, k, out, len);
+}
+
+template <typename T> typename std::enable_if<IsComplex<T>::value>::type
+#else
+template <typename T> void
+#endif
+XPlusK(const T* in, const T& k, T* out, size_t len)
 {
     for(size_t i = 0; i < len; ++i)
     {

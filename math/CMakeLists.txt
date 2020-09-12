@@ -48,6 +48,15 @@ if(xsimd_FOUND)
         "add"
         ${SIMDBuildArchs})
 
+    # /blocks/const_arithmetic (TODO: support multiple functions)
+    pothos_multiarch(
+        ConstArithmeticSIMDSources
+        SIMD/ConstArithmetic.cpp
+        PothosCommsSIMD
+        "template <typename T> void XPlusK(const T*, const T&, T*, size_t);"
+        "XPlusK"
+        ${SIMDBuildArchs})
+
     # /blocks/trigonometric (TODO: support multiple functions)
     pothos_multiarch(
         TrigonometricSIMDSources
@@ -59,6 +68,7 @@ if(xsimd_FOUND)
 
     set(SIMDSources
         ${ArithmeticSIMDSources}
+        ${ConstArithmeticSIMDSources}
         ${TrigonometricSIMDSources})
 
     # Convert to relative path so PothosUtil will accept the path
