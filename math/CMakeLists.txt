@@ -57,6 +57,15 @@ if(xsimd_FOUND)
         "XPlusK"
         ${SIMDBuildArchs})
 
+    # /blocks/log* (TODO: support multiple functions)
+    pothos_multiarch(
+        LogSIMDSources
+        SIMD/Log.cpp
+        PothosCommsSIMD
+        "template <typename T> void log2(const T*, T*, size_t);"
+        "log2"
+        ${SIMDBuildArchs})
+
     # /blocks/trigonometric (TODO: support multiple functions)
     pothos_multiarch(
         TrigonometricSIMDSources
@@ -69,6 +78,7 @@ if(xsimd_FOUND)
     set(SIMDSources
         ${ArithmeticSIMDSources}
         ${ConstArithmeticSIMDSources}
+        ${LogSIMDSources}
         ${TrigonometricSIMDSources})
 
     # Convert to relative path so PothosUtil will accept the path

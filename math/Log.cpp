@@ -2,6 +2,10 @@
 //               2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
+#ifdef POTHOS_XSIMD
+#include "SIMD/Log_SIMDDispatcher.hpp"
+#endif
+
 #include <Pothos/Exception.hpp>
 #include <Pothos/Framework.hpp>
 
@@ -16,6 +20,31 @@ using ArrayLogFcn = std::function<void(const Type*, Type*, const size_t)>;
 /***********************************************************************
  * Log functions
  **********************************************************************/
+
+#ifdef POTHOS_XSIMD
+
+template <typename Type>
+static typename std::enable_if<std::is_floating_point<Type>::value>::type arrayLog2(const Type* in, Type* out, const size_t num)
+{
+    // Cache on the first run.
+    static auto log2Fcn = PothosCommsSIMD::log2Dispatch<Type>();
+
+    log2Fcn(in, out, num);
+}
+
+template <typename Type>
+static typename std::enable_if<!std::is_floating_point<Type>::value>::type
+#else
+template <typename Type>
+static void
+#endif
+arrayLog2(const Type* in, Type* out, const size_t num)
+{
+    for (size_t i = 0; i < num; i++)
+    {
+        out[i] = std::log2(in[i]);
+    }
+}
 
 template <typename Type>
 static void arrayLogN(const Type *in, Type *out, Type base, const size_t num)
@@ -32,15 +61,6 @@ static void arrayLog(const Type *in, Type *out, const size_t num)
     for (size_t i = 0; i < num; i++)
     {
         out[i] = std::log(in[i]);
-    }
-}
-
-template <typename Type>
-static void arrayLog2(const Type *in, Type *out, const size_t num)
-{
-    for (size_t i = 0; i < num; i++)
-    {
-        out[i] = std::log2(in[i]);
     }
 }
 
