@@ -18,6 +18,7 @@ POTHOS_MODULE_UTIL(
     TARGET MathBlocks
     SOURCES
         Abs.cpp
+        TestAbs.cpp
         Angle.cpp
         TestAngle.cpp
         Arithmetic.cpp
