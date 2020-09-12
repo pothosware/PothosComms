@@ -1,5 +1,10 @@
 // Copyright (c) 2014-2016 Josh Blum
+//                    2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
+
+#ifdef POTHOS_XSIMD
+#include "SIMD/Arithmetic_SIMDDispatcher.hpp"
+#endif
 
 #include <Pothos/Framework.hpp>
 #include <cstdint>
@@ -152,11 +157,24 @@ private:
 /***********************************************************************
  * templated arithmetic vector operators
  **********************************************************************/
+#ifdef POTHOS_XSIMD
+
+template <typename Type>
+void addArray(const Type* in0, const Type* in1, Type* out, const size_t num)
+{
+    // Cache on the first call.
+    static auto addFcn = PothosCommsSIMD::addDispatch<Type>();
+
+    addFcn(in0, in1, out, num);
+}
+
+#else
 template <typename Type>
 void addArray(const Type *in0, const Type *in1, Type *out, const size_t num)
 {
     for (size_t i = 0; i < num; i++) out[i] = in0[i] + in1[i];
 }
+#endif
 
 template <typename Type>
 void subArray(const Type *in0, const Type *in1, Type *out, const size_t num)

@@ -39,6 +39,15 @@ set(libraries CommsFunctions)
 if(xsimd_FOUND)
     list(APPEND libraries xsimd)
 
+    # /blocks/arithmetic (TODO: support multiple functions)
+    pothos_multiarch(
+        ArithmeticSIMDSources
+        SIMD/Arithmetic.cpp
+        PothosCommsSIMD
+        "template <typename T> void add(const T*, const T*, T*, size_t);"
+        "add"
+        ${SIMDBuildArchs})
+
     # /blocks/trigonometric (TODO: support multiple functions)
     pothos_multiarch(
         TrigonometricSIMDSources
@@ -48,7 +57,9 @@ if(xsimd_FOUND)
         "cos"
         ${SIMDBuildArchs})
 
-    set(SIMDSources ${TrigonometricSIMDSources})
+    set(SIMDSources
+        ${ArithmeticSIMDSources}
+        ${TrigonometricSIMDSources})
 
     # Convert to relative path so PothosUtil will accept the path
     foreach(AbsPath ${SIMDSources})
