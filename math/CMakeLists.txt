@@ -16,6 +16,7 @@ endif(MSVC)
 
 set(sources
     Abs.cpp
+    TestAbs.cpp
     Angle.cpp
     TestAngle.cpp
     Arithmetic.cpp
