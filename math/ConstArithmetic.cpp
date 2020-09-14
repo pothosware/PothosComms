@@ -21,6 +21,24 @@ struct IsComplex : std::false_type {};
 template <typename T>
 struct IsComplex<std::complex<T>> : std::true_type {};
 
+template <typename T>
+using ConstArithmeticFcn = void(*)(const T*, const T&, T*, size_t);
+
+#ifdef POTHOS_XSIMD
+
+template <typename T>
+using EnableForSIMDFcn = typename std::enable_if<!IsComplex<T>::value, ConstArithmeticFcn<T>>::type;
+
+template <typename T>
+using EnableForDefaultFcn = typename std::enable_if<IsComplex<T>::value, ConstArithmeticFcn<T>>::type;
+
+#else
+
+template <typename T>
+using EnableForDefaultFcn = ConstArithmeticFcn<T>;
+
+#endif
+
 /***********************************************************************
  * |PothosDoc Const Arithmetic
  *
@@ -58,7 +76,7 @@ template <typename T>
 class ConstArithmetic: public Pothos::Block
 {
 public:
-    using ArithFcn = void(*)(const T*, const T&, T*, size_t);
+    using ArithFcn = ConstArithmeticFcn<T>;
     using Class = ConstArithmetic<T>;
 
     ConstArithmetic(
@@ -121,74 +139,140 @@ private:
 };
 
 //
-// Arithmetic functions
+// Arithmetic function getters, called on class construction
 //
 
 #ifdef POTHOS_XSIMD
-template <typename T>
-typename std::enable_if<!IsComplex<T>::value>::type XPlusK(const T* in, const T& k, T* out, size_t len)
-{
-    // Cache on the first call.
-    static auto XPlusKFcn = PothosCommsSIMD::XPlusKDispatch<T>();
 
-    XPlusKFcn(in, k, out, len);
+template <typename T>
+static inline EnableForSIMDFcn<T> getXPlusKFcn()
+{
+    return PothosCommsSIMD::XPlusKDispatch<T>();
 }
 
-template <typename T> typename std::enable_if<IsComplex<T>::value>::type
-#else
-template <typename T> void
+// TODO: remove when others exposed
+
+template <typename T>
+static inline EnableForSIMDFcn<T> getXSubKFcn()
+{
+    static const auto impl = [](const T* in, const T& k, T* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; i++) out[i] = in[i] - k;
+    };
+
+    return impl;
+}
+
+template <typename T>
+static inline EnableForSIMDFcn<T> getKSubXFcn()
+{
+    static const auto impl = [](const T* in, const T& k, T* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; i++) out[i] = k - in[i];
+    };
+
+    return impl;
+}
+
+template <typename T>
+static inline EnableForSIMDFcn<T> getXMultKFcn()
+{
+    static const auto impl = [](const T* in, const T& k, T* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; i++) out[i] = in[i] * k;
+    };
+
+    return impl;
+}
+
+template <typename T>
+static inline EnableForSIMDFcn<T> getXDivKFcn()
+{
+    static const auto impl = [](const T* in, const T& k, T* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; i++) out[i] = in[i] / k;
+    };
+
+    return impl;
+}
+
+template <typename T>
+static inline EnableForSIMDFcn<T> getKDivXFcn()
+{
+    static const auto impl = [](const T* in, const T& k, T* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; i++) out[i] = k / in[i];
+    };
+
+    return impl;
+}
+
 #endif
-XPlusK(const T* in, const T& k, T* out, size_t len)
+
+template <typename T>
+static inline EnableForDefaultFcn<T> getXPlusKFcn()
 {
-    for(size_t i = 0; i < len; ++i)
+    static const auto impl = [](const T* in, const T& k, T* out, const size_t num)
     {
-        out[i] = in[i] + k;
-    }
+        for (size_t i = 0; i < num; i++) out[i] = in[i] + k;
+    };
+
+    return impl;
 }
 
 template <typename T>
-void XSubK(const T* in, const T& k, T* out, size_t len)
+static inline EnableForDefaultFcn<T> getXSubKFcn()
 {
-    for(size_t i = 0; i < len; ++i)
+    static const auto impl = [](const T* in, const T& k, T* out, const size_t num)
     {
-        out[i] = in[i] - k;
-    }
+        for (size_t i = 0; i < num; i++) out[i] = in[i] - k;
+    };
+
+    return impl;
 }
 
 template <typename T>
-void KSubX(const T* in, const T& k, T* out, size_t len)
+static inline EnableForDefaultFcn<T> getKSubXFcn()
 {
-    for(size_t i = 0; i < len; ++i)
+    static const auto impl = [](const T* in, const T& k, T* out, const size_t num)
     {
-        out[i] = k - in[i];
-    }
+        for (size_t i = 0; i < num; i++) out[i] = k - in[i];
+    };
+
+    return impl;
 }
 
 template <typename T>
-void XMultK(const T* in, const T& k, T* out, size_t len)
+static inline EnableForDefaultFcn<T> getXMultKFcn()
 {
-    for(size_t i = 0; i < len; ++i)
+    static const auto impl = [](const T* in, const T& k, T* out, const size_t num)
     {
-        out[i] = in[i] * k;
-    }
+        for (size_t i = 0; i < num; i++) out[i] = in[i] * k;
+    };
+
+    return impl;
 }
 
 template <typename T>
-void XDivK(const T* in, const T& k, T* out, size_t len)
+static inline EnableForDefaultFcn<T> getXDivKFcn()
 {
-    for(size_t i = 0; i < len; ++i)
+    static const auto impl = [](const T* in, const T& k, T* out, const size_t num)
     {
-        out[i] = in[i] / k;
-    }
+        for (size_t i = 0; i < num; i++) out[i] = in[i] / k;
+    };
+
+    return impl;
 }
 
 template <typename T>
-void KDivX(const T* in, const T& k, T* out, size_t len)
+static inline EnableForDefaultFcn<T> getKDivXFcn()
 {
-    for(size_t i = 0; i < len; ++i)
+    static const auto impl = [](const T* in, const T& k, T* out, const size_t num)
     {
-        out[i] = k / in[i];
-    }
+        for (size_t i = 0; i < num; i++) out[i] = k / in[i];
+    };
+
+    return impl;
 }
 
 //
@@ -204,12 +288,12 @@ static Pothos::Block* makeConstArithmetic(
         if((Pothos::DType::fromDType(dtype, 1) == Pothos::DType(typeid(type))) && (opKey == operation)) \
             return new ConstArithmetic<type>(func, constant.convert<type>(), dtype.dimension());
     #define ifTypeDeclareFactory_(type) \
-        ifTypeDeclareFactory__(type, "X+K", XPlusK<type>) \
-        ifTypeDeclareFactory__(type, "X-K", XSubK<type>) \
-        ifTypeDeclareFactory__(type, "K-X", KSubX<type>) \
-        ifTypeDeclareFactory__(type, "X*K", XMultK<type>) \
-        ifTypeDeclareFactory__(type, "X/K", XDivK<type>) \
-        ifTypeDeclareFactory__(type, "K/X", KDivX<type>) 
+        ifTypeDeclareFactory__(type, "X+K", getXPlusKFcn<type>()) \
+        ifTypeDeclareFactory__(type, "X-K", getXSubKFcn<type>()) \
+        ifTypeDeclareFactory__(type, "K-X", getKSubXFcn<type>()) \
+        ifTypeDeclareFactory__(type, "X*K", getXMultKFcn<type>()) \
+        ifTypeDeclareFactory__(type, "X/K", getXDivKFcn<type>()) \
+        ifTypeDeclareFactory__(type, "K/X", getKDivXFcn<type>()) 
     #define ifTypeDeclareFactory(type) \
         ifTypeDeclareFactory_(type) \
         ifTypeDeclareFactory_(std::complex<type>)

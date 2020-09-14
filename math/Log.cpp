@@ -18,59 +18,111 @@ template <typename Type>
 using ArrayLogFcn = std::function<void(const Type*, Type*, const size_t)>;
 
 /***********************************************************************
- * Log functions
+ * Getters for functions, called on class construction
  **********************************************************************/
 
 #ifdef POTHOS_XSIMD
 
 template <typename Type>
-static typename std::enable_if<std::is_floating_point<Type>::value>::type arrayLog2(const Type* in, Type* out, const size_t num)
-{
-    // Cache on the first run.
-    static auto log2Fcn = PothosCommsSIMD::log2Dispatch<Type>();
+using EnableForSIMDFcn = typename std::enable_if<std::is_floating_point<Type>::value, ArrayLogFcn<Type>>::type;
 
-    log2Fcn(in, out, num);
+template <typename Type>
+using EnableForDefaultFcn = typename std::enable_if<!std::is_floating_point<Type>::value, ArrayLogFcn<Type>>::type;
+
+// TODO: switch to dispatch when limitation removed
+
+template <typename Type>
+static EnableForSIMDFcn<Type> getLogFcn()
+{
+    static const auto impl = [](const Type* in, Type* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; i++) out[i] = std::log(in[i]);
+    };
+
+    return impl;
 }
 
 template <typename Type>
-static typename std::enable_if<!std::is_floating_point<Type>::value>::type
+static EnableForSIMDFcn<Type> getLog2Fcn()
+{
+    return PothosCommsSIMD::log2Dispatch<Type>();
+}
+
+template <typename Type>
+static EnableForSIMDFcn<Type> getLog10Fcn()
+{
+    static const auto impl = [](const Type* in, Type* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; i++) out[i] = std::log10(in[i]);
+    };
+
+    return impl;
+}
+
+template <typename Type>
+static EnableForSIMDFcn<Type> getLogNFcn(Type base)
+{
+    using namespace std::placeholders;
+
+    static const auto impl = [base](const Type* in, Type* out, Type base, const size_t num)
+    {
+        for (size_t i = 0; i < num; i++) out[i] = std::log(in[i]) / std::log(base);
+    };
+
+    return std::bind(impl, _1, _2, base, _3);
+}
+
 #else
+
 template <typename Type>
-static void
+using EnableForDefaultFcn = ArrayLogFcn<Type>;
+
 #endif
-arrayLog2(const Type* in, Type* out, const size_t num)
+
+template <typename Type>
+static EnableForDefaultFcn<Type> getLogFcn()
 {
-    for (size_t i = 0; i < num; i++)
+    static const auto impl = [](const Type* in, Type* out, const size_t num)
     {
-        out[i] = std::log2(in[i]);
-    }
+        for (size_t i = 0; i < num; i++) out[i] = std::log(in[i]);
+    };
+
+    return impl;
 }
 
 template <typename Type>
-static void arrayLogN(const Type *in, Type *out, Type base, const size_t num)
+static EnableForDefaultFcn<Type> getLog2Fcn()
 {
-    for (size_t i = 0; i < num; i++)
+    static const auto impl = [](const Type* in, Type* out, const size_t num)
     {
-        out[i] = std::log(in[i]) / std::log(base);
-    }
+        for (size_t i = 0; i < num; i++) out[i] = std::log2(in[i]);
+    };
+
+    return impl;
 }
 
 template <typename Type>
-static void arrayLog(const Type *in, Type *out, const size_t num)
+static EnableForDefaultFcn<Type> getLog10Fcn()
 {
-    for (size_t i = 0; i < num; i++)
+    static const auto impl = [](const Type* in, Type* out, const size_t num)
     {
-        out[i] = std::log(in[i]);
-    }
+        for (size_t i = 0; i < num; i++) out[i] = std::log10(in[i]);
+    };
+
+    return impl;
 }
 
 template <typename Type>
-static void arrayLog10(const Type *in, Type *out, const size_t num)
+static EnableForDefaultFcn<Type> getLogNFcn(Type base)
 {
-    for (size_t i = 0; i < num; i++)
+    using namespace std::placeholders;
+
+    static const auto impl = [base](const Type* in, Type* out, Type base, const size_t num)
     {
-        out[i] = std::log10(in[i]);
-    }
+        for (size_t i = 0; i < num; i++) out[i] = std::log(in[i]) / std::log(base);
+    };
+
+    return std::bind(impl, _1, _2, base, _3);
 }
 
 /***********************************************************************
@@ -139,8 +191,6 @@ class LogN: public Log<Type>
 
         void setBase(Type base)
         {
-            using namespace std::placeholders;
-
             if(base <= 0)
             {
                 throw Pothos::RangeException("Log base must be > 0");
@@ -149,9 +199,9 @@ class LogN: public Log<Type>
             _base = base;
 
             // We can't use switch because the base can be floating-point.
-            if(_base == Type(2))  this->_arrayLogFcn = ClassArrayLogFcn(arrayLog2<Type>);
-            if(_base == Type(10)) this->_arrayLogFcn = ClassArrayLogFcn(arrayLog10<Type>);
-            else                  this->_arrayLogFcn = std::bind(arrayLogN<Type>, _1, _2, _base, _3);
+            if(_base == Type(2))  this->_arrayLogFcn = getLog2Fcn<Type>();
+            if(_base == Type(10)) this->_arrayLogFcn = getLog10Fcn<Type>();
+            else                  this->_arrayLogFcn = getLogNFcn<Type>(_base);
 
             this->emitSignal("baseChanged");
         }
@@ -164,29 +214,29 @@ class LogN: public Log<Type>
  * Factory/registration
  **********************************************************************/
 
-#define ifTypeDeclareLogFactory(Type, LogFcn) \
+#define ifTypeDeclareLogFactory(Type, LogFcnGetter) \
     if(Pothos::DType::fromDType(dtype, 1) == Pothos::DType(typeid(Type))) \
-        return new Log<Type>(dtype.dimension(), &LogFcn<Type>);
+        return new Log<Type>(dtype.dimension(), LogFcnGetter<Type>());
 
-#define LOGFACTORY(FactoryFcn, LogFcn) \
+#define LOGFACTORY(FactoryFcn, LogFcnGetter) \
     static Pothos::Block* FactoryFcn(const Pothos::DType& dtype) \
     { \
-        ifTypeDeclareLogFactory(double, LogFcn); \
-        ifTypeDeclareLogFactory(float, LogFcn); \
-        ifTypeDeclareLogFactory(int64_t, LogFcn); \
-        ifTypeDeclareLogFactory(int32_t, LogFcn); \
-        ifTypeDeclareLogFactory(int16_t, LogFcn); \
-        ifTypeDeclareLogFactory(int8_t, LogFcn); \
-        ifTypeDeclareLogFactory(uint64_t, LogFcn); \
-        ifTypeDeclareLogFactory(uint32_t, LogFcn); \
-        ifTypeDeclareLogFactory(uint16_t, LogFcn); \
-        ifTypeDeclareLogFactory(uint8_t, LogFcn); \
+        ifTypeDeclareLogFactory(double, LogFcnGetter); \
+        ifTypeDeclareLogFactory(float, LogFcnGetter); \
+        ifTypeDeclareLogFactory(int64_t, LogFcnGetter); \
+        ifTypeDeclareLogFactory(int32_t, LogFcnGetter); \
+        ifTypeDeclareLogFactory(int16_t, LogFcnGetter); \
+        ifTypeDeclareLogFactory(int8_t, LogFcnGetter); \
+        ifTypeDeclareLogFactory(uint64_t, LogFcnGetter); \
+        ifTypeDeclareLogFactory(uint32_t, LogFcnGetter); \
+        ifTypeDeclareLogFactory(uint16_t, LogFcnGetter); \
+        ifTypeDeclareLogFactory(uint8_t, LogFcnGetter); \
         throw Pothos::InvalidArgumentException( #FactoryFcn "("+dtype.toString()+")", "unsupported type"); \
     }
 
-LOGFACTORY(logFactory,   arrayLog)
-LOGFACTORY(log2Factory,  arrayLog2)
-LOGFACTORY(log10Factory, arrayLog10)
+LOGFACTORY(logFactory,   getLogFcn)
+LOGFACTORY(log2Factory,  getLog2Fcn)
+LOGFACTORY(log10Factory, getLog10Fcn)
 
 static Pothos::Block* logNFactory(
     const Pothos::DType& dtype,

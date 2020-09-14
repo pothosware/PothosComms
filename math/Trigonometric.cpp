@@ -15,237 +15,289 @@
 #include <string>
 #include <type_traits>
 
+template <typename T>
+using TrigFunc = void(*)(const T*, T*, size_t);
+
+//
+// Getters for functions, called on class construction
+//
+
 #ifdef POTHOS_XSIMD
 
 template <typename T>
-static void arrayCos(const T* in, T* out, size_t num)
+static TrigFunc<T> getCos()
 {
-    // Cache on the first call.
-    static auto cosFcn = PothosCommsSIMD::cosDispatch<T>();
-
-    cosFcn(in, out, num);
+    return PothosCommsSIMD::cosDispatch<T>();
 }
 
 #else
 
 template <typename T>
-static void arrayCos(const T* in, T* out, size_t num)
+static TrigFunc<T> getCos()
 {
-    for (size_t i = 0; i < num; ++i)
+    static const auto impl = [](const T* in, T* out, size_t num)
     {
-        out[i] = std::cos(in[i]);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = std::cos(in[i]);
+    };
+
+    return impl;
 }
 
 #endif
 
-
+// TODO: move into #else case when other SIMD implementations exposed
 
 template <typename T>
-static void arraySin(const T* in, T* out, size_t num)
+static TrigFunc<T> getSin()
 {
-    for(size_t i = 0; i < num; ++i)
+    static const auto impl = [](const T* in, T* out, size_t num)
     {
-        out[i] = std::sin(in[i]);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = std::sin(in[i]);
+    };
+
+    return impl;
 }
 
 template <typename T>
-static void arrayTan(const T* in, T* out, size_t num)
+static TrigFunc<T> getTan()
 {
-    for(size_t i = 0; i < num; ++i)
+    static const auto impl = [](const T* in, T* out, size_t num)
     {
-        out[i] = std::tan(in[i]);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = std::tan(in[i]);
+    };
+
+    return impl;
 }
 
 template <typename T>
-static void arraySec(const T* in, T* out, size_t num)
+static TrigFunc<T> getSec()
 {
-    for(size_t i = 0; i < num; ++i)
+    static const auto impl = [](const T* in, T* out, size_t num)
     {
-        out[i] = T(1.0) / std::cos(in[i]);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = T(1.0) / std::cos(in[i]);
+    };
+
+    return impl;
 }
 
 template <typename T>
-static void arrayCsc(const T* in, T* out, size_t num)
+static TrigFunc<T> getCsc()
 {
-    for(size_t i = 0; i < num; ++i)
+    static const auto impl = [](const T* in, T* out, size_t num)
     {
-        out[i] = T(1.0) / std::sin(in[i]);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = T(1.0) / std::sin(in[i]);
+    };
+
+    return impl;
 }
 
 template <typename T>
-static void arrayCot(const T* in, T* out, size_t num)
+static TrigFunc<T> getCot()
 {
-    for(size_t i = 0; i < num; ++i)
+    static const auto impl = [](const T* in, T* out, size_t num)
     {
-        out[i] = T(1.0) / std::tan(in[i]);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = T(1.0) / std::tan(in[i]);
+    };
+
+    return impl;
 }
 
 template <typename T>
-static void arrayACos(const T* in, T* out, size_t num)
+static TrigFunc<T> getACos()
 {
-    for(size_t i = 0; i < num; ++i)
+    static const auto impl = [](const T* in, T* out, size_t num)
     {
-        out[i] = std::acos(in[i]);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = std::acos(in[i]);
+    };
+
+    return impl;
 }
 
 template <typename T>
-static void arrayASin(const T* in, T* out, size_t num)
+static TrigFunc<T> getASin()
 {
-    for(size_t i = 0; i < num; ++i)
+    static const auto impl = [](const T* in, T* out, size_t num)
     {
-        out[i] = std::asin(in[i]);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = std::asin(in[i]);
+    };
+
+    return impl;
 }
 
 template <typename T>
-static void arrayATan(const T* in, T* out, size_t num)
+static TrigFunc<T> getATan()
 {
-    for(size_t i = 0; i < num; ++i)
+    static const auto impl = [](const T* in, T* out, size_t num)
     {
-        out[i] = std::atan(in[i]);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = std::atan(in[i]);
+    };
+
+    return impl;
 }
 
 template <typename T>
-static void arrayASec(const T* in, T* out, size_t num)
+static TrigFunc<T> getASec()
 {
-    for(size_t i = 0; i < num; ++i)
+    static const auto impl = [](const T* in, T* out, size_t num)
     {
-        out[i] = std::acos(T(1.0) / in[i]);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = std::acos(T(1.0) / in[i]);
+    };
+
+    return impl;
 }
 
 template <typename T>
-static void arrayACsc(const T* in, T* out, size_t num)
+static TrigFunc<T> getACsc()
 {
-    for(size_t i = 0; i < num; ++i)
+    static const auto impl = [](const T* in, T* out, size_t num)
     {
-        out[i] = std::asin(T(1.0) / in[i]);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = std::asin(T(1.0) / in[i]);
+    };
+
+    return impl;
 }
 
 template <typename T>
-static void arrayACot(const T* in, T* out, size_t num)
+static TrigFunc<T> getACot()
 {
-    for(size_t i = 0; i < num; ++i)
+    static const auto impl = [](const T* in, T* out, size_t num)
     {
-        out[i] = std::atan(T(1.0) / in[i]);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = std::atan(T(1.0) / in[i]);
+    };
+
+    return impl;
 }
 
 template <typename T>
-static void arrayCosH(const T* in, T* out, size_t num)
+static TrigFunc<T> getCosH()
 {
-    for(size_t i = 0; i < num; ++i)
+    static const auto impl = [](const T* in, T* out, size_t num)
     {
-        out[i] = std::cosh(in[i]);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = std::cosh(in[i]);
+    };
+
+    return impl;
 }
 
 template <typename T>
-static void arraySinH(const T* in, T* out, size_t num)
+static TrigFunc<T> getSinH()
 {
-    for(size_t i = 0; i < num; ++i)
+    static const auto impl = [](const T* in, T* out, size_t num)
     {
-        out[i] = std::sinh(in[i]);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = std::sinh(in[i]);
+    };
+
+    return impl;
 }
 
 template <typename T>
-static void arrayTanH(const T* in, T* out, size_t num)
+static TrigFunc<T> getTanH()
 {
-    for(size_t i = 0; i < num; ++i)
+    static const auto impl = [](const T* in, T* out, size_t num)
     {
-        out[i] = std::tanh(in[i]);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = std::tanh(in[i]);
+    };
+
+    return impl;
 }
 
 template <typename T>
-static void arraySecH(const T* in, T* out, size_t num)
+static TrigFunc<T> getSecH()
 {
-    for(size_t i = 0; i < num; ++i)
+    static const auto impl = [](const T* in, T* out, size_t num)
     {
-        out[i] = T(1.0) / std::cosh(in[i]);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = T(1.0) / std::cosh(in[i]);
+    };
+
+    return impl;
 }
 
 template <typename T>
-static void arrayCscH(const T* in, T* out, size_t num)
+static TrigFunc<T> getCscH()
 {
-    for(size_t i = 0; i < num; ++i)
+    static const auto impl = [](const T* in, T* out, size_t num)
     {
-        out[i] = T(1.0) / std::sinh(in[i]);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = T(1.0) / std::sinh(in[i]);
+    };
+
+    return impl;
 }
 
 template <typename T>
-static void arrayCotH(const T* in, T* out, size_t num)
+static TrigFunc<T> getCotH()
 {
-    for(size_t i = 0; i < num; ++i)
+    static const auto impl = [](const T* in, T* out, size_t num)
     {
-        out[i] = T(1.0) / std::tanh(in[i]);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = T(1.0) / std::tanh(in[i]);
+    };
+
+    return impl;
 }
 
 template <typename T>
-static void arrayACosH(const T* in, T* out, size_t num)
+static TrigFunc<T> getACosH()
 {
-    for(size_t i = 0; i < num; ++i)
+    static const auto impl = [](const T* in, T* out, size_t num)
     {
-        out[i] = std::acosh(in[i]);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = std::acosh(in[i]);
+    };
+
+    return impl;
 }
 
 template <typename T>
-static void arrayASinH(const T* in, T* out, size_t num)
+static TrigFunc<T> getASinH()
 {
-    for(size_t i = 0; i < num; ++i)
+    static const auto impl = [](const T* in, T* out, size_t num)
     {
-        out[i] = std::asinh(in[i]);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = std::asinh(in[i]);
+    };
+
+    return impl;
 }
 
 template <typename T>
-static void arrayATanH(const T* in, T* out, size_t num)
+static TrigFunc<T> getATanH()
 {
-    for(size_t i = 0; i < num; ++i)
+    static const auto impl = [](const T* in, T* out, size_t num)
     {
-        out[i] = std::atanh(in[i]);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = std::atanh(in[i]);
+    };
+
+    return impl;
 }
 
 template <typename T>
-static void arrayASecH(const T* in, T* out, size_t num)
+static TrigFunc<T> getASecH()
 {
-    for(size_t i = 0; i < num; ++i)
+    static const auto impl = [](const T* in, T* out, size_t num)
     {
-        out[i] = std::acosh(T(1.0) / in[i]);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = std::acosh(T(1.0) / in[i]);
+    };
+
+    return impl;
 }
 
 template <typename T>
-static void arrayACscH(const T* in, T* out, size_t num)
+static TrigFunc<T> getACscH()
 {
-    for(size_t i = 0; i < num; ++i)
+    static const auto impl = [](const T* in, T* out, size_t num)
     {
-        out[i] = std::asinh(T(1.0) / in[i]);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = std::asinh(T(1.0) / in[i]);
+    };
+
+    return impl;
 }
 
 template <typename T>
-static void arrayACotH(const T* in, T* out, size_t num)
+static TrigFunc<T> getACotH()
 {
-    for(size_t i = 0; i < num; ++i)
+    static const auto impl = [](const T* in, T* out, size_t num)
     {
-        out[i] = std::atanh(T(1.0) / in[i]);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = std::atanh(T(1.0) / in[i]);
+    };
+
+    return impl;
 }
 
 /***********************************************************************
@@ -324,7 +376,7 @@ template <typename T>
 class Trigonometric: public Pothos::Block
 {
 public:
-    using Func = void(*)(const T*, T*, size_t);
+    using Func = TrigFunc<T>;
     using Class = Trigonometric<T>;
 
     Trigonometric(const std::string& operation, size_t dimension)
@@ -340,33 +392,33 @@ public:
 
     void setOperation(const std::string& funcName)
     {
-        #define ifNameSetFunc(name,func) \
-            if(name == funcName) _func = Func(func<T>);
+        #define ifNameSetFunc(name, getter) \
+            if(name == funcName) _func = getter<T>();
 
-        ifNameSetFunc(     "COS",   arrayCos)
-        else ifNameSetFunc("SIN",   arraySin)
-        else ifNameSetFunc("TAN",   arrayTan)
-        else ifNameSetFunc("SEC",   arraySec)
-        else ifNameSetFunc("CSC",   arrayCsc)
-        else ifNameSetFunc("COT",   arrayCot)
-        else ifNameSetFunc("ACOS",  arrayACos)
-        else ifNameSetFunc("ASIN",  arrayASin)
-        else ifNameSetFunc("ATAN",  arrayATan)
-        else ifNameSetFunc("ASEC",  arrayASec)
-        else ifNameSetFunc("ACSC",  arrayACsc)
-        else ifNameSetFunc("ACOT",  arrayACot)
-        else ifNameSetFunc("COSH",  arrayCosH)
-        else ifNameSetFunc("SINH",  arraySinH)
-        else ifNameSetFunc("TANH",  arrayTanH)
-        else ifNameSetFunc("SECH",  arraySecH)
-        else ifNameSetFunc("CSCH",  arrayCscH)
-        else ifNameSetFunc("COTH",  arrayCotH)
-        else ifNameSetFunc("ACOSH", arrayACosH)
-        else ifNameSetFunc("ASINH", arrayASinH)
-        else ifNameSetFunc("ATANH", arrayATanH)
-        else ifNameSetFunc("ASECH", arrayASecH)
-        else ifNameSetFunc("ACSCH", arrayACscH)
-        else ifNameSetFunc("ACOTH", arrayACotH)
+        ifNameSetFunc     ("COS",   getCos)
+        else ifNameSetFunc("SIN",   getSin)
+        else ifNameSetFunc("TAN",   getTan)
+        else ifNameSetFunc("SEC",   getSec)
+        else ifNameSetFunc("CSC",   getCsc)
+        else ifNameSetFunc("COT",   getCot)
+        else ifNameSetFunc("ACOS",  getACos)
+        else ifNameSetFunc("ASIN",  getASin)
+        else ifNameSetFunc("ATAN",  getATan)
+        else ifNameSetFunc("ASEC",  getASec)
+        else ifNameSetFunc("ACSC",  getACsc)
+        else ifNameSetFunc("ACOT",  getACot)
+        else ifNameSetFunc("COSH",  getCosH)
+        else ifNameSetFunc("SINH",  getSinH)
+        else ifNameSetFunc("TANH",  getTanH)
+        else ifNameSetFunc("SECH",  getSecH)
+        else ifNameSetFunc("CSCH",  getCscH)
+        else ifNameSetFunc("COTH",  getCotH)
+        else ifNameSetFunc("ACOSH", getACosH)
+        else ifNameSetFunc("ASINH", getASinH)
+        else ifNameSetFunc("ATANH", getATanH)
+        else ifNameSetFunc("ASECH", getASecH)
+        else ifNameSetFunc("ACSCH", getACscH)
+        else ifNameSetFunc("ACOTH", getACotH)
         else throw Pothos::InvalidArgumentException("Invalid operation", funcName);
     }
 

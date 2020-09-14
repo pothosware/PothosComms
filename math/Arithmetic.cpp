@@ -14,6 +14,66 @@
 #include <cstring> //memset
 #include <algorithm> //min/max
 
+template <typename Type>
+using ArithmeticFcn = void(*)(const Type*, const Type*, Type*, const size_t);
+
+/***********************************************************************
+ * templated arithmetic vector operators
+ **********************************************************************/
+#ifdef POTHOS_XSIMD
+
+template <typename Type>
+static inline ArithmeticFcn<Type> getAddFcn()
+{
+    return PothosCommsSIMD::addDispatch<Type>();
+}
+
+#else
+template <typename Type>
+static inline ArithmeticFcn<Type> getAddFcn()
+{
+    static const auto impl = [](const Type* in0, const Type* in1, Type* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; i++) out[i] = in0[i] + in1[i];
+    };
+
+    return impl;
+}
+#endif
+
+template <typename Type>
+static inline ArithmeticFcn<Type> getSubFcn()
+{
+    static const auto impl = [](const Type* in0, const Type* in1, Type* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; i++) out[i] = in0[i] - in1[i];
+    };
+
+    return impl;
+}
+
+template <typename Type>
+static inline ArithmeticFcn<Type> getMulFcn()
+{
+    static const auto impl = [](const Type* in0, const Type* in1, Type* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; i++) out[i] = in0[i] * in1[i];
+    };
+
+    return impl;
+}
+
+template <typename Type>
+static inline ArithmeticFcn<Type> getDivFcn()
+{
+    static const auto impl = [](const Type* in0, const Type* in1, Type* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; i++) out[i] = in0[i] / in1[i];
+    };
+
+    return impl;
+}
+
 /***********************************************************************
  * |PothosDoc Arithmetic
  *
@@ -54,14 +114,15 @@
  * |initializer setNumInputs(numInputs)
  * |initializer setPreload(preload)
  **********************************************************************/
-template <typename Type, void (*Operator)(const Type *, const Type *, Type *, const size_t)>
+template <typename Type>
 class Arithmetic : public Pothos::Block
 {
 public:
-    Arithmetic(const size_t dimension):
+    Arithmetic(const size_t dimension, ArithmeticFcn<Type> arithmeticFcn):
+        _arithmeticFcn(arithmeticFcn),
         _numInlineBuffers(0)
     {
-        typedef Arithmetic<Type, Operator> ClassType;
+        typedef Arithmetic<Type> ClassType;
         this->registerCall(this, POTHOS_FCN_TUPLE(ClassType, setNumInputs));
         this->registerCall(this, POTHOS_FCN_TUPLE(ClassType, setPreload));
         this->registerCall(this, POTHOS_FCN_TUPLE(ClassType, preload));
@@ -125,7 +186,7 @@ public:
         for (size_t i = 1; i < inputs.size(); i++)
         {
             const Type *inX = inputs[i]->buffer();
-            Operator(in0, inX, out, elems*output->dtype().dimension());
+            _arithmeticFcn(in0, inX, out, elems*output->dtype().dimension());
             in0 = out; //operate on output array next loop
             inputs[i]->consume(elems); //consume on ith input port
         }
@@ -150,49 +211,11 @@ public:
     }
 
 private:
+    ArithmeticFcn<Type> _arithmeticFcn;
+
     size_t _numInlineBuffers;
     std::vector<size_t> _preload;
 };
-
-/***********************************************************************
- * templated arithmetic vector operators
- **********************************************************************/
-#ifdef POTHOS_XSIMD
-
-template <typename Type>
-void addArray(const Type* in0, const Type* in1, Type* out, const size_t num)
-{
-    // Cache on the first call.
-    static auto addFcn = PothosCommsSIMD::addDispatch<Type>();
-
-    addFcn(in0, in1, out, num);
-}
-
-#else
-template <typename Type>
-void addArray(const Type *in0, const Type *in1, Type *out, const size_t num)
-{
-    for (size_t i = 0; i < num; i++) out[i] = in0[i] + in1[i];
-}
-#endif
-
-template <typename Type>
-void subArray(const Type *in0, const Type *in1, Type *out, const size_t num)
-{
-    for (size_t i = 0; i < num; i++) out[i] = in0[i] - in1[i];
-}
-
-template <typename Type>
-void mulArray(const Type *in0, const Type *in1, Type *out, const size_t num)
-{
-    for (size_t i = 0; i < num; i++) out[i] = in0[i] * in1[i];
-}
-
-template <typename Type>
-void divArray(const Type *in0, const Type *in1, Type *out, const size_t num)
-{
-    for (size_t i = 0; i < num; i++) out[i] = in0[i] / in1[i];
-}
 
 /***********************************************************************
  * registration
@@ -201,12 +224,12 @@ static Pothos::Block *arithmeticFactory(const Pothos::DType &dtype, const std::s
 {
     #define ifTypeDeclareFactory__(type, opKey, opVal) \
         if (Pothos::DType::fromDType(dtype, 1) == Pothos::DType(typeid(type)) and operation == opKey) \
-            return new Arithmetic<type, opVal<type>>(dtype.dimension());
+            return new Arithmetic<type>(dtype.dimension(), opVal<type>());
     #define ifTypeDeclareFactory_(type) \
-        ifTypeDeclareFactory__(type, "ADD", addArray) \
-        ifTypeDeclareFactory__(type, "SUB", subArray) \
-        ifTypeDeclareFactory__(type, "MUL", mulArray) \
-        ifTypeDeclareFactory__(type, "DIV", divArray)
+        ifTypeDeclareFactory__(type, "ADD", getAddFcn) \
+        ifTypeDeclareFactory__(type, "SUB", getSubFcn) \
+        ifTypeDeclareFactory__(type, "MUL", getMulFcn) \
+        ifTypeDeclareFactory__(type, "DIV", getDivFcn)
     #define ifTypeDeclareFactory(type) \
         ifTypeDeclareFactory_(type) \
         ifTypeDeclareFactory_(std::complex<type>)
