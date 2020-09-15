@@ -2,6 +2,10 @@
 //                    2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
+#ifdef POTHOS_XSIMD
+#include "SIMD/Abs_SIMDDispatcher.hpp"
+#endif
+
 #include <Pothos/Framework.hpp>
 #include <cstdint>
 #include <iostream>
@@ -10,13 +14,35 @@
 #include <type_traits>
 #include "FxptHelpers.hpp"
 
+/***********************************************************************
+ * function getter, called on class construction
+ **********************************************************************/
+
 template <typename InType, typename OutType>
-static void arrayAbs(const InType *in, OutType *out, const size_t num)
+using AbsFcn = void(*)(const InType*, OutType*, size_t);
+
+#ifdef POTHOS_XSIMD
+
+template <typename InType, typename OutType>
+static typename std::enable_if<std::is_same<InType, OutType>::value, AbsFcn<InType,OutType>>::type getAbs()
 {
-    for (size_t i = 0; i < num; i++)
+    return PothosCommsSIMD::absDispatch<InType>();
+}
+
+template <typename InType, typename OutType>
+static typename std::enable_if<!std::is_same<InType, OutType>::value, AbsFcn<InType,OutType>>::type
+#else
+template <typename InType, typename OutType>
+static AbsFcn<InType, OutType>
+#endif
+getAbs()
+{
+    static const auto impl = [](const InType* in, OutType* out, size_t num)
     {
-        out[i] = getAbs<OutType>(in[i]);
-    }
+        for (size_t i = 0; i < num; i++) out[i] = getAbs<OutType>(in[i]);
+    };
+
+    return impl;
 }
 
 /***********************************************************************
@@ -63,13 +89,20 @@ public:
 
         //perform abs operation
         const size_t N = elems*inPort->dtype().dimension();
-        arrayAbs(in, out, N);
+        _absFcn(in, out, N);
 
         //produce and consume on 0th ports
         inPort->consume(elems);
         outPort->produce(elems);
     }
+
+private:
+
+    static AbsFcn<InType, OutType> _absFcn;
 };
+
+template <typename InType, typename OutType>
+AbsFcn<InType, OutType> Abs<InType, OutType>::_absFcn = getAbs<InType, OutType>();
 
 /***********************************************************************
  * registration

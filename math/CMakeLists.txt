@@ -40,6 +40,15 @@ set(libraries CommsFunctions)
 if(xsimd_FOUND)
     list(APPEND libraries xsimd)
 
+    # /blocks/abs
+    pothos_multiarch(
+        AbsSIMDSources
+        SIMD/Abs.cpp
+        PothosCommsSIMD
+        "template <typename T> void abs(const T*, T*, size_t);"
+        "abs"
+        ${SIMDBuildArchs})
+
     # /blocks/arithmetic (TODO: support multiple functions)
     pothos_multiarch(
         ArithmeticSIMDSources
@@ -77,6 +86,7 @@ if(xsimd_FOUND)
         ${SIMDBuildArchs})
 
     set(SIMDSources
+        ${AbsSIMDSources}
         ${ArithmeticSIMDSources}
         ${ConstArithmeticSIMDSources}
         ${LogSIMDSources}
