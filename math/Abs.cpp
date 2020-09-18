@@ -10,13 +10,20 @@
 #include <type_traits>
 #include "FxptHelpers.hpp"
 
+//
+// Implementation getters to be called on class construction
+//
+
 template <typename InType, typename OutType>
-static void arrayAbs(const InType *in, OutType *out, const size_t num)
+using AbsFcn = void(*)(const InType*, OutType*, const size_t);
+
+template <typename InType, typename OutType>
+static inline AbsFcn<InType, OutType> getAbsFcn()
 {
-    for (size_t i = 0; i < num; i++)
+    return [](const InType* in, OutType* out, const size_t num)
     {
-        out[i] = getAbs<OutType>(in[i]);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = getAbs<OutType>(in[i]);
+    };
 }
 
 /***********************************************************************
@@ -43,7 +50,7 @@ template <typename InType, typename OutType>
 class Abs : public Pothos::Block
 {
 public:
-    Abs(const size_t dimension)
+    Abs(const size_t dimension): _fcn(getAbsFcn<InType, OutType>())
     {
         this->setupInput(0, Pothos::DType(typeid(InType), dimension));
         this->setupOutput(0, Pothos::DType(typeid(OutType), dimension));
@@ -63,12 +70,15 @@ public:
 
         //perform abs operation
         const size_t N = elems*inPort->dtype().dimension();
-        arrayAbs(in, out, N);
+        _fcn(in, out, N);
 
         //produce and consume on 0th ports
         inPort->consume(elems);
         outPort->produce(elems);
     }
+
+private:
+    AbsFcn<InType, OutType> _fcn;
 };
 
 /***********************************************************************
