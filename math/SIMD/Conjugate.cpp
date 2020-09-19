@@ -25,26 +25,20 @@ namespace PothosCommsSIMD { namespace POTHOS_SIMD_NAMESPACE {
 
     // TODO: explain getImagMask()
 
-    template <typename T, size_t N>
-    static inline xsimd::batch_bool<T, N> getImagMask()
-    {
-        return xsimd::batch_bool<T, N>(false);
-    }
-
     template <typename T>
-    static inline xsimd::batch_bool<T, 2> getImagMask()
+    static inline xsimd::batch_bool<T, 2> getImagMask(const xsimd::batch<T, 2>*)
     {
         return xsimd::batch_bool<T, 2>(false, true);
     }
 
     template <typename T>
-    static inline xsimd::batch_bool<T, 4> getImagMask()
+    static inline xsimd::batch_bool<T, 4> getImagMask(const xsimd::batch<T, 4>*)
     {
         return xsimd::batch_bool<T, 4>(false, true, false, true);
     }
 
     template <typename T>
-    static inline xsimd::batch_bool<T, 8> getImagMask()
+    static inline xsimd::batch_bool<T, 8> getImagMask(const xsimd::batch<T, 8>*)
     {
         return xsimd::batch_bool<T, 8>(
             false, true, false, true, false, true, false, true
@@ -52,7 +46,7 @@ namespace PothosCommsSIMD { namespace POTHOS_SIMD_NAMESPACE {
     }
 
     template <typename T>
-    static inline xsimd::batch_bool<T, 16> getImagMask()
+    static inline xsimd::batch_bool<T, 16> getImagMask(const xsimd::batch<T, 16>*)
     {
         return xsimd::batch_bool<T, 16>(
             false, true, false, true, false, true, false, true,
@@ -61,7 +55,7 @@ namespace PothosCommsSIMD { namespace POTHOS_SIMD_NAMESPACE {
     }
 
     template <typename T>
-    static inline xsimd::batch_bool<T, 32> getImagMask()
+    static inline xsimd::batch_bool<T, 32> getImagMask(const xsimd::batch<T, 32>*)
     {
         return xsimd::batch_bool<T, 32>(
             false, true, false, true, false, true, false, true,
@@ -72,7 +66,7 @@ namespace PothosCommsSIMD { namespace POTHOS_SIMD_NAMESPACE {
     }
 
     template <typename T>
-    static inline xsimd::batch_bool<T, 64> getImagMask()
+    static inline xsimd::batch_bool<T, 64> getImagMask(const xsimd::batch<T, 64>*)
     {
         return xsimd::batch_bool<T, 64>(
             false, true, false, true, false, true, false, true,
@@ -95,7 +89,8 @@ namespace PothosCommsSIMD { namespace POTHOS_SIMD_NAMESPACE {
         const auto scalarLen = len * 2;
         const auto numSIMDFrames = scalarLen / simdSize;
 
-        static const auto imagMask = getImagMask<ScalarType, xsimd::simd_traits<ScalarType>::size>();
+        static const xsimd::batch<ScalarType, simdSize>* batchPtrParam = nullptr;
+        static const auto imagMask = getImagMask<ScalarType>(batchPtrParam);
 
         const ScalarType* scalarInPtr = (const ScalarType*)in;
         ScalarType* scalarOutPtr = (ScalarType*)out;
@@ -105,7 +100,8 @@ namespace PothosCommsSIMD { namespace POTHOS_SIMD_NAMESPACE {
         for (size_t frameIndex = 0; frameIndex < numSIMDFrames; ++frameIndex)
         {
             auto inReg = xsimd::load_unaligned(scalarInPtr);
-            auto outReg = xsimd::select(imagMask, inReg, (inReg * NegOneReg));
+
+            auto outReg = xsimd::select(imagMask, (inReg * NegOneReg), inReg);
             outReg.store_unaligned(scalarOutPtr);
 
             scalarInPtr += simdSize;
