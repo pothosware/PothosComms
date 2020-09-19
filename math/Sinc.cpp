@@ -1,6 +1,10 @@
 // Copyright (c) 2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
+#ifdef POTHOS_XSIMD
+#include "SIMD/Sinc_SIMDDispatcher.hpp"
+#endif
+
 #include <Pothos/Framework.hpp>
 
 #include <cmath>
@@ -11,6 +15,16 @@
 
 template <typename Type>
 using SincFcn = void(*)(const Type*, Type*, const size_t);
+
+#ifdef POTHOS_XSIMD
+
+template <typename Type>
+static inline SincFcn<Type> getSincFcn()
+{
+    return PothosCommsSIMD::sincDispatch<Type>();
+}
+
+#else
 
 template <typename Type>
 static inline SincFcn<Type> getSincFcn()
@@ -24,6 +38,8 @@ static inline SincFcn<Type> getSincFcn()
         }
     };
 }
+
+#endif
 
 /***********************************************************************
  * |PothosDoc Sinc
@@ -61,7 +77,7 @@ class Sinc : public Pothos::Block
 public:
     using Class = Sinc<Type>;
 
-    Sinc(const size_t dimension): _fcn(getSincFcn<Type>())
+    Sinc(const size_t dimension)
     {
         this->setupInput(0, Pothos::DType(typeid(Type), dimension));
         this->setupOutput(0, Pothos::DType(typeid(Type), dimension));
@@ -88,8 +104,12 @@ public:
     }
 
 private:
-    SincFcn<Type> _fcn;
+
+    static SincFcn<Type> _fcn;
 };
+
+template <typename Type>
+SincFcn<Type> Sinc<Type>::_fcn = getSincFcn<Type>();
 
 /***********************************************************************
  * registration

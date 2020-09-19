@@ -75,6 +75,14 @@ if(xsimd_FOUND)
         "template <typename T> void log2(const T*, T*, size_t);"
         "log2"
         ${SIMDBuildArchs})
+        
+    pothos_multiarch(
+        SincSIMDSources
+        SIMD/Sinc.cpp
+        PothosCommsSIMD
+        "template <typename T> void sinc(const T*, T*, size_t);"
+        "sinc"
+        ${SIMDBuildArchs})
 
     # /blocks/trigonometric (TODO: support multiple functions)
     pothos_multiarch(
@@ -90,6 +98,7 @@ if(xsimd_FOUND)
         ${ArithmeticSIMDSources}
         ${ConstArithmeticSIMDSources}
         ${LogSIMDSources}
+        ${SincSIMDSources}
         ${TrigonometricSIMDSources})
 
     # Convert to relative path so PothosUtil will accept the path
