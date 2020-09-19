@@ -6,6 +6,11 @@
 #include <cmath>
 #include <type_traits>
 
+// Actually enforce EnableSincSIMD
+#ifdef _MSC_VER
+#pragma warning(error: 4667) // no function template defined that matches forced instantiation
+#endif
+
 // Only support scalar floating-point types.
 template <typename T>
 using EnableSincSIMD = typename std::enable_if<std::is_floating_point<T>::value>::type;

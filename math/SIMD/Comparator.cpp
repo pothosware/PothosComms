@@ -6,6 +6,11 @@
 #include <complex>
 #include <type_traits>
 
+// Actually enforce IsComparatorSupported
+#ifdef _MSC_VER
+#pragma warning(error: 4667) // no function template defined that matches forced instantiation
+#endif
+
 // No (u)int16 support due to XSIMD limitation
 template <typename T>
 struct IsComparatorSupported : std::integral_constant<bool,

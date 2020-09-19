@@ -6,6 +6,11 @@
 #include <complex>
 #include <type_traits>
 
+// Actually enforce EnableIf(Not)Complex
+#ifdef _MSC_VER
+#pragma warning(error: 4667) // no function template defined that matches forced instantiation
+#endif
+
 template <typename T>
 struct IsComplex : std::false_type {};
 
