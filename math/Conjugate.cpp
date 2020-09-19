@@ -2,11 +2,16 @@
 //                    2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
+#ifdef POTHOS_XSIMD
+#include "SIMD/Conjugate_SIMDDispatcher.hpp"
+#endif
+
 #include <Pothos/Framework.hpp>
 #include <cstdint>
 #include <iostream>
 #include <complex>
 #include <algorithm> //min/max
+#include <type_traits>
 
 //
 // Implementation getters to be called on class construction
@@ -15,8 +20,29 @@
 template <typename Type>
 using ConjFcn = void(*)(const Type*, Type*, const size_t);
 
+#ifdef POTHOS_XSIMD
+
+// Due to a limitation in XSIMD's AVX implementation, there is no int16_t SIMD
+// implementation, so go with the default implementation.
 template <typename Type>
-static inline ConjFcn<Type> getConjFcn()
+struct HasSIMDImplementation : std::integral_constant<
+    bool,
+    !std::is_same<Type, std::complex<int16_t>>::value>
+{};
+
+template <typename Type>
+static inline typename std::enable_if<HasSIMDImplementation<Type>::value, ConjFcn<Type>>::type getConjFcn()
+{
+    return PothosCommsSIMD::conjDispatch<Type>();
+}
+
+template <typename Type>
+static inline typename std::enable_if<!HasSIMDImplementation<Type>::value, ConjFcn<Type>>::type
+#else
+template <typename Type>
+static inline ConjFcn<Type>
+#endif
+getConjFcn()
 {
     return [](const Type* in, Type* out, const size_t num)
     {
@@ -45,7 +71,7 @@ template <typename Type>
 class Conjugate : public Pothos::Block
 {
 public:
-    Conjugate(const size_t dimension): _fcn(getConjFcn<Type>())
+    Conjugate(const size_t dimension)
     {
         this->setupInput(0, Pothos::DType(typeid(Type), dimension));
         this->setupOutput(0, Pothos::DType(typeid(Type), dimension));
@@ -73,8 +99,11 @@ public:
     }
 
 private:
-    ConjFcn<Type> _fcn;
+    static ConjFcn<Type> _fcn;
 };
+
+template <typename Type>
+ConjFcn<Type> Conjugate<Type>::_fcn = getConjFcn<Type>();
 
 /***********************************************************************
  * registration

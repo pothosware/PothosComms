@@ -58,6 +58,15 @@ if(xsimd_FOUND)
         "add"
         ${SIMDBuildArchs})
 
+    # /blocks/conjugate
+    pothos_multiarch(
+        ConjugateSIMDSources
+        SIMD/Conjugate.cpp
+        PothosCommsSIMD
+        "template <typename T> void conj(const T*, T*, size_t);"
+        "conj"
+        ${SIMDBuildArchs})
+
     # /blocks/const_arithmetic (TODO: support multiple functions)
     pothos_multiarch(
         ConstArithmeticSIMDSources
@@ -96,6 +105,7 @@ if(xsimd_FOUND)
     set(SIMDSources
         ${AbsSIMDSources}
         ${ArithmeticSIMDSources}
+        ${ConjugateSIMDSources}
         ${ConstArithmeticSIMDSources}
         ${LogSIMDSources}
         ${SincSIMDSources}
