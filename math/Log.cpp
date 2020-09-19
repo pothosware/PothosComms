@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: BSL-1.0
 
 #ifdef POTHOS_XSIMD
-#include "SIMD/Log_SIMDDispatcher.hpp"
+#include "SIMD/MathBlocks_SIMD.hpp"
 #endif
 
 #include <Pothos/Exception.hpp>

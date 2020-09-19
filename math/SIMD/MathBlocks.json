@@ -1,0 +1,288 @@
+{
+    "namespace": "PothosCommsSIMD",
+    "functions":
+    [
+        {
+            "name": "abs",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "add",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "const T*", "T*", "size_t"]
+        },
+        {
+            "name": "sub",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "const T*", "T*", "size_t"]
+        },
+        {
+            "name": "mul",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "const T*", "T*", "size_t"]
+        },
+        {
+            "name": "div",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "const T*", "T*", "size_t"]
+        },
+        {
+            "name": "greaterThan",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "const T*", "char*", "size_t"]
+        },
+        {
+            "name": "lessThan",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "const T*", "char*", "size_t"]
+        },
+        {
+            "name": "greaterThanOrEqual",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "const T*", "char*", "size_t"]
+        },
+        {
+            "name": "lessThanOrEqual",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "const T*", "char*", "size_t"]
+        },
+        {
+            "name": "equalTo",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "const T*", "char*", "size_t"]
+        },
+        {
+            "name": "notEqualTo",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "const T*", "char*", "size_t"]
+        },
+        {
+            "name": "conj",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "XPlusK",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "const T&", "T*", "size_t"]
+        },
+        {
+            "name": "XMinusK",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "const T&", "T*", "size_t"]
+        },
+        {
+            "name": "KMinusX",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "const T&", "T*", "size_t"]
+        },
+        {
+            "name": "XMultK",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "const T&", "T*", "size_t"]
+        },
+        {
+            "name": "XDivK",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "const T&", "T*", "size_t"]
+        },
+        {
+            "name": "KDivX",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "const T&", "T*", "size_t"]
+        },
+        {
+            "name": "log",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "log2",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "log10",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "logN",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "T", "size_t"]
+        },
+        {
+            "name": "sinc",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "cos",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "sin",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "tan",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "sec",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "csc",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "cot",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "acos",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "asin",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "atan",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "asec",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "acsc",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "acot",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "cosh",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "sinh",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "tanh",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "sech",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "csch",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "coth",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "acosh",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "asinh",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "atanh",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "asech",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "acsch",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "acoth",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        }
+    ]
+}
