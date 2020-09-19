@@ -1,4 +1,5 @@
 // Copyright (c) 2014-2016 Tony Kirke
+//                    2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
@@ -6,6 +7,67 @@
 #include <iostream>
 #include <complex>
 #include <algorithm> //min/max
+
+//
+// Implementation getters to be called on class construction
+//
+
+template <typename Type>
+using ComparatorFcn = void(*)(const Type*, const Type*, char*, const size_t);
+
+template <typename Type>
+static inline ComparatorFcn<Type> getGreaterThanFcn()
+{
+    return [](const Type* in0, const Type* in1, char* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; ++i) out[i] = (in0[i] > in1[i]) ? 1 : 0;
+    };
+}
+
+template <typename Type>
+static inline ComparatorFcn<Type> getLessThanFcn()
+{
+    return [](const Type* in0, const Type* in1, char* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; ++i) out[i] = (in0[i] < in1[i]) ? 1 : 0;
+    };
+}
+
+template <typename Type>
+static inline ComparatorFcn<Type> getGreaterOrEqualFcn()
+{
+    return [](const Type* in0, const Type* in1, char* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; ++i) out[i] = (in0[i] >= in1[i]) ? 1 : 0;
+    };
+}
+
+template <typename Type>
+static inline ComparatorFcn<Type> getLessOrEqualFcn()
+{
+    return [](const Type* in0, const Type* in1, char* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; ++i) out[i] = (in0[i] <= in1[i]) ? 1 : 0;
+    };
+}
+
+template <typename Type>
+static inline ComparatorFcn<Type> getEqualToFcn()
+{
+    return [](const Type* in0, const Type* in1, char* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; ++i) out[i] = (in0[i] == in1[i]) ? 1 : 0;
+    };
+}
+
+template <typename Type>
+static inline ComparatorFcn<Type> getNotEqualToFcn()
+{
+    return [](const Type* in0, const Type* in1, char* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; ++i) out[i] = (in0[i] != in1[i]) ? 1 : 0;
+    };
+}
 
 /***********************************************************************
  * |PothosDoc Comparator
@@ -33,12 +95,13 @@
  *
  * |factory /comms/comparator(dtype,comparator)
  **********************************************************************/
-template <typename Type, void (*Operator)(const Type *, const Type *, char *, const size_t)>
+template <typename Type>
 class Comparator : public Pothos::Block
 {
 public:
-  Comparator(const size_t dimension) {
-    typedef Comparator<Type, Operator> ClassType;
+  Comparator(const size_t dimension, ComparatorFcn<Type> fcn): _fcn(fcn)
+  {
+    typedef Comparator<Type> ClassType;
     this->setupInput(0, Pothos::DType(typeid(Type), dimension));
     this->setupInput(1, Pothos::DType(typeid(Type), dimension));
     this->setupOutput(0, typeid(char));
@@ -59,64 +122,33 @@ public:
         char *out = outPort->buffer();
 
         //perform operation
-        Operator(in0, in1, out, elems*outPort->dtype().dimension());
+        _fcn(in0, in1, out, elems*outPort->dtype().dimension());
 
         //produce and consume on 0th ports
         inPort0->consume(elems);
         inPort1->consume(elems);
         outPort->produce(elems);
     }
+
+private:
+    ComparatorFcn<Type> _fcn;
 };
-/**********************************************************************/
-template <typename Type>
-void greaterThan(const Type *in0, const Type *in1, char *out, const size_t num)
-{
-    for (size_t i = 0; i < num; i++) out[i] = in0[i] > in1[i];
-}
-
-template <typename Type>
-void lessThan(const Type *in0, const Type *in1, char *out, const size_t num)
-{
-    for (size_t i = 0; i < num; i++) out[i] = in0[i] < in1[i];
-}
-
-template <typename Type>
-void greaterOrEqualTo(const Type *in0, const Type *in1, char *out, const size_t num)
-{
-    for (size_t i = 0; i < num; i++) out[i] = in0[i] >= in1[i];
-}
-
-template <typename Type>
-void lessThanOrEqualTo(const Type *in0, const Type *in1, char *out, const size_t num)
-{
-    for (size_t i = 0; i < num; i++) out[i] = in0[i] <= in1[i];
-}
-template <typename Type>
-void equalTo(const Type *in0, const Type *in1, char *out, const size_t num)
-{
-    for (size_t i = 0; i < num; i++) out[i] = in0[i] == in1[i];
-}
-template <typename Type>
-void notEqualTo(const Type *in0, const Type *in1, char *out, const size_t num)
-{
-    for (size_t i = 0; i < num; i++) out[i] = in0[i] != in1[i];
-}
 
 /***********************************************************************
  * registration
  **********************************************************************/
 static Pothos::Block *comparatorFactory(const Pothos::DType &dtype, const std::string &operation)
 {
-    #define ifTypeDeclareFactory__(type, opKey, opVal) \
+    #define ifTypeDeclareFactory__(type, opKey, opFcn) \
         if (Pothos::DType::fromDType(dtype, 1) == Pothos::DType(typeid(type)) and operation == opKey) \
-            return new Comparator<type, opVal<type>>(dtype.dimension());
+            return new Comparator<type>(dtype.dimension(), opFcn<type>());
     #define ifTypeDeclareFactory(type) \
-        ifTypeDeclareFactory__(type, ">", greaterThan) \
-        ifTypeDeclareFactory__(type, "<", lessThan) \
-        ifTypeDeclareFactory__(type, ">=", greaterOrEqualTo) \
-        ifTypeDeclareFactory__(type, "<=", lessThanOrEqualTo) \
-        ifTypeDeclareFactory__(type, "==", equalTo) \
-        ifTypeDeclareFactory__(type, "!=", notEqualTo)
+        ifTypeDeclareFactory__(type, ">", getGreaterThanFcn) \
+        ifTypeDeclareFactory__(type, "<", getLessThanFcn) \
+        ifTypeDeclareFactory__(type, ">=", getGreaterOrEqualFcn) \
+        ifTypeDeclareFactory__(type, "<=", getLessOrEqualFcn) \
+        ifTypeDeclareFactory__(type, "==", getEqualToFcn) \
+        ifTypeDeclareFactory__(type, "!=", getNotEqualToFcn)
     ifTypeDeclareFactory(double);
     ifTypeDeclareFactory(float);
     ifTypeDeclareFactory(int64_t);

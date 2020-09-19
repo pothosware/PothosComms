@@ -14,35 +14,33 @@
 #include <type_traits>
 #include "FxptHelpers.hpp"
 
-/***********************************************************************
- * function getter, called on class construction
- **********************************************************************/
+//
+// Implementation getters to be called on class construction
+//
 
 template <typename InType, typename OutType>
-using AbsFcn = void(*)(const InType*, OutType*, size_t);
+using AbsFcn = void(*)(const InType*, OutType*, const size_t);
 
 #ifdef POTHOS_XSIMD
 
 template <typename InType, typename OutType>
-static typename std::enable_if<std::is_same<InType, OutType>::value, AbsFcn<InType,OutType>>::type getAbs()
+static typename std::enable_if<std::is_same<InType, OutType>::value, AbsFcn<InType, OutType>>::type getAbsFcn()
 {
     return PothosCommsSIMD::absDispatch<InType>();
 }
 
 template <typename InType, typename OutType>
-static typename std::enable_if<!std::is_same<InType, OutType>::value, AbsFcn<InType,OutType>>::type
+static typename std::enable_if<!std::is_same<InType, OutType>::value, AbsFcn<InType, OutType>>::type
 #else
 template <typename InType, typename OutType>
 static AbsFcn<InType, OutType>
 #endif
-getAbs()
+getAbsFcn()
 {
-    static const auto impl = [](const InType* in, OutType* out, size_t num)
+    return [](const InType* in, OutType* out, const size_t num)
     {
-        for (size_t i = 0; i < num; i++) out[i] = getAbs<OutType>(in[i]);
+        for (size_t i = 0; i < num; ++i) out[i] = getAbs<OutType>(in[i]);
     };
-
-    return impl;
 }
 
 /***********************************************************************
@@ -97,12 +95,11 @@ public:
     }
 
 private:
-
     static AbsFcn<InType, OutType> _absFcn;
 };
 
 template <typename InType, typename OutType>
-AbsFcn<InType, OutType> Abs<InType, OutType>::_absFcn = getAbs<InType, OutType>();
+AbsFcn<InType, OutType> Abs<InType, OutType>::_absFcn = getAbsFcn<InType, OutType>();
 
 /***********************************************************************
  * registration

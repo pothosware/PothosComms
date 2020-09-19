@@ -15,17 +15,17 @@
 #include <string>
 #include <type_traits>
 
+//
+// Implementation getters to be called on class construction
+//
+
 template <typename T>
 using TrigFunc = void(*)(const T*, T*, size_t);
-
-//
-// Getters for functions, called on class construction
-//
 
 #ifdef POTHOS_XSIMD
 
 template <typename T>
-static TrigFunc<T> getCos()
+static inline TrigFunc<T> getCos()
 {
     return PothosCommsSIMD::cosDispatch<T>();
 }
@@ -33,271 +33,221 @@ static TrigFunc<T> getCos()
 #else
 
 template <typename T>
-static TrigFunc<T> getCos()
+static inline TrigFunc<T> getCos()
 {
-    static const auto impl = [](const T* in, T* out, size_t num)
+    return [](const T* in, T* out, size_t num)
     {
         for (size_t i = 0; i < num; ++i) out[i] = std::cos(in[i]);
     };
-
-    return impl;
 }
 
 #endif
 
-// TODO: move into #else case when other SIMD implementations exposed
-
 template <typename T>
-static TrigFunc<T> getSin()
+static inline TrigFunc<T> getSin()
 {
-    static const auto impl = [](const T* in, T* out, size_t num)
+    return [](const T* in, T* out, size_t num)
     {
         for (size_t i = 0; i < num; ++i) out[i] = std::sin(in[i]);
     };
-
-    return impl;
 }
 
 template <typename T>
-static TrigFunc<T> getTan()
+static inline TrigFunc<T> getTan()
 {
-    static const auto impl = [](const T* in, T* out, size_t num)
+    return [](const T* in, T* out, size_t num)
     {
         for (size_t i = 0; i < num; ++i) out[i] = std::tan(in[i]);
     };
-
-    return impl;
 }
 
 template <typename T>
-static TrigFunc<T> getSec()
+static inline TrigFunc<T> getSec()
 {
-    static const auto impl = [](const T* in, T* out, size_t num)
+    return [](const T* in, T* out, size_t num)
     {
         for (size_t i = 0; i < num; ++i) out[i] = T(1.0) / std::cos(in[i]);
     };
-
-    return impl;
 }
 
 template <typename T>
-static TrigFunc<T> getCsc()
+static inline TrigFunc<T> getCsc()
 {
-    static const auto impl = [](const T* in, T* out, size_t num)
+    return [](const T* in, T* out, size_t num)
     {
         for (size_t i = 0; i < num; ++i) out[i] = T(1.0) / std::sin(in[i]);
     };
-
-    return impl;
 }
 
 template <typename T>
-static TrigFunc<T> getCot()
+static inline TrigFunc<T> getCot()
 {
-    static const auto impl = [](const T* in, T* out, size_t num)
+    return [](const T* in, T* out, size_t num)
     {
         for (size_t i = 0; i < num; ++i) out[i] = T(1.0) / std::tan(in[i]);
     };
-
-    return impl;
 }
 
 template <typename T>
-static TrigFunc<T> getACos()
+static inline TrigFunc<T> getACos()
 {
-    static const auto impl = [](const T* in, T* out, size_t num)
+    return [](const T* in, T* out, size_t num)
     {
         for (size_t i = 0; i < num; ++i) out[i] = std::acos(in[i]);
     };
-
-    return impl;
 }
 
 template <typename T>
-static TrigFunc<T> getASin()
+static inline TrigFunc<T> getASin()
 {
-    static const auto impl = [](const T* in, T* out, size_t num)
+    return [](const T* in, T* out, size_t num)
     {
         for (size_t i = 0; i < num; ++i) out[i] = std::asin(in[i]);
     };
-
-    return impl;
 }
 
 template <typename T>
-static TrigFunc<T> getATan()
+static inline TrigFunc<T> getATan()
 {
-    static const auto impl = [](const T* in, T* out, size_t num)
+    return [](const T* in, T* out, size_t num)
     {
         for (size_t i = 0; i < num; ++i) out[i] = std::atan(in[i]);
     };
-
-    return impl;
 }
 
 template <typename T>
-static TrigFunc<T> getASec()
+static inline TrigFunc<T> getASec()
 {
-    static const auto impl = [](const T* in, T* out, size_t num)
+    return [](const T* in, T* out, size_t num)
     {
         for (size_t i = 0; i < num; ++i) out[i] = std::acos(T(1.0) / in[i]);
     };
-
-    return impl;
 }
 
 template <typename T>
-static TrigFunc<T> getACsc()
+static inline TrigFunc<T> getACsc()
 {
-    static const auto impl = [](const T* in, T* out, size_t num)
+    return [](const T* in, T* out, size_t num)
     {
         for (size_t i = 0; i < num; ++i) out[i] = std::asin(T(1.0) / in[i]);
     };
-
-    return impl;
 }
 
 template <typename T>
-static TrigFunc<T> getACot()
+static inline TrigFunc<T> getACot()
 {
-    static const auto impl = [](const T* in, T* out, size_t num)
+    return [](const T* in, T* out, size_t num)
     {
         for (size_t i = 0; i < num; ++i) out[i] = std::atan(T(1.0) / in[i]);
     };
-
-    return impl;
 }
 
 template <typename T>
-static TrigFunc<T> getCosH()
+static inline TrigFunc<T> getCosH()
 {
-    static const auto impl = [](const T* in, T* out, size_t num)
+    return [](const T* in, T* out, size_t num)
     {
         for (size_t i = 0; i < num; ++i) out[i] = std::cosh(in[i]);
     };
-
-    return impl;
 }
 
 template <typename T>
-static TrigFunc<T> getSinH()
+static inline TrigFunc<T> getSinH()
 {
-    static const auto impl = [](const T* in, T* out, size_t num)
+    return [](const T* in, T* out, size_t num)
     {
         for (size_t i = 0; i < num; ++i) out[i] = std::sinh(in[i]);
     };
-
-    return impl;
 }
 
 template <typename T>
-static TrigFunc<T> getTanH()
+static inline TrigFunc<T> getTanH()
 {
-    static const auto impl = [](const T* in, T* out, size_t num)
+    return [](const T* in, T* out, size_t num)
     {
         for (size_t i = 0; i < num; ++i) out[i] = std::tanh(in[i]);
     };
-
-    return impl;
 }
 
 template <typename T>
-static TrigFunc<T> getSecH()
+static inline TrigFunc<T> getSecH()
 {
-    static const auto impl = [](const T* in, T* out, size_t num)
+    return [](const T* in, T* out, size_t num)
     {
         for (size_t i = 0; i < num; ++i) out[i] = T(1.0) / std::cosh(in[i]);
     };
-
-    return impl;
 }
 
 template <typename T>
-static TrigFunc<T> getCscH()
+static inline TrigFunc<T> getCscH()
 {
-    static const auto impl = [](const T* in, T* out, size_t num)
+    return [](const T* in, T* out, size_t num)
     {
         for (size_t i = 0; i < num; ++i) out[i] = T(1.0) / std::sinh(in[i]);
     };
-
-    return impl;
 }
 
 template <typename T>
-static TrigFunc<T> getCotH()
+static inline TrigFunc<T> getCotH()
 {
-    static const auto impl = [](const T* in, T* out, size_t num)
+    return [](const T* in, T* out, size_t num)
     {
         for (size_t i = 0; i < num; ++i) out[i] = T(1.0) / std::tanh(in[i]);
     };
-
-    return impl;
 }
 
 template <typename T>
-static TrigFunc<T> getACosH()
+static inline TrigFunc<T> getACosH()
 {
-    static const auto impl = [](const T* in, T* out, size_t num)
+    return [](const T* in, T* out, size_t num)
     {
         for (size_t i = 0; i < num; ++i) out[i] = std::acosh(in[i]);
     };
-
-    return impl;
 }
 
 template <typename T>
-static TrigFunc<T> getASinH()
+static inline TrigFunc<T> getASinH()
 {
-    static const auto impl = [](const T* in, T* out, size_t num)
+    return [](const T* in, T* out, size_t num)
     {
         for (size_t i = 0; i < num; ++i) out[i] = std::asinh(in[i]);
     };
-
-    return impl;
 }
 
 template <typename T>
-static TrigFunc<T> getATanH()
+static inline TrigFunc<T> getATanH()
 {
-    static const auto impl = [](const T* in, T* out, size_t num)
+    return [](const T* in, T* out, size_t num)
     {
         for (size_t i = 0; i < num; ++i) out[i] = std::atanh(in[i]);
     };
-
-    return impl;
 }
 
 template <typename T>
-static TrigFunc<T> getASecH()
+static inline TrigFunc<T> getASecH()
 {
-    static const auto impl = [](const T* in, T* out, size_t num)
+    return [](const T* in, T* out, size_t num)
     {
         for (size_t i = 0; i < num; ++i) out[i] = std::acosh(T(1.0) / in[i]);
     };
-
-    return impl;
 }
 
 template <typename T>
-static TrigFunc<T> getACscH()
+static inline TrigFunc<T> getACscH()
 {
-    static const auto impl = [](const T* in, T* out, size_t num)
+    return [](const T* in, T* out, size_t num)
     {
         for (size_t i = 0; i < num; ++i) out[i] = std::asinh(T(1.0) / in[i]);
     };
-
-    return impl;
 }
 
 template <typename T>
-static TrigFunc<T> getACotH()
+static inline TrigFunc<T> getACotH()
 {
-    static const auto impl = [](const T* in, T* out, size_t num)
+    return [](const T* in, T* out, size_t num)
     {
         for (size_t i = 0; i < num; ++i) out[i] = std::atanh(T(1.0) / in[i]);
     };
-
-    return impl;
 }
 
 /***********************************************************************

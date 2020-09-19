@@ -14,115 +14,74 @@
 #include <functional>
 #include <type_traits>
 
+// Use std::function instead of function pointer because LogN's lambda
+// needs to capture a parameter.
 template <typename Type>
-using ArrayLogFcn = std::function<void(const Type*, Type*, const size_t)>;
+using LogFcn = std::function<void(const Type*, Type*, const size_t)>;
+
+#ifdef POTHOS_XSIMD
+
+template <typename Type>
+using EnableForSIMDFcn = typename std::enable_if<std::is_floating_point<Type>::value, LogFcn<Type>>::type;
+
+template <typename Type>
+using EnableForDefaultFcn = typename std::enable_if<!std::is_floating_point<Type>::value, LogFcn<Type>>::type;
+
+#else
+
+template <typename Type>
+using EnableForDefaultFcn = typename LogFcn<Type>;
+
+#endif
 
 /***********************************************************************
- * Getters for functions, called on class construction
+ * Implementation getters to be called on class construction
  **********************************************************************/
 
 #ifdef POTHOS_XSIMD
 
 template <typename Type>
-using EnableForSIMDFcn = typename std::enable_if<std::is_floating_point<Type>::value, ArrayLogFcn<Type>>::type;
-
-template <typename Type>
-using EnableForDefaultFcn = typename std::enable_if<!std::is_floating_point<Type>::value, ArrayLogFcn<Type>>::type;
-
-// TODO: switch to dispatch when limitation removed
-
-template <typename Type>
-static EnableForSIMDFcn<Type> getLogFcn()
-{
-    static const auto impl = [](const Type* in, Type* out, const size_t num)
-    {
-        for (size_t i = 0; i < num; i++) out[i] = std::log(in[i]);
-    };
-
-    return impl;
-}
-
-template <typename Type>
-static EnableForSIMDFcn<Type> getLog2Fcn()
+static inline EnableForSIMDFcn<Type> getLog2Fcn()
 {
     return PothosCommsSIMD::log2Dispatch<Type>();
 }
 
-template <typename Type>
-static EnableForSIMDFcn<Type> getLog10Fcn()
-{
-    static const auto impl = [](const Type* in, Type* out, const size_t num)
-    {
-        for (size_t i = 0; i < num; i++) out[i] = std::log10(in[i]);
-    };
-
-    return impl;
-}
-
-template <typename Type>
-static EnableForSIMDFcn<Type> getLogNFcn(Type base)
-{
-    using namespace std::placeholders;
-
-    static const auto impl = [base](const Type* in, Type* out, Type base, const size_t num)
-    {
-        for (size_t i = 0; i < num; i++) out[i] = std::log(in[i]) / std::log(base);
-    };
-
-    return std::bind(impl, _1, _2, base, _3);
-}
-
-#else
-
-template <typename Type>
-using EnableForDefaultFcn = ArrayLogFcn<Type>;
-
 #endif
 
 template <typename Type>
-static EnableForDefaultFcn<Type> getLogFcn()
+static inline LogFcn<Type> getLogFcn()
 {
-    static const auto impl = [](const Type* in, Type* out, const size_t num)
+    return [](const Type* in, Type* out, const size_t num)
     {
-        for (size_t i = 0; i < num; i++) out[i] = std::log(in[i]);
+        for (size_t i = 0; i < num; ++i) out[i] = std::log(in[i]);
     };
-
-    return impl;
 }
 
 template <typename Type>
-static EnableForDefaultFcn<Type> getLog2Fcn()
+static inline EnableForDefaultFcn<Type> getLog2Fcn()
 {
-    static const auto impl = [](const Type* in, Type* out, const size_t num)
+    return [](const Type* in, Type* out, const size_t num)
     {
-        for (size_t i = 0; i < num; i++) out[i] = std::log2(in[i]);
+        for (size_t i = 0; i < num; ++i) out[i] = std::log2(in[i]);
     };
-
-    return impl;
 }
 
 template <typename Type>
-static EnableForDefaultFcn<Type> getLog10Fcn()
+static inline LogFcn<Type> getLog10Fcn()
 {
-    static const auto impl = [](const Type* in, Type* out, const size_t num)
+    return [](const Type* in, Type* out, const size_t num)
     {
-        for (size_t i = 0; i < num; i++) out[i] = std::log10(in[i]);
+        for (size_t i = 0; i < num; ++i) out[i] = std::log10(in[i]);
     };
-
-    return impl;
 }
 
 template <typename Type>
-static EnableForDefaultFcn<Type> getLogNFcn(Type base)
+static inline LogFcn<Type> getLogNFcn(Type base)
 {
-    using namespace std::placeholders;
-
-    static const auto impl = [base](const Type* in, Type* out, Type base, const size_t num)
+    return [base](const Type* in, Type* out, const size_t num)
     {
-        for (size_t i = 0; i < num; i++) out[i] = std::log(in[i]) / std::log(base);
+        for (size_t i = 0; i < num; ++i) out[i] = std::log(in[i]) / std::log(base);
     };
-
-    return std::bind(impl, _1, _2, base, _3);
 }
 
 /***********************************************************************
@@ -135,9 +94,9 @@ class Log: public Pothos::Block
     public:
 
         using Class = Log<Type>;
-        using ClassArrayLogFcn = ArrayLogFcn<Type>;
+        using ClassLogFcn = LogFcn<Type>;
 
-        Log(const size_t dimension, ClassArrayLogFcn logFcn):
+        Log(const size_t dimension, ClassLogFcn logFcn):
             _arrayLogFcn(logFcn)
         {
             this->setupInput(0, Pothos::DType(typeid(Type), dimension));
@@ -161,7 +120,7 @@ class Log: public Pothos::Block
         }
 
     protected:
-        ClassArrayLogFcn _arrayLogFcn;
+        ClassLogFcn _arrayLogFcn;
 };
 
 template <typename Type>
@@ -170,7 +129,7 @@ class LogN: public Log<Type>
     public:
 
         using Class = LogN<Type>;
-        using ClassArrayLogFcn = typename Log<Type>::ClassArrayLogFcn;
+        using ClassArrayLogFcn = typename Log<Type>::ClassLogFcn;
 
         LogN(const size_t dimension, const Type base): Log<Type>(dimension, nullptr)
         {

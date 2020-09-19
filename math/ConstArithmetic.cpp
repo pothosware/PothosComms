@@ -39,6 +39,74 @@ using EnableForDefaultFcn = ConstArithmeticFcn<T>;
 
 #endif
 
+//
+// Implementation getters, called on class construction
+//
+
+#ifdef POTHOS_XSIMD
+
+template <typename T>
+static inline EnableForSIMDFcn<T> getXPlusKFcn()
+{
+    return PothosCommsSIMD::XPlusKDispatch<T>();
+}
+
+#endif
+
+template <typename T>
+static inline EnableForDefaultFcn<T> getXPlusKFcn()
+{
+    return [](const T* in, const T& k, T* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; i++) out[i] = in[i] + k;
+    };
+}
+
+template <typename T>
+static inline ConstArithmeticFcn<T> getXSubKFcn()
+{
+    return [](const T* in, const T& k, T* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; i++) out[i] = in[i] - k;
+    };
+}
+
+template <typename T>
+static inline ConstArithmeticFcn<T> getKSubXFcn()
+{
+    return [](const T* in, const T& k, T* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; i++) out[i] = k - in[i];
+    };
+}
+
+template <typename T>
+static inline ConstArithmeticFcn<T> getXMultKFcn()
+{
+    return [](const T* in, const T& k, T* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; i++) out[i] = in[i] * k;
+    };
+}
+
+template <typename T>
+static inline ConstArithmeticFcn<T> getXDivKFcn()
+{
+    return [](const T* in, const T& k, T* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; i++) out[i] = in[i] / k;
+    };
+}
+
+template <typename T>
+static inline ConstArithmeticFcn<T> getKDivXFcn()
+{
+    return [](const T* in, const T& k, T* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; i++) out[i] = k / in[i];
+    };
+}
+
 /***********************************************************************
  * |PothosDoc Const Arithmetic
  *
@@ -137,143 +205,6 @@ private:
     size_t _position;
     ArithFcn _func;
 };
-
-//
-// Arithmetic function getters, called on class construction
-//
-
-#ifdef POTHOS_XSIMD
-
-template <typename T>
-static inline EnableForSIMDFcn<T> getXPlusKFcn()
-{
-    return PothosCommsSIMD::XPlusKDispatch<T>();
-}
-
-// TODO: remove when others exposed
-
-template <typename T>
-static inline EnableForSIMDFcn<T> getXSubKFcn()
-{
-    static const auto impl = [](const T* in, const T& k, T* out, const size_t num)
-    {
-        for (size_t i = 0; i < num; i++) out[i] = in[i] - k;
-    };
-
-    return impl;
-}
-
-template <typename T>
-static inline EnableForSIMDFcn<T> getKSubXFcn()
-{
-    static const auto impl = [](const T* in, const T& k, T* out, const size_t num)
-    {
-        for (size_t i = 0; i < num; i++) out[i] = k - in[i];
-    };
-
-    return impl;
-}
-
-template <typename T>
-static inline EnableForSIMDFcn<T> getXMultKFcn()
-{
-    static const auto impl = [](const T* in, const T& k, T* out, const size_t num)
-    {
-        for (size_t i = 0; i < num; i++) out[i] = in[i] * k;
-    };
-
-    return impl;
-}
-
-template <typename T>
-static inline EnableForSIMDFcn<T> getXDivKFcn()
-{
-    static const auto impl = [](const T* in, const T& k, T* out, const size_t num)
-    {
-        for (size_t i = 0; i < num; i++) out[i] = in[i] / k;
-    };
-
-    return impl;
-}
-
-template <typename T>
-static inline EnableForSIMDFcn<T> getKDivXFcn()
-{
-    static const auto impl = [](const T* in, const T& k, T* out, const size_t num)
-    {
-        for (size_t i = 0; i < num; i++) out[i] = k / in[i];
-    };
-
-    return impl;
-}
-
-#endif
-
-template <typename T>
-static inline EnableForDefaultFcn<T> getXPlusKFcn()
-{
-    static const auto impl = [](const T* in, const T& k, T* out, const size_t num)
-    {
-        for (size_t i = 0; i < num; i++) out[i] = in[i] + k;
-    };
-
-    return impl;
-}
-
-template <typename T>
-static inline EnableForDefaultFcn<T> getXSubKFcn()
-{
-    static const auto impl = [](const T* in, const T& k, T* out, const size_t num)
-    {
-        for (size_t i = 0; i < num; i++) out[i] = in[i] - k;
-    };
-
-    return impl;
-}
-
-template <typename T>
-static inline EnableForDefaultFcn<T> getKSubXFcn()
-{
-    static const auto impl = [](const T* in, const T& k, T* out, const size_t num)
-    {
-        for (size_t i = 0; i < num; i++) out[i] = k - in[i];
-    };
-
-    return impl;
-}
-
-template <typename T>
-static inline EnableForDefaultFcn<T> getXMultKFcn()
-{
-    static const auto impl = [](const T* in, const T& k, T* out, const size_t num)
-    {
-        for (size_t i = 0; i < num; i++) out[i] = in[i] * k;
-    };
-
-    return impl;
-}
-
-template <typename T>
-static inline EnableForDefaultFcn<T> getXDivKFcn()
-{
-    static const auto impl = [](const T* in, const T& k, T* out, const size_t num)
-    {
-        for (size_t i = 0; i < num; i++) out[i] = in[i] / k;
-    };
-
-    return impl;
-}
-
-template <typename T>
-static inline EnableForDefaultFcn<T> getKDivXFcn()
-{
-    static const auto impl = [](const T* in, const T& k, T* out, const size_t num)
-    {
-        for (size_t i = 0; i < num; i++) out[i] = k / in[i];
-    };
-
-    return impl;
-}
 
 //
 // Registration
