@@ -2,9 +2,12 @@
 //                    2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
+#ifdef POTHOS_XSIMD
+#include "SIMD/Comparator_SIMDDispatcher.hpp"
+#endif
+
 #include <Pothos/Framework.hpp>
 #include <cstdint>
-#include <iostream>
 #include <complex>
 #include <algorithm> //min/max
 
@@ -15,8 +18,37 @@
 template <typename Type>
 using ComparatorFcn = void(*)(const Type*, const Type*, char*, const size_t);
 
+#ifdef POTHOS_XSIMD
+
+// No (u)int16 support due to XSIMD limitation
 template <typename Type>
-static inline ComparatorFcn<Type> getGreaterThanFcn()
+struct IsSIMDComparatorSupported : std::integral_constant<bool,
+    !std::is_same<Type, std::int16_t>::value &&
+    !std::is_same<Type, std::uint16_t>::value> {};
+
+template <typename Type>
+using EnableForSIMDFcn = typename std::enable_if<IsSIMDComparatorSupported<Type>::value, ComparatorFcn<Type>>::type;
+
+template <typename Type>
+using EnableForDefaultFcn = typename std::enable_if<!IsSIMDComparatorSupported<Type>::value, ComparatorFcn<Type>>::type;
+
+template <typename Type>
+static inline EnableForSIMDFcn<Type> getGreaterThanFcn()
+{
+    return PothosCommsSIMD::greaterThanDispatch<Type>();
+}
+
+#else
+
+template <typename T>
+using EnableForDefaultFcn = ComparatorFcn<T>;
+
+#endif
+
+// TODO: change ComparatorFcn to EnableForDefaultFcn when all functions supported
+
+template <typename Type>
+static inline EnableForDefaultFcn<Type> getGreaterThanFcn()
 {
     return [](const Type* in0, const Type* in1, char* out, const size_t num)
     {

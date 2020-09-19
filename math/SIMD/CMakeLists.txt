@@ -21,6 +21,15 @@ pothos_multiarch(
     "add"
     ${SIMDBuildArchs})
 
+# /blocks/comparator (TODO: support multiple functions)
+pothos_multiarch(
+    ComparatorSIMDSources
+    Comparator.cpp
+    PothosCommsSIMD
+    "template <typename T> void greaterThan(const T*, const T*, char*, const size_t);"
+    "greaterThan"
+    ${SIMDBuildArchs})
+
 # /blocks/conjugate
 pothos_multiarch(
     ConjugateSIMDSources
@@ -68,6 +77,7 @@ pothos_multiarch(
 set(sources
     ${AbsSIMDSources}
     ${ArithmeticSIMDSources}
+    ${ComparatorSIMDSources}
     ${ConjugateSIMDSources}
     ${ConstArithmeticSIMDSources}
     ${LogSIMDSources}
