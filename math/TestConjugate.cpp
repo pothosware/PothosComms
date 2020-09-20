@@ -63,8 +63,8 @@ static void testConjugate()
     POTHOS_TEST_EQUAL(expectedOutputs.dtype, outputs.dtype);
     POTHOS_TEST_EQUAL(expectedOutputs.elements(), outputs.elements());
     POTHOS_TEST_EQUALA(
-        expectedOutputs.as<const Type*>(),
-        outputs.as<const Type*>(),
+        expectedOutputs.as<const ComplexType*>(),
+        outputs.as<const ComplexType*>(),
         bufferLen);
 }
 
