@@ -8,13 +8,20 @@
 #include <complex>
 #include <algorithm> //min/max
 
+//
+// Implementation getters to be called on class construction
+//
+
 template <typename Type>
-static void arrayConj(const Type* in, Type* out, const size_t num)
+using ConjFcn = void(*)(const Type*, Type*, const size_t);
+
+template <typename Type>
+static inline ConjFcn<Type> getConjFcn()
 {
-    for (size_t i = 0; i < num; i++)
+    return [](const Type* in, Type* out, const size_t num)
     {
-        out[i] = std::conj(in[i]);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = std::conj(in[i]);
+    };
 }
 
 /***********************************************************************
@@ -38,7 +45,7 @@ template <typename Type>
 class Conjugate : public Pothos::Block
 {
 public:
-    Conjugate(const size_t dimension)
+    Conjugate(const size_t dimension): _fcn(getConjFcn<Type>())
     {
         this->setupInput(0, Pothos::DType(typeid(Type), dimension));
         this->setupOutput(0, Pothos::DType(typeid(Type), dimension));
@@ -58,12 +65,15 @@ public:
 
         //perform conjugate operation
         const size_t N = elems*inPort->dtype().dimension();
-        arrayConj(in, out, N);
+        _fcn(in, out, N);
 
         //produce and consume on 0th ports
         inPort->consume(elems);
         outPort->produce(elems);
     }
+
+private:
+    ConjFcn<Type> _fcn;
 };
 
 /***********************************************************************

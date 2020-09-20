@@ -10,6 +10,67 @@
 #include <cstdint>
 #include <string>
 
+//
+// Implementation getters, called on class construction
+//
+
+template <typename T>
+using ConstArithmeticFcn = void(*)(const T*, const T&, T*, size_t);
+
+template <typename T>
+static inline ConstArithmeticFcn<T> getXPlusKFcn()
+{
+    return [](const T* in, const T& k, T* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; i++) out[i] = in[i] + k;
+    };
+}
+
+template <typename T>
+static inline ConstArithmeticFcn<T> getXSubKFcn()
+{
+    return [](const T* in, const T& k, T* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; i++) out[i] = in[i] - k;
+    };
+}
+
+template <typename T>
+static inline ConstArithmeticFcn<T> getKSubXFcn()
+{
+    return [](const T* in, const T& k, T* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; i++) out[i] = k - in[i];
+    };
+}
+
+template <typename T>
+static inline ConstArithmeticFcn<T> getXMultKFcn()
+{
+    return [](const T* in, const T& k, T* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; i++) out[i] = in[i] * k;
+    };
+}
+
+template <typename T>
+static inline ConstArithmeticFcn<T> getXDivKFcn()
+{
+    return [](const T* in, const T& k, T* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; i++) out[i] = in[i] / k;
+    };
+}
+
+template <typename T>
+static inline ConstArithmeticFcn<T> getKDivXFcn()
+{
+    return [](const T* in, const T& k, T* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; i++) out[i] = k / in[i];
+    };
+}
+
 /***********************************************************************
  * |PothosDoc Const Arithmetic
  *
@@ -47,7 +108,7 @@ template <typename T>
 class ConstArithmetic: public Pothos::Block
 {
 public:
-    using ArithFcn = void(*)(const T*, const T&, T*, size_t);
+    using ArithFcn = ConstArithmeticFcn<T>;
     using Class = ConstArithmetic<T>;
 
     ConstArithmetic(
@@ -110,64 +171,6 @@ private:
 };
 
 //
-// Arithmetic functions
-//
-
-template <typename T>
-void XPlusK(const T* in, const T& k, T* out, size_t len)
-{
-    for(size_t i = 0; i < len; ++i)
-    {
-        out[i] = in[i] + k;
-    }
-}
-
-template <typename T>
-void XSubK(const T* in, const T& k, T* out, size_t len)
-{
-    for(size_t i = 0; i < len; ++i)
-    {
-        out[i] = in[i] - k;
-    }
-}
-
-template <typename T>
-void KSubX(const T* in, const T& k, T* out, size_t len)
-{
-    for(size_t i = 0; i < len; ++i)
-    {
-        out[i] = k - in[i];
-    }
-}
-
-template <typename T>
-void XMultK(const T* in, const T& k, T* out, size_t len)
-{
-    for(size_t i = 0; i < len; ++i)
-    {
-        out[i] = in[i] * k;
-    }
-}
-
-template <typename T>
-void XDivK(const T* in, const T& k, T* out, size_t len)
-{
-    for(size_t i = 0; i < len; ++i)
-    {
-        out[i] = in[i] / k;
-    }
-}
-
-template <typename T>
-void KDivX(const T* in, const T& k, T* out, size_t len)
-{
-    for(size_t i = 0; i < len; ++i)
-    {
-        out[i] = k / in[i];
-    }
-}
-
-//
 // Registration
 //
 
@@ -180,12 +183,12 @@ static Pothos::Block* makeConstArithmetic(
         if((Pothos::DType::fromDType(dtype, 1) == Pothos::DType(typeid(type))) && (opKey == operation)) \
             return new ConstArithmetic<type>(func, constant.convert<type>(), dtype.dimension());
     #define ifTypeDeclareFactory_(type) \
-        ifTypeDeclareFactory__(type, "X+K", XPlusK<type>) \
-        ifTypeDeclareFactory__(type, "X-K", XSubK<type>) \
-        ifTypeDeclareFactory__(type, "K-X", KSubX<type>) \
-        ifTypeDeclareFactory__(type, "X*K", XMultK<type>) \
-        ifTypeDeclareFactory__(type, "X/K", XDivK<type>) \
-        ifTypeDeclareFactory__(type, "K/X", KDivX<type>) 
+        ifTypeDeclareFactory__(type, "X+K", getXPlusKFcn<type>()) \
+        ifTypeDeclareFactory__(type, "X-K", getXSubKFcn<type>()) \
+        ifTypeDeclareFactory__(type, "K-X", getKSubXFcn<type>()) \
+        ifTypeDeclareFactory__(type, "X*K", getXMultKFcn<type>()) \
+        ifTypeDeclareFactory__(type, "X/K", getXDivKFcn<type>()) \
+        ifTypeDeclareFactory__(type, "K/X", getKDivXFcn<type>()) 
     #define ifTypeDeclareFactory(type) \
         ifTypeDeclareFactory_(type) \
         ifTypeDeclareFactory_(std::complex<type>)

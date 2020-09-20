@@ -10,47 +10,49 @@
 #include <functional>
 #include <type_traits>
 
-template <typename Type>
-using ArrayLogFcn = std::function<void(const Type*, Type*, const size_t)>;
-
 /***********************************************************************
- * Log functions
+ * Implementation getters to be called on class construction
  **********************************************************************/
 
+// Use std::function instead of function pointer because LogN's lambda
+// needs to capture a parameter.
 template <typename Type>
-static void arrayLogN(const Type *in, Type *out, Type base, const size_t num)
+using LogFcn = std::function<void(const Type*, Type*, const size_t)>;
+
+template <typename Type>
+static inline LogFcn<Type> getLogFcn()
 {
-    for (size_t i = 0; i < num; i++)
+    return [](const Type* in, Type* out, const size_t num)
     {
-        out[i] = std::log(in[i]) / std::log(base);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = std::log(in[i]);
+    };
 }
 
 template <typename Type>
-static void arrayLog(const Type *in, Type *out, const size_t num)
+static inline LogFcn<Type> getLog2Fcn()
 {
-    for (size_t i = 0; i < num; i++)
+    return [](const Type* in, Type* out, const size_t num)
     {
-        out[i] = std::log(in[i]);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = std::log2(in[i]);
+    };
 }
 
 template <typename Type>
-static void arrayLog2(const Type *in, Type *out, const size_t num)
+static inline LogFcn<Type> getLog10Fcn()
 {
-    for (size_t i = 0; i < num; i++)
+    return [](const Type* in, Type* out, const size_t num)
     {
-        out[i] = std::log2(in[i]);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = std::log10(in[i]);
+    };
 }
 
 template <typename Type>
-static void arrayLog10(const Type *in, Type *out, const size_t num)
+static inline LogFcn<Type> getLogNFcn(Type base)
 {
-    for (size_t i = 0; i < num; i++)
+    return [base](const Type* in, Type* out, const size_t num)
     {
-        out[i] = std::log10(in[i]);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = std::log(in[i]) / std::log(base);
+    };
 }
 
 /***********************************************************************
@@ -63,9 +65,9 @@ class Log: public Pothos::Block
     public:
 
         using Class = Log<Type>;
-        using ClassArrayLogFcn = ArrayLogFcn<Type>;
+        using ClassLogFcn = LogFcn<Type>;
 
-        Log(const size_t dimension, ClassArrayLogFcn logFcn):
+        Log(const size_t dimension, ClassLogFcn logFcn):
             _arrayLogFcn(logFcn)
         {
             this->setupInput(0, Pothos::DType(typeid(Type), dimension));
@@ -89,7 +91,7 @@ class Log: public Pothos::Block
         }
 
     protected:
-        ClassArrayLogFcn _arrayLogFcn;
+        ClassLogFcn _arrayLogFcn;
 };
 
 template <typename Type>
@@ -98,7 +100,7 @@ class LogN: public Log<Type>
     public:
 
         using Class = LogN<Type>;
-        using ClassArrayLogFcn = typename Log<Type>::ClassArrayLogFcn;
+        using ClassArrayLogFcn = typename Log<Type>::ClassLogFcn;
 
         LogN(const size_t dimension, const Type base): Log<Type>(dimension, nullptr)
         {
@@ -119,8 +121,6 @@ class LogN: public Log<Type>
 
         void setBase(Type base)
         {
-            using namespace std::placeholders;
-
             if(base <= 0)
             {
                 throw Pothos::RangeException("Log base must be > 0");
@@ -129,9 +129,9 @@ class LogN: public Log<Type>
             _base = base;
 
             // We can't use switch because the base can be floating-point.
-            if(_base == Type(2))  this->_arrayLogFcn = ClassArrayLogFcn(arrayLog2<Type>);
-            if(_base == Type(10)) this->_arrayLogFcn = ClassArrayLogFcn(arrayLog10<Type>);
-            else                  this->_arrayLogFcn = std::bind(arrayLogN<Type>, _1, _2, _base, _3);
+            if(_base == Type(2))  this->_arrayLogFcn = getLog2Fcn<Type>();
+            if(_base == Type(10)) this->_arrayLogFcn = getLog10Fcn<Type>();
+            else                  this->_arrayLogFcn = getLogNFcn<Type>(_base);
 
             this->emitSignal("baseChanged");
         }
@@ -146,7 +146,7 @@ class LogN: public Log<Type>
 
 #define ifTypeDeclareLogFactory(Type, LogFcn) \
     if(Pothos::DType::fromDType(dtype, 1) == Pothos::DType(typeid(Type))) \
-        return new Log<Type>(dtype.dimension(), &LogFcn<Type>);
+        return new Log<Type>(dtype.dimension(), LogFcn<Type>());
 
 #define LOGFACTORY(FactoryFcn, LogFcn) \
     static Pothos::Block* FactoryFcn(const Pothos::DType& dtype) \
@@ -164,9 +164,9 @@ class LogN: public Log<Type>
         throw Pothos::InvalidArgumentException( #FactoryFcn "("+dtype.toString()+")", "unsupported type"); \
     }
 
-LOGFACTORY(logFactory,   arrayLog)
-LOGFACTORY(log2Factory,  arrayLog2)
-LOGFACTORY(log10Factory, arrayLog10)
+LOGFACTORY(logFactory,   getLogFcn)
+LOGFACTORY(log2Factory,  getLog2Fcn)
+LOGFACTORY(log10Factory, getLog10Fcn)
 
 static Pothos::Block* logNFactory(
     const Pothos::DType& dtype,

@@ -1,4 +1,5 @@
 // Copyright (c) 2014-2016 Josh Blum
+//                    2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
 #include <Pothos/Framework.hpp>
@@ -8,6 +9,49 @@
 #include <vector>
 #include <cstring> //memset
 #include <algorithm> //min/max
+
+//
+// Implementation getters to be called on class construction
+//
+
+template <typename Type>
+using ArithFcn = void(*)(const Type*, const Type*, Type*, const size_t);
+
+template <typename Type>
+static inline ArithFcn<Type> getAddFcn()
+{
+    return [](const Type* in0, const Type* in1, Type* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; ++i) out[i] = in0[i] + in1[i];
+    };
+}
+
+template <typename Type>
+static inline ArithFcn<Type> getSubFcn()
+{
+    return [](const Type* in0, const Type* in1, Type* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; ++i) out[i] = in0[i] - in1[i];
+    };
+}
+
+template <typename Type>
+static inline ArithFcn<Type> getMulFcn()
+{
+    return [](const Type* in0, const Type* in1, Type* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; ++i) out[i] = in0[i] * in1[i];
+    };
+}
+
+template <typename Type>
+static inline ArithFcn<Type> getDivFcn()
+{
+    return [](const Type* in0, const Type* in1, Type* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; ++i) out[i] = in0[i] / in1[i];
+    };
+}
 
 /***********************************************************************
  * |PothosDoc Arithmetic
@@ -49,14 +93,15 @@
  * |initializer setNumInputs(numInputs)
  * |initializer setPreload(preload)
  **********************************************************************/
-template <typename Type, void (*Operator)(const Type *, const Type *, Type *, const size_t)>
+template <typename Type>
 class Arithmetic : public Pothos::Block
 {
 public:
-    Arithmetic(const size_t dimension):
-        _numInlineBuffers(0)
+    Arithmetic(const size_t dimension, ArithFcn<Type> fcn):
+        _numInlineBuffers(0),
+        _fcn(fcn)
     {
-        typedef Arithmetic<Type, Operator> ClassType;
+        typedef Arithmetic<Type> ClassType;
         this->registerCall(this, POTHOS_FCN_TUPLE(ClassType, setNumInputs));
         this->registerCall(this, POTHOS_FCN_TUPLE(ClassType, setPreload));
         this->registerCall(this, POTHOS_FCN_TUPLE(ClassType, preload));
@@ -120,7 +165,7 @@ public:
         for (size_t i = 1; i < inputs.size(); i++)
         {
             const Type *inX = inputs[i]->buffer();
-            Operator(in0, inX, out, elems*output->dtype().dimension());
+            _fcn(in0, inX, out, elems*output->dtype().dimension());
             in0 = out; //operate on output array next loop
             inputs[i]->consume(elems); //consume on ith input port
         }
@@ -147,6 +192,8 @@ public:
 private:
     size_t _numInlineBuffers;
     std::vector<size_t> _preload;
+
+    ArithFcn<Type> _fcn;
 };
 
 /***********************************************************************
@@ -181,14 +228,14 @@ void divArray(const Type *in0, const Type *in1, Type *out, const size_t num)
  **********************************************************************/
 static Pothos::Block *arithmeticFactory(const Pothos::DType &dtype, const std::string &operation)
 {
-    #define ifTypeDeclareFactory__(type, opKey, opVal) \
+    #define ifTypeDeclareFactory__(type, opKey, opFcn) \
         if (Pothos::DType::fromDType(dtype, 1) == Pothos::DType(typeid(type)) and operation == opKey) \
-            return new Arithmetic<type, opVal<type>>(dtype.dimension());
+            return new Arithmetic<type>(dtype.dimension(), opFcn<type>());
     #define ifTypeDeclareFactory_(type) \
-        ifTypeDeclareFactory__(type, "ADD", addArray) \
-        ifTypeDeclareFactory__(type, "SUB", subArray) \
-        ifTypeDeclareFactory__(type, "MUL", mulArray) \
-        ifTypeDeclareFactory__(type, "DIV", divArray)
+        ifTypeDeclareFactory__(type, "ADD", getAddFcn) \
+        ifTypeDeclareFactory__(type, "SUB", getSubFcn) \
+        ifTypeDeclareFactory__(type, "MUL", getMulFcn) \
+        ifTypeDeclareFactory__(type, "DIV", getDivFcn)
     #define ifTypeDeclareFactory(type) \
         ifTypeDeclareFactory_(type) \
         ifTypeDeclareFactory_(std::complex<type>)

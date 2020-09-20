@@ -10,13 +10,20 @@
 #include <type_traits>
 #include "FxptHelpers.hpp"
 
+//
+// Implementation getters to be called on class construction
+//
+
 template <typename InType, typename OutType>
-static void arrayAngle(const std::complex<InType> *in, OutType *out, const size_t num)
+using AngleFcn = void(*)(const InType*, OutType*, const size_t);
+
+template <typename InType, typename OutType>
+static inline AngleFcn<InType, OutType> getAngleFcn()
 {
-    for (size_t i = 0; i < num; i++)
+    return [](const InType* in, OutType* out, const size_t num)
     {
-        out[i] = getAngle(in[i]);
-    }
+        for (size_t i = 0; i < num; ++i) out[i] = getAngle(in[i]);
+    };
 }
 
 /***********************************************************************
@@ -44,7 +51,7 @@ template <typename InType, typename OutType>
 class Angle : public Pothos::Block
 {
 public:
-    Angle(const size_t dimension)
+    Angle(const size_t dimension): _fcn(getAngleFcn<InType, OutType>())
     {
         this->setupInput(0, Pothos::DType(typeid(InType), dimension));
         this->setupOutput(0, Pothos::DType(typeid(OutType), dimension));
@@ -64,12 +71,15 @@ public:
 
         //compute angle using templated function
         const size_t N = elems*inPort->dtype().dimension();
-        arrayAngle(in, out, N);
+        _fcn(in, out, N);
 
         //produce and consume on 0th ports
         inPort->consume(elems);
         outPort->produce(elems);
     }
+
+private:
+    AngleFcn<InType, OutType> _fcn;
 };
 
 /***********************************************************************
