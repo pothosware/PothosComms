@@ -14,8 +14,8 @@
 #include <functional>
 #include <type_traits>
 
-// Use std::function instead of function pointer because LogN's lambda
-// needs to capture a parameter.
+// Use std::function instead of function pointer because LogN's return
+// callable needs to capture a parameter.
 template <typename Type>
 using LogFcn = std::function<void(const Type*, Type*, const size_t)>;
 
@@ -41,15 +41,35 @@ using EnableForDefaultFcn = typename LogFcn<Type>;
 #ifdef POTHOS_XSIMD
 
 template <typename Type>
+static inline EnableForSIMDFcn<Type> getLogFcn()
+{
+    return PothosCommsSIMD::logDispatch<Type>();
+}
+
+template <typename Type>
 static inline EnableForSIMDFcn<Type> getLog2Fcn()
 {
     return PothosCommsSIMD::log2Dispatch<Type>();
 }
 
+template <typename Type>
+static inline EnableForSIMDFcn<Type> getLog10Fcn()
+{
+    return PothosCommsSIMD::log10Dispatch<Type>();
+}
+
+template <typename Type>
+static inline EnableForSIMDFcn<Type> getLogNFcn(Type base)
+{
+    using namespace std::placeholders;
+
+    return std::bind(PothosCommsSIMD::logNDispatch<Type>(), _1, _2, base, _3);
+}
+
 #endif
 
 template <typename Type>
-static inline LogFcn<Type> getLogFcn()
+static inline EnableForDefaultFcn<Type> getLogFcn()
 {
     return [](const Type* in, Type* out, const size_t num)
     {
@@ -67,7 +87,7 @@ static inline EnableForDefaultFcn<Type> getLog2Fcn()
 }
 
 template <typename Type>
-static inline LogFcn<Type> getLog10Fcn()
+static inline EnableForDefaultFcn<Type> getLog10Fcn()
 {
     return [](const Type* in, Type* out, const size_t num)
     {
@@ -76,7 +96,7 @@ static inline LogFcn<Type> getLog10Fcn()
 }
 
 template <typename Type>
-static inline LogFcn<Type> getLogNFcn(Type base)
+static inline EnableForDefaultFcn<Type> getLogNFcn(Type base)
 {
     return [base](const Type* in, Type* out, const size_t num)
     {

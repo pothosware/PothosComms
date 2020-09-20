@@ -38,14 +38,42 @@ static inline EnableForSIMDFcn<Type> getGreaterThanFcn()
     return PothosCommsSIMD::greaterThanDispatch<Type>();
 }
 
+template <typename Type>
+static inline EnableForSIMDFcn<Type> getLessThanFcn()
+{
+    return PothosCommsSIMD::lessThanDispatch<Type>();
+}
+
+template <typename Type>
+static inline EnableForSIMDFcn<Type> getGreaterOrEqualFcn()
+{
+    return PothosCommsSIMD::greaterThanOrEqualDispatch<Type>();
+}
+
+template <typename Type>
+static inline EnableForSIMDFcn<Type> getLessOrEqualFcn()
+{
+    return PothosCommsSIMD::lessThanOrEqualDispatch<Type>();
+}
+
+template <typename Type>
+static inline EnableForSIMDFcn<Type> getEqualToFcn()
+{
+    return PothosCommsSIMD::equalToDispatch<Type>();
+}
+
+template <typename Type>
+static inline EnableForSIMDFcn<Type> getNotEqualToFcn()
+{
+    return PothosCommsSIMD::notEqualToDispatch<Type>();
+}
+
 #else
 
-template <typename T>
-using EnableForDefaultFcn = ComparatorFcn<T>;
+template <typename Type>
+using EnableForDefaultFcn = ComparatorFcn<Type>;
 
 #endif
-
-// TODO: change ComparatorFcn to EnableForDefaultFcn when all functions supported
 
 template <typename Type>
 static inline EnableForDefaultFcn<Type> getGreaterThanFcn()
@@ -57,7 +85,7 @@ static inline EnableForDefaultFcn<Type> getGreaterThanFcn()
 }
 
 template <typename Type>
-static inline ComparatorFcn<Type> getLessThanFcn()
+static inline EnableForDefaultFcn<Type> getLessThanFcn()
 {
     return [](const Type* in0, const Type* in1, char* out, const size_t num)
     {
@@ -66,7 +94,7 @@ static inline ComparatorFcn<Type> getLessThanFcn()
 }
 
 template <typename Type>
-static inline ComparatorFcn<Type> getGreaterOrEqualFcn()
+static inline EnableForDefaultFcn<Type> getGreaterOrEqualFcn()
 {
     return [](const Type* in0, const Type* in1, char* out, const size_t num)
     {
@@ -75,7 +103,7 @@ static inline ComparatorFcn<Type> getGreaterOrEqualFcn()
 }
 
 template <typename Type>
-static inline ComparatorFcn<Type> getLessOrEqualFcn()
+static inline EnableForDefaultFcn<Type> getLessOrEqualFcn()
 {
     return [](const Type* in0, const Type* in1, char* out, const size_t num)
     {
@@ -84,7 +112,7 @@ static inline ComparatorFcn<Type> getLessOrEqualFcn()
 }
 
 template <typename Type>
-static inline ComparatorFcn<Type> getEqualToFcn()
+static inline EnableForDefaultFcn<Type> getEqualToFcn()
 {
     return [](const Type* in0, const Type* in1, char* out, const size_t num)
     {
@@ -93,7 +121,7 @@ static inline ComparatorFcn<Type> getEqualToFcn()
 }
 
 template <typename Type>
-static inline ComparatorFcn<Type> getNotEqualToFcn()
+static inline EnableForDefaultFcn<Type> getNotEqualToFcn()
 {
     return [](const Type* in0, const Type* in1, char* out, const size_t num)
     {

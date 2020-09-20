@@ -51,6 +51,36 @@ static inline EnableForSIMDFcn<T> getXPlusKFcn()
     return PothosCommsSIMD::XPlusKDispatch<T>();
 }
 
+template <typename T>
+static inline EnableForSIMDFcn<T> getXSubKFcn()
+{
+    return PothosCommsSIMD::XMinusKDispatch<T>();
+}
+
+template <typename T>
+static inline EnableForSIMDFcn<T> getKSubXFcn()
+{
+    return PothosCommsSIMD::KMinusXDispatch<T>();
+}
+
+template <typename T>
+static inline EnableForSIMDFcn<T> getXMultKFcn()
+{
+    return PothosCommsSIMD::XMultKDispatch<T>();
+}
+
+template <typename T>
+static inline EnableForSIMDFcn<T> getXDivKFcn()
+{
+    return PothosCommsSIMD::XDivKDispatch<T>();
+}
+
+template <typename T>
+static inline EnableForSIMDFcn<T> getKDivXFcn()
+{
+    return PothosCommsSIMD::KDivXDispatch<T>();
+}
+
 #endif
 
 template <typename T>
@@ -63,7 +93,7 @@ static inline EnableForDefaultFcn<T> getXPlusKFcn()
 }
 
 template <typename T>
-static inline ConstArithmeticFcn<T> getXSubKFcn()
+static inline EnableForDefaultFcn<T> getXSubKFcn()
 {
     return [](const T* in, const T& k, T* out, const size_t num)
     {
@@ -72,7 +102,7 @@ static inline ConstArithmeticFcn<T> getXSubKFcn()
 }
 
 template <typename T>
-static inline ConstArithmeticFcn<T> getKSubXFcn()
+static inline EnableForDefaultFcn<T> getKSubXFcn()
 {
     return [](const T* in, const T& k, T* out, const size_t num)
     {
@@ -81,7 +111,7 @@ static inline ConstArithmeticFcn<T> getKSubXFcn()
 }
 
 template <typename T>
-static inline ConstArithmeticFcn<T> getXMultKFcn()
+static inline EnableForDefaultFcn<T> getXMultKFcn()
 {
     return [](const T* in, const T& k, T* out, const size_t num)
     {
@@ -90,7 +120,7 @@ static inline ConstArithmeticFcn<T> getXMultKFcn()
 }
 
 template <typename T>
-static inline ConstArithmeticFcn<T> getXDivKFcn()
+static inline EnableForDefaultFcn<T> getXDivKFcn()
 {
     return [](const T* in, const T& k, T* out, const size_t num)
     {
@@ -99,7 +129,7 @@ static inline ConstArithmeticFcn<T> getXDivKFcn()
 }
 
 template <typename T>
-static inline ConstArithmeticFcn<T> getKDivXFcn()
+static inline EnableForDefaultFcn<T> getKDivXFcn()
 {
     return [](const T* in, const T& k, T* out, const size_t num)
     {

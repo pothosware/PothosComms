@@ -30,6 +30,144 @@ static inline TrigFunc<T> getCos()
     return PothosCommsSIMD::cosDispatch<T>();
 }
 
+template <typename T>
+static inline TrigFunc<T> getSin()
+{
+    return PothosCommsSIMD::sinDispatch<T>();
+}
+
+template <typename T>
+static inline TrigFunc<T> getTan()
+{
+    return PothosCommsSIMD::tanDispatch<T>();
+}
+
+template <typename T>
+static inline TrigFunc<T> getSec()
+{
+    return PothosCommsSIMD::secDispatch<T>();
+}
+
+template <typename T>
+static inline TrigFunc<T> getCsc()
+{
+    return PothosCommsSIMD::cscDispatch<T>();
+}
+
+template <typename T>
+static inline TrigFunc<T> getCot()
+{
+    return PothosCommsSIMD::cotDispatch<T>();
+}
+
+template <typename T>
+static inline TrigFunc<T> getACos()
+{
+    return PothosCommsSIMD::acosDispatch<T>();
+}
+
+template <typename T>
+static inline TrigFunc<T> getASin()
+{
+    return PothosCommsSIMD::asinDispatch<T>();
+}
+
+template <typename T>
+static inline TrigFunc<T> getATan()
+{
+    return PothosCommsSIMD::atanDispatch<T>();
+}
+
+template <typename T>
+static inline TrigFunc<T> getASec()
+{
+    return PothosCommsSIMD::asecDispatch<T>();
+}
+
+template <typename T>
+static inline TrigFunc<T> getACsc()
+{
+    return PothosCommsSIMD::acscDispatch<T>();
+}
+
+template <typename T>
+static inline TrigFunc<T> getACot()
+{
+    return PothosCommsSIMD::acotDispatch<T>();
+}
+
+template <typename T>
+static inline TrigFunc<T> getCosH()
+{
+    return PothosCommsSIMD::coshDispatch<T>();
+}
+
+template <typename T>
+static inline TrigFunc<T> getSinH()
+{
+    return PothosCommsSIMD::sinhDispatch<T>();
+}
+
+template <typename T>
+static inline TrigFunc<T> getTanH()
+{
+    return PothosCommsSIMD::tanhDispatch<T>();
+}
+
+template <typename T>
+static inline TrigFunc<T> getSecH()
+{
+    return PothosCommsSIMD::sechDispatch<T>();
+}
+
+template <typename T>
+static inline TrigFunc<T> getCscH()
+{
+    return PothosCommsSIMD::cschDispatch<T>();
+}
+
+template <typename T>
+static inline TrigFunc<T> getCotH()
+{
+    return PothosCommsSIMD::cothDispatch<T>();
+}
+
+template <typename T>
+static inline TrigFunc<T> getACosH()
+{
+    return PothosCommsSIMD::acoshDispatch<T>();
+}
+
+template <typename T>
+static inline TrigFunc<T> getASinH()
+{
+    return PothosCommsSIMD::asinhDispatch<T>();
+}
+
+template <typename T>
+static inline TrigFunc<T> getATanH()
+{
+    return PothosCommsSIMD::atanhDispatch<T>();
+}
+
+template <typename T>
+static inline TrigFunc<T> getASecH()
+{
+    return PothosCommsSIMD::asechDispatch<T>();
+}
+
+template <typename T>
+static inline TrigFunc<T> getACscH()
+{
+    return PothosCommsSIMD::acschDispatch<T>();
+}
+
+template <typename T>
+static inline TrigFunc<T> getACotH()
+{
+    return PothosCommsSIMD::acothDispatch<T>();
+}
+
 #else
 
 template <typename T>
@@ -40,8 +178,6 @@ static inline TrigFunc<T> getCos()
         for (size_t i = 0; i < num; ++i) out[i] = std::cos(in[i]);
     };
 }
-
-#endif
 
 template <typename T>
 static inline TrigFunc<T> getSin()
@@ -249,6 +385,8 @@ static inline TrigFunc<T> getACotH()
         for (size_t i = 0; i < num; ++i) out[i] = std::atanh(T(1.0) / in[i]);
     };
 }
+
+#endif
 
 /***********************************************************************
  * |PothosDoc Trigonometric

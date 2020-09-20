@@ -13,6 +13,7 @@
 #include <vector>
 #include <cstring> //memset
 #include <algorithm> //min/max
+#include <type_traits>
 
 //
 // Implementation getters to be called on class construction
@@ -23,13 +24,53 @@ using ArithFcn = void(*)(const Type*, const Type*, Type*, const size_t);
 
 #ifdef POTHOS_XSIMD
 
+//
+// For complex multiplication and addition, always use the default implementations
+// because of differences in SIMD implementation. This SFINAE stuff below will make
+// the compiler choose the right version.
+//
+
+template <typename Type>
+struct IsComplex : std::false_type {};
+
+template <typename Type>
+struct IsComplex<std::complex<Type>> : std::true_type {};
+
+template <typename Type>
+using EnableForSIMDFcn = typename std::enable_if<!IsComplex<Type>::value, ArithFcn<Type>>::type;
+
+template <typename Type>
+using EnableForDefaultFcn = typename std::enable_if<IsComplex<Type>::value, ArithFcn<Type>>::type;
+
 template <typename Type>
 static inline ArithFcn<Type> getAddFcn()
 {
     return PothosCommsSIMD::addDispatch<Type>();
 }
 
+template <typename Type>
+static inline ArithFcn<Type> getSubFcn()
+{
+    return PothosCommsSIMD::subDispatch<Type>();
+}
+
+template <typename Type>
+static inline EnableForSIMDFcn<Type> getMulFcn()
+{
+    return PothosCommsSIMD::mulDispatch<Type>();
+}
+
+template <typename Type>
+static inline EnableForSIMDFcn<Type> getDivFcn()
+{
+    return PothosCommsSIMD::divDispatch<Type>();
+}
+
 #else
+
+template <typename Type>
+using EnableForDefaultFcn = ArithFcn<Type>;
+
 template <typename Type>
 static inline ArithFcn<Type> getAddFcn()
 {
@@ -38,7 +79,6 @@ static inline ArithFcn<Type> getAddFcn()
         for (size_t i = 0; i < num; ++i) out[i] = in0[i] + in1[i];
     };
 }
-#endif
 
 template <typename Type>
 static inline ArithFcn<Type> getSubFcn()
@@ -48,9 +88,10 @@ static inline ArithFcn<Type> getSubFcn()
         for (size_t i = 0; i < num; ++i) out[i] = in0[i] - in1[i];
     };
 }
+#endif
 
 template <typename Type>
-static inline ArithFcn<Type> getMulFcn()
+static inline EnableForDefaultFcn<Type> getMulFcn()
 {
     return [](const Type* in0, const Type* in1, Type* out, const size_t num)
     {
@@ -59,7 +100,7 @@ static inline ArithFcn<Type> getMulFcn()
 }
 
 template <typename Type>
-static inline ArithFcn<Type> getDivFcn()
+static inline EnableForDefaultFcn<Type> getDivFcn()
 {
     return [](const Type* in0, const Type* in1, Type* out, const size_t num)
     {
