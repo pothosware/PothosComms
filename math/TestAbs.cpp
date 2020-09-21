@@ -100,8 +100,8 @@ static void testAbs()
     POTHOS_TEST_EQUAL(testValues.expectedOutput.dtype, output.dtype);
     POTHOS_TEST_EQUAL(testValues.expectedOutput.elements(), output.elements());
     POTHOS_TEST_EQUALA(
-        testValues.expectedOutput.as<const OutType*>(),
-        output.as<const OutType*>(),
+        testValues.expectedOutput.template as<const OutType*>(),
+        output.template as<const OutType*>(),
         testValues.expectedOutput.elements());
 }
 

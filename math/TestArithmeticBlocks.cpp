@@ -170,8 +170,9 @@ static typename std::enable_if<IsComplex<T>::value, ArithmeticTestValues>::type 
 
     for (size_t elem = 0; elem < testValues.expectedOutputs.elements(); ++elem)
     {
-        testValues.expectedOutputs.as<T*>()[elem] = testValues.inputs[0].as<const T*>()[elem]
-                                                  * testValues.inputs[1].as<const T*>()[elem];
+        testValues.expectedOutputs.template as<T*>()[elem] =
+            testValues.inputs[0].template as<const T*>()[elem] *
+            testValues.inputs[1].template as<const T*>()[elem];
     }
 
     return testValues;
@@ -216,8 +217,9 @@ static typename std::enable_if<IsComplex<T>::value, ArithmeticTestValues>::type 
 
     for (size_t elem = 0; elem < testValues.expectedOutputs.elements(); ++elem)
     {
-        testValues.expectedOutputs.as<T*>()[elem] = testValues.inputs[0].as<const T*>()[elem]
-                                                  / testValues.inputs[1].as<const T*>()[elem];
+        testValues.expectedOutputs.template as<T*>()[elem] =
+            testValues.inputs[0].template as<const T*>()[elem] /
+            testValues.inputs[1].template as<const T*>()[elem];
     }
 
     return testValues;
