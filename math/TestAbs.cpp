@@ -1,6 +1,8 @@
 // Copyright (c) 2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
+#include "FxptHelpers.hpp"
+
 #include <Pothos/Framework.hpp>
 #include <Pothos/Proxy.hpp>
 #include <Pothos/Testing.hpp>
@@ -65,7 +67,7 @@ struct AbsTestValues
 
         for (size_t elem = 0; elem < input.elements(); ++elem)
         {
-            outPtr[elem] = std::abs(inPtr[elem]);
+            outPtr[elem] = getAbs<OutType>(inPtr[elem]);
         }
     }
 };

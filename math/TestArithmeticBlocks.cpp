@@ -162,7 +162,7 @@ static typename std::enable_if<IsComplex<T>::value, ArithmeticTestValues>::type 
     using ScalarType = typename T::value_type;
     static const Pothos::DType dtype(typeid(T));
 
-    auto testValues = getSubTestValues<ScalarType>();
+    auto testValues = getMulTestValues<ScalarType>();
     POTHOS_TEST_EQUAL(2, testValues.inputs.size());
 
     for (auto& input : testValues.inputs) input.dtype = dtype;
@@ -209,7 +209,7 @@ static typename std::enable_if<IsComplex<T>::value, ArithmeticTestValues>::type 
     using ScalarType = typename T::value_type;
     static const Pothos::DType dtype(typeid(T));
 
-    auto testValues = getSubTestValues<ScalarType>();
+    auto testValues = getDivTestValues<ScalarType>();
     POTHOS_TEST_EQUAL(2, testValues.inputs.size());
 
     for (auto& input : testValues.inputs) input.dtype = dtype;
@@ -413,6 +413,23 @@ struct ConstArithmeticTestValues
 };
 
 template <typename T>
+static inline typename std::enable_if<!IsComplex<T>::value, T>::type avoidZero(const T& value)
+{
+    return (T(0) == value) ? (value+1) : value;
+}
+
+template <typename T>
+static inline typename std::enable_if<IsComplex<T>::value, T>::type avoidZero(const T& value)
+{
+    T ret(value);
+
+    if(T(0) == ret.real()) ret = T(ret.real()+1, ret.imag());
+    if(T(0) == ret.imag()) ret = T(ret.real(), ret.imag()+1);
+
+    return ret;
+}
+
+template <typename T>
 static inline typename std::enable_if<!IsComplex<T>::value, T>::type getXByKTestConstant()
 {
     return T(2);
@@ -443,12 +460,13 @@ static void getXByKTestValues(
     {
         auto value = static_cast<T>(elem + 2);
         if (std::is_signed<T>::value) value -= static_cast<T>(bufferLen / 2);
+        value = avoidZero(value);
 
         pXPlusKTestValues->inputs.as<T*>()[elem] = value;
         pXMinusKTestValues->inputs.as<T*>()[elem] = value;
         pXMulKTestValues->inputs.as<T*>()[elem] = value;
         pXDivKTestValues->inputs.as<T*>()[elem] = value;
-        
+
         pXPlusKTestValues->expectedOutputs.as<T*>()[elem] = value + testConstant;
         pXMinusKTestValues->expectedOutputs.as<T*>()[elem] = value - testConstant;
         pXMulKTestValues->expectedOutputs.as<T*>()[elem] = value * testConstant;
@@ -486,8 +504,8 @@ static void getKByXTestValues(
         if (std::is_signed<T>::value)
         {
             value -= static_cast<T>(bufferLen / 2);
-            if (T(0) == value) value += T(1);
         }
+        value = avoidZero(value);
 
         pKMinusXTestValues->inputs.as<T*>()[elem] = value;
         pKDivXTestValues->inputs.as<T*>()[elem] = value;
