@@ -84,7 +84,7 @@ class Log: public Pothos::Block
             auto input = this->input(0);
             auto output = this->output(0);
 
-            _arrayLogFcn(input->buffer(), output->buffer(), elems);
+            _arrayLogFcn(input->buffer(), output->buffer(), elems*input->dtype().dimension());
 
             input->consume(elems);
             output->produce(elems);
