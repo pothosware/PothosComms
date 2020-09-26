@@ -343,7 +343,7 @@ public:
         bufferWork(
             outPort->buffer().template as<T*>(),
             inPort->buffer().template as<const T*>(),
-            numElements);
+            numElements*inPort->dtype().dimension());
 
         inPort->consume(numElements);
         outPort->produce(numElements);
