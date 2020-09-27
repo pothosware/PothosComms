@@ -38,6 +38,9 @@ POTHOS_MODULE_UTIL(
         TestSinc.cpp
         Trigonometric.cpp
         TestTrigonometric.cpp
+        Pow.cpp
+        Root.cpp
+        TestPowRoot.cpp
     LIBRARIES CommsFunctions
     DESTINATION comms
     ENABLE_DOCS
