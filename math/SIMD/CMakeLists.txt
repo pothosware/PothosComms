@@ -12,7 +12,7 @@ set(SIMDInputs
     Log.cpp
     Sinc.cpp
     Trigonometric.cpp)
-    
+
 PothosGenerateSIMDSources(
     SIMDSources
     MathBlocks.json
@@ -25,10 +25,10 @@ include_directories(
 set(libraries
     ${Pothos_LIBRARIES}
     xsimd)
-    
+
 add_library(CommsMathSIMD STATIC ${SIMDSources})
 target_link_libraries(CommsMathSIMD ${libraries})
-add_dependencies(CommsMathSIMD MathBlocks_SIMD)
+add_dependencies(CommsMathSIMD MathBlocks_SIMDDispatcher)
 set_property(TARGET CommsMathSIMD PROPERTY POSITION_INDEPENDENT_CODE TRUE)
 
 # This library is pure templates, so expect large object files.
