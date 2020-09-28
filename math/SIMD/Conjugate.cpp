@@ -113,9 +113,6 @@ namespace PothosCommsSIMD { namespace POTHOS_SIMD_NAMESPACE {
             scalarOutPtr += simdSize;
         }
 
-        const T* inPtr = (const T*)scalarInPtr;
-        T* outPtr = (T*)scalarOutPtr;
-
         for (size_t elem = (simdSize * numSIMDFrames / 2); elem < len; ++elem)
         {
             out[elem] = std::conj(in[elem]);
