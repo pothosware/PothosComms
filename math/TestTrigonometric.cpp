@@ -9,14 +9,13 @@
 #include <iostream>
 #include <vector>
 
-#define _USE_MATH_DEFINES
 #include <cmath>
 
 //
 // Utility code
 //
 
-constexpr size_t bufferLen = 123; // Long enough for any SIMD frame, while having manual entries
+constexpr size_t bufferLen = 64; // Long enough for any SIMD frame
 
 // https://gist.github.com/lorenzoriano/5414671
 template <typename T>
@@ -104,14 +103,14 @@ static void testTrigonometricOperation(
         POTHOS_TEST_TRUE(topology.waitInactive(0.01));
     }
 
-    static constexpr T epsilon = T(1e-3);
+    static constexpr T epsilon = T(1e-6);
 
     auto outputs = sink.call<Pothos::BufferChunk>("getBuffer");
     POTHOS_TEST_EQUAL(testParams.expectedOutputs.dtype, outputs.dtype);
     POTHOS_TEST_EQUAL(testParams.expectedOutputs.elements(), outputs.elements());
     POTHOS_TEST_CLOSEA(
-        testParams.expectedOutputs.as<const T*>(),
-        outputs.as<const T*>(),
+        testParams.expectedOutputs.template as<const T*>(),
+        outputs.template as<const T*>(),
         epsilon,
         outputs.elements());
 }
@@ -163,33 +162,33 @@ static void testTrigonmetricBlockForType()
 
     for (size_t elem = 0; elem < bufferLen; ++elem)
     {
-        cosTestParams.expectedOutputs.as<T*>()[elem] = std::cos(piDiv2Inputs[elem]);
-        sinTestParams.expectedOutputs.as<T*>()[elem] = std::sin(piDiv2Inputs[elem]);
-        tanTestParams.expectedOutputs.as<T*>()[elem] = std::tan(piDiv2Inputs[elem]);
-        secTestParams.expectedOutputs.as<T*>()[elem] = T(1.0) / std::cos(piDiv2Inputs[elem]);
-        cscTestParams.expectedOutputs.as<T*>()[elem] = T(1.0) / std::sin(piDiv2Inputs[elem]);
-        cotTestParams.expectedOutputs.as<T*>()[elem] = T(1.0) / std::tan(piDiv2Inputs[elem]);
+        cosTestParams.expectedOutputs.template as<T*>()[elem] = std::cos(piDiv2Inputs[elem]);
+        sinTestParams.expectedOutputs.template as<T*>()[elem] = std::sin(piDiv2Inputs[elem]);
+        tanTestParams.expectedOutputs.template as<T*>()[elem] = std::tan(piDiv2Inputs[elem]);
+        secTestParams.expectedOutputs.template as<T*>()[elem] = T(1.0) / std::cos(piDiv2Inputs[elem]);
+        cscTestParams.expectedOutputs.template as<T*>()[elem] = T(1.0) / std::sin(piDiv2Inputs[elem]);
+        cotTestParams.expectedOutputs.template as<T*>()[elem] = T(1.0) / std::tan(piDiv2Inputs[elem]);
 
-        acosTestParams.expectedOutputs.as<T*>()[elem] = std::acos(oneToOneInputs[elem]);
-        asinTestParams.expectedOutputs.as<T*>()[elem] = std::asin(oneToOneInputs[elem]);
-        atanTestParams.expectedOutputs.as<T*>()[elem] = std::atan(oneToOneInputs[elem]);
-        asecTestParams.expectedOutputs.as<T*>()[elem] = std::acos(T(1.0) / outsideOneToOneInputs[elem]);
-        acscTestParams.expectedOutputs.as<T*>()[elem] = std::asin(T(1.0) / outsideOneToOneInputs[elem]);
-        acotTestParams.expectedOutputs.as<T*>()[elem] = std::atan(T(1.0) / piDiv2Inputs[elem]);
+        acosTestParams.expectedOutputs.template as<T*>()[elem] = std::acos(oneToOneInputs[elem]);
+        asinTestParams.expectedOutputs.template as<T*>()[elem] = std::asin(oneToOneInputs[elem]);
+        atanTestParams.expectedOutputs.template as<T*>()[elem] = std::atan(oneToOneInputs[elem]);
+        asecTestParams.expectedOutputs.template as<T*>()[elem] = std::acos(T(1.0) / outsideOneToOneInputs[elem]);
+        acscTestParams.expectedOutputs.template as<T*>()[elem] = std::asin(T(1.0) / outsideOneToOneInputs[elem]);
+        acotTestParams.expectedOutputs.template as<T*>()[elem] = std::atan(T(1.0) / piDiv2Inputs[elem]);
 
-        coshTestParams.expectedOutputs.as<T*>()[elem] = std::cosh(piDiv2Inputs[elem]);
-        sinhTestParams.expectedOutputs.as<T*>()[elem] = std::sinh(piDiv2Inputs[elem]);
-        tanhTestParams.expectedOutputs.as<T*>()[elem] = std::tanh(piDiv2Inputs[elem]);
-        sechTestParams.expectedOutputs.as<T*>()[elem] = T(1.0) / std::cosh(piDiv2Inputs[elem]);
-        cschTestParams.expectedOutputs.as<T*>()[elem] = T(1.0) / std::sinh(piDiv2Inputs[elem]);
-        cothTestParams.expectedOutputs.as<T*>()[elem] = T(1.0) / std::tanh(piDiv2Inputs[elem]);
+        coshTestParams.expectedOutputs.template as<T*>()[elem] = std::cosh(piDiv2Inputs[elem]);
+        sinhTestParams.expectedOutputs.template as<T*>()[elem] = std::sinh(piDiv2Inputs[elem]);
+        tanhTestParams.expectedOutputs.template as<T*>()[elem] = std::tanh(piDiv2Inputs[elem]);
+        sechTestParams.expectedOutputs.template as<T*>()[elem] = T(1.0) / std::cosh(piDiv2Inputs[elem]);
+        cschTestParams.expectedOutputs.template as<T*>()[elem] = T(1.0) / std::sinh(piDiv2Inputs[elem]);
+        cothTestParams.expectedOutputs.template as<T*>()[elem] = T(1.0) / std::tanh(piDiv2Inputs[elem]);
 
-        acoshTestParams.expectedOutputs.as<T*>()[elem] = std::acosh(oneToPiInputs[elem]);
-        asinhTestParams.expectedOutputs.as<T*>()[elem] = std::asinh(piDiv2Inputs[elem]);
-        atanhTestParams.expectedOutputs.as<T*>()[elem] = std::atanh(oneToOneInputs[elem]);
-        asechTestParams.expectedOutputs.as<T*>()[elem] = std::acosh(T(1.0) / zeroToOneInputs[elem]);
-        acschTestParams.expectedOutputs.as<T*>()[elem] = std::asinh(T(1.0) / outsideOneToOneInputs[elem]);
-        acothTestParams.expectedOutputs.as<T*>()[elem] = std::atanh(T(1.0) / outsideOneToOneInputs[elem]);
+        acoshTestParams.expectedOutputs.template as<T*>()[elem] = std::acosh(oneToPiInputs[elem]);
+        asinhTestParams.expectedOutputs.template as<T*>()[elem] = std::asinh(piDiv2Inputs[elem]);
+        atanhTestParams.expectedOutputs.template as<T*>()[elem] = std::atanh(oneToOneInputs[elem]);
+        asechTestParams.expectedOutputs.template as<T*>()[elem] = std::acosh(T(1.0) / zeroToOneInputs[elem]);
+        acschTestParams.expectedOutputs.template as<T*>()[elem] = std::asinh(T(1.0) / outsideOneToOneInputs[elem]);
+        acothTestParams.expectedOutputs.template as<T*>()[elem] = std::atanh(T(1.0) / outsideOneToOneInputs[elem]);
     }
 
     testTrigonometricOperation<T>("COS", cosTestParams);

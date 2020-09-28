@@ -1,6 +1,8 @@
 // Copyright (c) 2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
+#include "FxptHelpers.hpp"
+
 #include <Pothos/Framework.hpp>
 #include <Pothos/Proxy.hpp>
 #include <Pothos/Testing.hpp>
@@ -65,7 +67,7 @@ struct AbsTestValues
 
         for (size_t elem = 0; elem < input.elements(); ++elem)
         {
-            outPtr[elem] = std::abs(inPtr[elem]);
+            outPtr[elem] = getAbs<OutType>(inPtr[elem]);
         }
     }
 };
@@ -100,8 +102,8 @@ static void testAbs()
     POTHOS_TEST_EQUAL(testValues.expectedOutput.dtype, output.dtype);
     POTHOS_TEST_EQUAL(testValues.expectedOutput.elements(), output.elements());
     POTHOS_TEST_EQUALA(
-        testValues.expectedOutput.as<const OutType*>(),
-        output.as<const OutType*>(),
+        testValues.expectedOutput.template as<const OutType*>(),
+        output.template as<const OutType*>(),
         testValues.expectedOutput.elements());
 }
 

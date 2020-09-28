@@ -524,7 +524,7 @@ public:
         const T* buffIn = input->buffer();
         T* buffOut = output->buffer();
 
-        _func(buffIn, buffOut, elems);
+        _func(buffIn, buffOut, elems*input->dtype().dimension());
 
         input->consume(elems);
         output->produce(elems);

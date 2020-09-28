@@ -37,13 +37,11 @@ static void testConjugate()
 {
     using ComplexType = std::complex<Type>;
 
-    const auto dtype = Pothos::DType(typeid(ComplexType));
-
-    std::cout << "Testing " << dtype.name() << "..." << std::endl;
-
     Pothos::BufferChunk inputs;
     Pothos::BufferChunk expectedOutputs;
     getTestValues<Type>(&inputs, &expectedOutputs);
+
+    const auto dtype = Pothos::DType(typeid(ComplexType));
 
     auto source = Pothos::BlockRegistry::make("/blocks/feeder_source", dtype);
     auto conj = Pothos::BlockRegistry::make("/comms/conjugate", dtype);
@@ -72,8 +70,6 @@ static void testConjugate()
 
 POTHOS_TEST_BLOCK("/comms/tests", test_conjugate)
 {
-    srand((unsigned int)time(0));
-
     testConjugate<std::int8_t>();
     testConjugate<std::int16_t>();
     testConjugate<std::int32_t>();
