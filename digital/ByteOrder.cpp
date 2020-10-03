@@ -198,7 +198,7 @@ static const ByteOrderTypeMap TypeMap =
  * |keywords bytes big little host network endian
  *
  * |param dtype[Data Type] The output data type produced by the mapper.
- * |widget DTypeChooser(uint=1,cuint=1,dim=1)
+ * |widget DTypeChooser(uint=1,cuint=1,float=1,cfloat=1,dim=1)
  * |default "uint64"
  * |preview disable
  *
