@@ -18,12 +18,14 @@ POTHOS_MODULE_UTIL(
     TARGET MathBlocks
     SOURCES
         Abs.cpp
+        TestAbs.cpp
         Angle.cpp
         TestAngle.cpp
         Arithmetic.cpp
         TestComparatorBlocks.cpp
         Comparator.cpp
         Conjugate.cpp
+        TestConjugate.cpp
         Log.cpp
         TestLog.cpp
         TestArithmeticBlocks.cpp
@@ -35,6 +37,7 @@ POTHOS_MODULE_UTIL(
         Sinc.cpp
         TestSinc.cpp
         Trigonometric.cpp
+        TestTrigonometric.cpp
     LIBRARIES CommsFunctions
     DESTINATION comms
     ENABLE_DOCS
