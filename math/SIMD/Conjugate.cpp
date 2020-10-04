@@ -12,21 +12,23 @@
 #pragma warning(error: 4667) // no function template defined that matches forced instantiation
 #endif
 
-template <typename T>
-struct IsComplex : std::false_type {};
-
-template <typename T>
-struct IsComplex<std::complex<T>> : std::true_type {};
-
-// Only support complex types.
-template <typename T>
-using EnableConjSIMD = typename std::enable_if<IsComplex<T>::value>::type;
-
 #if !defined POTHOS_SIMD_NAMESPACE
 #error Must define POTHOS_SIMD_NAMESPACE to build this file
 #endif
 
 namespace PothosCommsSIMD { namespace POTHOS_SIMD_NAMESPACE {
+
+namespace detail
+{
+    template <typename T>
+    struct IsComplex : std::false_type {};
+
+    template <typename T>
+    struct IsComplex<std::complex<T>> : std::true_type {};
+
+    // Only support complex types.
+    template <typename T>
+    using EnableConjSIMD = typename std::enable_if<IsComplex<T>::value>::type;
 
     // TODO: explain getImagMask()
 
@@ -86,7 +88,7 @@ namespace PothosCommsSIMD { namespace POTHOS_SIMD_NAMESPACE {
     }
 
     template <typename T>
-    EnableConjSIMD<T> conj(const T* in, T* out, size_t len)
+    static EnableConjSIMD<T> conj(const T* in, T* out, size_t len)
     {
         using ScalarType = typename T::value_type;
         static constexpr size_t simdSize = xsimd::simd_traits<ScalarType>::size;
@@ -118,6 +120,13 @@ namespace PothosCommsSIMD { namespace POTHOS_SIMD_NAMESPACE {
             out[elem] = std::conj(in[elem]);
         }
     }
+}
+
+template <typename T>
+void conj(const T* in, T* out, size_t len)
+{
+    detail::conj(in, out, len);
+}
 
 #define CONJ(T) template void conj(const std::complex<T>*, std::complex<T>*, size_t);
 

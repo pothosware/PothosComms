@@ -11,18 +11,20 @@
 #pragma warning(error: 4667) // no function template defined that matches forced instantiation
 #endif
 
-// Only support scalar floating-point types.
-template <typename T>
-using EnableSincSIMD = typename std::enable_if<std::is_floating_point<T>::value>::type;
-
 #if !defined POTHOS_SIMD_NAMESPACE
 #error Must define POTHOS_SIMD_NAMESPACE to build this file
 #endif
 
 namespace PothosCommsSIMD { namespace POTHOS_SIMD_NAMESPACE {
 
+namespace detail
+{
+    // Only support scalar floating-point types.
     template <typename T>
-    EnableSincSIMD<T> sinc(const T* in, T* out, size_t len)
+    using EnableSincSIMD = typename std::enable_if<std::is_floating_point<T>::value>::type;
+
+    template <typename T>
+    static EnableSincSIMD<T> sinc(const T* in, T* out, size_t len)
     {
         static constexpr size_t simdSize = xsimd::simd_traits<T>::size;
         const auto numSIMDFrames = len / simdSize;
@@ -49,6 +51,14 @@ namespace PothosCommsSIMD { namespace POTHOS_SIMD_NAMESPACE {
             out[elem] = ZERO(in[elem]) ? 1 : (std::sin(in[elem]) / in[elem]);
         }
     }
+}
+
+// Hide the SFINAE
+template <typename T>
+void sinc(const T* in, T* out, size_t len)
+{
+    detail::sinc(in, out, len);
+}
 
 #define SINC(T) template void sinc(const T*, T*, size_t);
 

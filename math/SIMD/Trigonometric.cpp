@@ -4,6 +4,7 @@
 #include <xsimd/xsimd.hpp>
 
 #include <cmath>
+#include <type_traits>
 
 #if !defined POTHOS_SIMD_NAMESPACE
 #error Must define POTHOS_SIMD_NAMESPACE to build this file
@@ -11,10 +12,15 @@
 
 namespace PothosCommsSIMD { namespace POTHOS_SIMD_NAMESPACE {
 
+namespace detail
+{
+    template <typename T>
+    using EnableTrigSIMD = typename std::enable_if<std::is_floating_point<T>::value>::type;
+
 // For when the function exists in both xsimd:: and std:: without any manual calculation (1/func(x), etc)
 #define XSIMD_TRIG_FUNC(func) \
     template <typename T> \
-    void func(const T* in, T* out, size_t len) \
+    EnableTrigSIMD<T> func(const T* in, T* out, size_t len) \
     { \
         static constexpr size_t simdSize = xsimd::simd_traits<T>::size; \
         const auto numSIMDFrames = len / simdSize; \
@@ -41,7 +47,7 @@ namespace PothosCommsSIMD { namespace POTHOS_SIMD_NAMESPACE {
 // func = 1 / baseFunc(x)
 #define XSIMD_TRIG_ONEDIV_FUNC(func,baseFunc) \
     template <typename T> \
-    void func(const T* in, T* out, size_t len) \
+    EnableTrigSIMD<T> func(const T* in, T* out, size_t len) \
     { \
         static constexpr size_t simdSize = xsimd::simd_traits<T>::size; \
         const auto numSIMDFrames = len / simdSize; \
@@ -70,7 +76,7 @@ namespace PothosCommsSIMD { namespace POTHOS_SIMD_NAMESPACE {
 // func = baseFunc(1 / x)
 #define XSIMD_TRIG_FUNC_ONEDIVX(func,baseFunc) \
     template <typename T> \
-    void func(const T* in, T* out, size_t len) \
+    EnableTrigSIMD<T> func(const T* in, T* out, size_t len) \
     { \
         static constexpr size_t simdSize = xsimd::simd_traits<T>::size; \
         const auto numSIMDFrames = len / simdSize; \
@@ -120,8 +126,42 @@ namespace PothosCommsSIMD { namespace POTHOS_SIMD_NAMESPACE {
     XSIMD_TRIG_FUNC_ONEDIVX(asech, acosh)
     XSIMD_TRIG_FUNC_ONEDIVX(acsch, asinh)
     XSIMD_TRIG_FUNC_ONEDIVX(acoth, atanh)
+}
 
-#define DECLARE_FUNCS(T) \
+// Don't expose the SFINAE
+#define DEFINE_FUNC(func) \
+    template <typename T> \
+    void func(const T* in, T* out, size_t num) \
+    { \
+        detail::func(in, out, num); \
+    }
+
+    DEFINE_FUNC(cos)
+    DEFINE_FUNC(sin)
+    DEFINE_FUNC(tan)
+    DEFINE_FUNC(sec)
+    DEFINE_FUNC(csc)
+    DEFINE_FUNC(cot)
+    DEFINE_FUNC(acos)
+    DEFINE_FUNC(asin)
+    DEFINE_FUNC(atan)
+    DEFINE_FUNC(asec)
+    DEFINE_FUNC(acsc)
+    DEFINE_FUNC(acot)
+    DEFINE_FUNC(cosh)
+    DEFINE_FUNC(sinh)
+    DEFINE_FUNC(tanh)
+    DEFINE_FUNC(sech)
+    DEFINE_FUNC(csch)
+    DEFINE_FUNC(coth)
+    DEFINE_FUNC(acosh)
+    DEFINE_FUNC(asinh)
+    DEFINE_FUNC(atanh)
+    DEFINE_FUNC(asech)
+    DEFINE_FUNC(acsch)
+    DEFINE_FUNC(acoth)
+
+#define SPECIALIZE_FUNCS(T) \
     template void cos<T>(const T*, T*, size_t); \
     template void sin<T>(const T*, T*, size_t); \
     template void tan<T>(const T*, T*, size_t); \
@@ -147,7 +187,7 @@ namespace PothosCommsSIMD { namespace POTHOS_SIMD_NAMESPACE {
     template void acsch<T>(const T*, T*, size_t); \
     template void acoth<T>(const T*, T*, size_t);
 
-DECLARE_FUNCS(float)
-DECLARE_FUNCS(double)
+SPECIALIZE_FUNCS(float)
+SPECIALIZE_FUNCS(double)
 
 }}

@@ -11,27 +11,29 @@
 #pragma warning(error: 4667) // no function template defined that matches forced instantiation
 #endif
 
-template <typename T>
-struct IsComplex : std::false_type {};
-
-template <typename T>
-struct IsComplex<std::complex<T>> : std::true_type {};
-
-template <typename T>
-using EnableIfNotComplex = typename std::enable_if<!IsComplex<T>::value>::type;
-
-template <typename T>
-using EnableIfComplex = typename std::enable_if<IsComplex<T>::value>::type;
-
 #if !defined POTHOS_SIMD_NAMESPACE
 #error Must define POTHOS_SIMD_NAMESPACE to build this file
 #endif
 
 namespace PothosCommsSIMD { namespace POTHOS_SIMD_NAMESPACE {
 
+namespace detail
+{
+    template <typename T>
+    struct IsComplex : std::false_type {};
+
+    template <typename T>
+    struct IsComplex<std::complex<T>> : std::true_type {};
+
+    template <typename T>
+    using EnableIfNotComplex = typename std::enable_if<!IsComplex<T>::value>::type;
+
+    template <typename T>
+    using EnableIfComplex = typename std::enable_if<IsComplex<T>::value>::type;
+
 #define XSIMD_SCALAR_ARITHMETIC_FUNC(func, op) \
     template <typename T> \
-    EnableIfNotComplex<T> func(const T* in0, const T* in1, T* out, size_t len) \
+    static EnableIfNotComplex<T> func(const T* in0, const T* in1, T* out, size_t len) \
     { \
         static constexpr size_t simdSize = xsimd::simd_traits<T>::size; \
         const auto numSIMDFrames = len / simdSize; \
@@ -60,7 +62,7 @@ namespace PothosCommsSIMD { namespace POTHOS_SIMD_NAMESPACE {
 
 #define XSIMD_COMPLEX_ARITHMETIC_FUNC(func) \
     template <typename T> \
-    EnableIfComplex<T> func(const T* in0, const T* in1, T* out, size_t len) \
+    static EnableIfComplex<T> func(const T* in0, const T* in1, T* out, size_t len) \
     { \
         using ScalarType = typename T::value_type; \
         func<ScalarType>((const ScalarType*)in0, (const ScalarType*)in1, (ScalarType*)out, (len * 2)); \
@@ -78,8 +80,22 @@ namespace PothosCommsSIMD { namespace POTHOS_SIMD_NAMESPACE {
     // the normal STL operators.
     XSIMD_COMPLEX_ARITHMETIC_FUNC(add)
     XSIMD_COMPLEX_ARITHMETIC_FUNC(sub)
+}
 
-#define DECLARE_FUNCS(T) \
+// Don't expose the SFINAE
+#define DEFINE_FUNC(func) \
+    template <typename T> \
+    void func(const T* in0, const T* in1, T* out, size_t len) \
+    { \
+        detail::func(in0, in1, out, len); \
+    }
+
+DEFINE_FUNC(add)
+DEFINE_FUNC(sub)
+DEFINE_FUNC(mul)
+DEFINE_FUNC(div)
+
+#define SPECIALIZE_FUNCS(T) \
     template void add<T>(const T*, const T*, T*, size_t); \
     template void add<std::complex<T>>(const std::complex<T>*, const std::complex<T>*, std::complex<T>*, size_t); \
     template void sub<T>(const T*, const T*, T*, size_t); \
@@ -87,15 +103,15 @@ namespace PothosCommsSIMD { namespace POTHOS_SIMD_NAMESPACE {
     template void mul<T>(const T*, const T*, T*, size_t); \
     template void div<T>(const T*, const T*, T*, size_t); \
 
-DECLARE_FUNCS(std::int8_t)
-DECLARE_FUNCS(std::int16_t)
-DECLARE_FUNCS(std::int32_t)
-DECLARE_FUNCS(std::int64_t)
-DECLARE_FUNCS(std::uint8_t)
-DECLARE_FUNCS(std::uint16_t)
-DECLARE_FUNCS(std::uint32_t)
-DECLARE_FUNCS(std::uint64_t)
-DECLARE_FUNCS(float)
-DECLARE_FUNCS(double)
+SPECIALIZE_FUNCS(std::int8_t)
+SPECIALIZE_FUNCS(std::int16_t)
+SPECIALIZE_FUNCS(std::int32_t)
+SPECIALIZE_FUNCS(std::int64_t)
+SPECIALIZE_FUNCS(std::uint8_t)
+SPECIALIZE_FUNCS(std::uint16_t)
+SPECIALIZE_FUNCS(std::uint32_t)
+SPECIALIZE_FUNCS(std::uint64_t)
+SPECIALIZE_FUNCS(float)
+SPECIALIZE_FUNCS(double)
 
 }}
