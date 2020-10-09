@@ -1,6 +1,8 @@
 // Copyright (c) 2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
+#include "common/Testing.hpp"
+
 #include <Pothos/Framework.hpp>
 #include <Pothos/Testing.hpp>
 #include <Pothos/Proxy.hpp>
@@ -59,13 +61,9 @@ static void testConjugate()
         POTHOS_TEST_TRUE(topology.waitInactive(0.01));
     }
 
-    auto outputs = sink.call<Pothos::BufferChunk>("getBuffer");
-    POTHOS_TEST_EQUAL(expectedOutputs.dtype, outputs.dtype);
-    POTHOS_TEST_EQUAL(expectedOutputs.elements(), outputs.elements());
-    POTHOS_TEST_EQUALA(
-        expectedOutputs.as<const ComplexType*>(),
-        outputs.as<const ComplexType*>(),
-        bufferLen);
+    CommsTests::testBufferChunksEqual<Type>(
+        expectedOutputs,
+        sink.call<Pothos::BufferChunk>("getBuffer"));
 }
 
 POTHOS_TEST_BLOCK("/comms/tests", test_conjugate)

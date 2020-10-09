@@ -1,11 +1,11 @@
 // Copyright (c) 2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
+#include "common/Testing.hpp"
+
 #include <Pothos/Framework.hpp>
 #include <Pothos/Testing.hpp>
 
-#include <algorithm>
-#include <cstring>
 #include <iostream>
 #include <vector>
 
@@ -45,20 +45,6 @@ std::vector<T> linspaceOutsideRange(T leftMin, T leftMax, T rightMin, T rightMax
     return output;
 }
 
-template <typename T>
-static Pothos::BufferChunk stdVectorToBufferChunk(const std::vector<T>& stdVector)
-{
-    static const Pothos::DType dtype(typeid(T));
-
-    Pothos::BufferChunk bufferChunk(dtype, stdVector.size());
-    std::memcpy(
-        reinterpret_cast<void*>(bufferChunk.address),
-        stdVector.data(),
-        stdVector.size() * sizeof(T));
-
-    return bufferChunk;
-}
-
 //
 // Test implementation
 //
@@ -73,7 +59,7 @@ struct TestParams
     {
         static const Pothos::DType dtype(typeid(T));
 
-        inputs = stdVectorToBufferChunk(inputVec);
+        inputs = CommsTests::stdVectorToBufferChunk(inputVec);
         expectedOutputs = Pothos::BufferChunk(dtype, inputVec.size());
     }
 };
@@ -104,15 +90,10 @@ static void testTrigonometricOperation(
     }
 
     static constexpr T epsilon = T(1e-6);
-
-    auto outputs = sink.call<Pothos::BufferChunk>("getBuffer");
-    POTHOS_TEST_EQUAL(testParams.expectedOutputs.dtype, outputs.dtype);
-    POTHOS_TEST_EQUAL(testParams.expectedOutputs.elements(), outputs.elements());
-    POTHOS_TEST_CLOSEA(
-        testParams.expectedOutputs.template as<const T*>(),
-        outputs.template as<const T*>(),
-        epsilon,
-        outputs.elements());
+    CommsTests::testBufferChunksClose<T>(
+        testParams.expectedOutputs,
+        sink.call<Pothos::BufferChunk>("getBuffer"),
+        epsilon);
 }
 
 template <typename T>

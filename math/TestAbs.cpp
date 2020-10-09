@@ -1,6 +1,7 @@
 // Copyright (c) 2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
+#include "common/Testing.hpp"
 #include "FxptHelpers.hpp"
 
 #include <Pothos/Framework.hpp>
@@ -19,13 +20,7 @@
 constexpr size_t bufferLen = 100; // Long enough for any SIMD frame, plus manually adding entries
 
 template <typename T>
-struct IsComplex : std::false_type {};
-
-template <typename T>
-struct IsComplex<std::complex<T>> : std::true_type {};
-
-template <typename T>
-static typename std::enable_if<!IsComplex<T>::value, Pothos::BufferChunk>::type getTestInputs()
+static CommsTests::DisableIfComplex<T, Pothos::BufferChunk> getTestInputs()
 {
     static const Pothos::DType dtype(typeid(T));
 
@@ -39,7 +34,7 @@ static typename std::enable_if<!IsComplex<T>::value, Pothos::BufferChunk>::type 
 }
 
 template <typename T>
-static typename std::enable_if<IsComplex<T>::value, Pothos::BufferChunk>::type getTestInputs()
+static CommsTests::EnableIfComplex<T, Pothos::BufferChunk> getTestInputs()
 {
     using ScalarType = typename T::value_type;
 
@@ -98,13 +93,9 @@ static void testAbs()
         POTHOS_TEST_TRUE(topology.waitInactive(0.01));
     }
 
-    auto output = sink.call<Pothos::BufferChunk>("getBuffer");
-    POTHOS_TEST_EQUAL(testValues.expectedOutput.dtype, output.dtype);
-    POTHOS_TEST_EQUAL(testValues.expectedOutput.elements(), output.elements());
-    POTHOS_TEST_EQUALA(
-        testValues.expectedOutput.template as<const OutType*>(),
-        output.template as<const OutType*>(),
-        testValues.expectedOutput.elements());
+    CommsTests::testBufferChunksEqual<OutType>(
+        testValues.expectedOutput,
+        sink.call<Pothos::BufferChunk>("getBuffer"));
 }
 
 POTHOS_TEST_BLOCK("/comms/tests", test_abs)

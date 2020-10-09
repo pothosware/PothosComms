@@ -2,6 +2,8 @@
 //                    2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
+#include "common/Testing.hpp"
+
 #include <Pothos/Testing.hpp>
 #include <Pothos/Framework.hpp>
 #include <Pothos/Proxy.hpp>
@@ -18,12 +20,6 @@
 //
 
 constexpr size_t bufferLen = 64; // Long enough for any SIMD frame
-
-template <typename T>
-struct IsComplex : std::false_type {};
-
-template <typename T>
-struct IsComplex<std::complex<T>> : std::true_type {};
 
 //
 // /comms/arithmetic
@@ -49,7 +45,7 @@ struct ArithmeticTestValues
 };
 
 template <typename T>
-static typename std::enable_if<!IsComplex<T>::value, ArithmeticTestValues>::type getAddTestValues()
+static CommsTests::DisableIfComplex<T, ArithmeticTestValues> getAddTestValues()
 {
     constexpr auto numInputs = 3;
 
@@ -82,7 +78,7 @@ static typename std::enable_if<!IsComplex<T>::value, ArithmeticTestValues>::type
 
 // Fully co-opt the scalar implementation since complex addition is just (real+real, imag+imag)
 template <typename T>
-static typename std::enable_if<IsComplex<T>::value, ArithmeticTestValues>::type getAddTestValues()
+static CommsTests::EnableIfComplex<T, ArithmeticTestValues> getAddTestValues()
 {
     using ScalarType = typename T::value_type;
     static const Pothos::DType dtype(typeid(T));
@@ -95,7 +91,7 @@ static typename std::enable_if<IsComplex<T>::value, ArithmeticTestValues>::type 
 }
 
 template <typename T>
-static typename std::enable_if<!IsComplex<T>::value, ArithmeticTestValues>::type getSubTestValues()
+static CommsTests::DisableIfComplex<T, ArithmeticTestValues> getSubTestValues()
 {
     constexpr auto numInputs = 2;
 
@@ -119,7 +115,7 @@ static typename std::enable_if<!IsComplex<T>::value, ArithmeticTestValues>::type
 
 // Fully co-opt the scalar implementation since complex subtraction is just (real-real, imag-imag)
 template <typename T>
-static typename std::enable_if<IsComplex<T>::value, ArithmeticTestValues>::type getSubTestValues()
+static CommsTests::EnableIfComplex<T, ArithmeticTestValues> getSubTestValues()
 {
     using ScalarType = typename T::value_type;
     static const Pothos::DType dtype(typeid(T));
@@ -132,7 +128,7 @@ static typename std::enable_if<IsComplex<T>::value, ArithmeticTestValues>::type 
 }
 
 template <typename T>
-static typename std::enable_if<!IsComplex<T>::value, ArithmeticTestValues>::type getMulTestValues()
+static CommsTests::DisableIfComplex<T, ArithmeticTestValues> getMulTestValues()
 {
     constexpr auto numInputs = 2;
 
@@ -157,7 +153,7 @@ static typename std::enable_if<!IsComplex<T>::value, ArithmeticTestValues>::type
 
 // Out of laziness, get the scalar version's values and recalculate the outputs.
 template <typename T>
-static typename std::enable_if<IsComplex<T>::value, ArithmeticTestValues>::type getMulTestValues()
+static CommsTests::EnableIfComplex<T, ArithmeticTestValues> getMulTestValues()
 {
     using ScalarType = typename T::value_type;
     static const Pothos::DType dtype(typeid(T));
@@ -179,7 +175,7 @@ static typename std::enable_if<IsComplex<T>::value, ArithmeticTestValues>::type 
 }
 
 template <typename T>
-static typename std::enable_if<!IsComplex<T>::value, ArithmeticTestValues>::type getDivTestValues()
+static CommsTests::DisableIfComplex<T, ArithmeticTestValues> getDivTestValues()
 {
     constexpr auto numInputs = 2;
 
@@ -204,7 +200,7 @@ static typename std::enable_if<!IsComplex<T>::value, ArithmeticTestValues>::type
 
 // Out of laziness, get the scalar version's values and recalculate the outputs.
 template <typename T>
-static typename std::enable_if<IsComplex<T>::value, ArithmeticTestValues>::type getDivTestValues()
+static CommsTests::EnableIfComplex<T, ArithmeticTestValues> getDivTestValues()
 {
     using ScalarType = typename T::value_type;
     static const Pothos::DType dtype(typeid(T));
@@ -261,13 +257,9 @@ static void testArithmeticOp(
         POTHOS_TEST_TRUE(topology.waitInactive(0.01));
     }
 
-    auto output = sink.call<Pothos::BufferChunk>("getBuffer");
-    POTHOS_TEST_EQUAL(output.dtype, testValues.expectedOutputs.dtype);
-    POTHOS_TEST_EQUAL(output.elements(), testValues.expectedOutputs.elements());
-    POTHOS_TEST_EQUALA(
-        output.as<const T*>(),
-        testValues.expectedOutputs.as<const T*>(),
-        output.elements());
+    CommsTests::testBufferChunksEqual<T>(
+        testValues.expectedOutputs,
+        sink.call<Pothos::BufferChunk>("getBuffer"));
 }
 
 template <typename T>
@@ -413,13 +405,13 @@ struct ConstArithmeticTestValues
 };
 
 template <typename T>
-static inline typename std::enable_if<!IsComplex<T>::value, T>::type avoidZero(const T& value)
+static inline CommsTests::DisableIfComplex<T, T> avoidZero(const T& value)
 {
     return (T(0) == value) ? (value+1) : value;
 }
 
 template <typename T>
-static inline typename std::enable_if<IsComplex<T>::value, T>::type avoidZero(const T& value)
+static inline CommsTests::EnableIfComplex<T, T> avoidZero(const T& value)
 {
     T ret(value);
 
@@ -430,13 +422,13 @@ static inline typename std::enable_if<IsComplex<T>::value, T>::type avoidZero(co
 }
 
 template <typename T>
-static inline typename std::enable_if<!IsComplex<T>::value, T>::type getXByKTestConstant()
+static inline CommsTests::DisableIfComplex<T, T> getXByKTestConstant()
 {
     return T(2);
 }
 
 template <typename T>
-static inline typename std::enable_if<IsComplex<T>::value, T>::type getXByKTestConstant()
+static inline CommsTests::EnableIfComplex<T, T> getXByKTestConstant()
 {
     return T(3, 2);
 }
@@ -475,13 +467,13 @@ static void getXByKTestValues(
 }
 
 template <typename T>
-static inline typename std::enable_if<!IsComplex<T>::value, T>::type getKByXTestConstant(size_t bufferLength)
+static inline CommsTests::DisableIfComplex<T, T> getKByXTestConstant(size_t bufferLength)
 {
     return T(bufferLength + 2);
 }
 
 template <typename T>
-static inline typename std::enable_if<IsComplex<T>::value, T>::type getKByXTestConstant(size_t bufferLength)
+static inline CommsTests::EnableIfComplex<T, T> getKByXTestConstant(size_t bufferLength)
 {
     using ScalarType = typename T::value_type;
 
@@ -546,13 +538,9 @@ static void testConstArithmeticOp(
         POTHOS_TEST_TRUE(topology.waitInactive(0.01));
     }
 
-    auto output = sink.call<Pothos::BufferChunk>("getBuffer");
-    POTHOS_TEST_EQUAL(output.dtype, testValues.expectedOutputs.dtype);
-    POTHOS_TEST_EQUAL(output.elements(), testValues.expectedOutputs.elements());
-    POTHOS_TEST_EQUALA(
-        output.as<const T*>(),
-        testValues.expectedOutputs.as<const T*>(),
-        output.elements());
+    CommsTests::testBufferChunksEqual<T>(
+        testValues.expectedOutputs,
+        sink.call<Pothos::BufferChunk>("getBuffer"));
 }
 
 template <typename T>

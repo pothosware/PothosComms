@@ -1,6 +1,8 @@
 // Copyright (c) 2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
+#include "common/Testing.hpp"
+
 #include <Pothos/Framework.hpp>
 #include <Pothos/Testing.hpp>
 
@@ -207,19 +209,16 @@ static void blockTest(
     const Pothos::BufferChunk& expectedBufferOutput = expectSwap ? swapped : inputs;
     const Pothos::BufferChunk& expectedPacketOutput = expectSwap ? inputs : swapped;
 
-    POTHOS_TEST_EQUAL(outputBuffer.elements(), expectedBufferOutput.elements());
-    POTHOS_TEST_EQUALA(
-        expectedBufferOutput.as<const T*>(),
-        outputBuffer.as<const T*>(),
-        outputBuffer.elements());
+    CommsTests::testBufferChunksEqual<T>(
+        expectedBufferOutput,
+        outputBuffer);
 
     const auto outputMessages = collectorSink.call<std::vector<Pothos::Packet>>("getPackets");
     POTHOS_TEST_EQUAL(1, outputMessages.size());
-    POTHOS_TEST_EQUAL(outputMessages[0].payload.elements(), expectedPacketOutput.elements());
-    POTHOS_TEST_EQUALA(
-        expectedPacketOutput.as<const T*>(),
-        outputMessages[0].payload.as<const T*>(),
-        outputMessages[0].payload.elements());
+
+    CommsTests::testBufferChunksEqual<T>(
+        expectedPacketOutput,
+        outputMessages[0].payload);
 }
 
 //

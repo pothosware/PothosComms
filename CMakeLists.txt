@@ -46,6 +46,8 @@ endif (Spuce_FOUND)
 # Build subdirectories
 ########################################################################
 include_directories(functions)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
 add_subdirectory(functions)
 add_subdirectory(demod)
 add_subdirectory(digital)
