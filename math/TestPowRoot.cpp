@@ -1,6 +1,8 @@
 // Copyright (c) 2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
+#include "common/Testing.hpp"
+
 #include <Pothos/Framework.hpp>
 #include <Pothos/Proxy.hpp>
 #include <Pothos/Testing.hpp>
@@ -48,13 +50,7 @@ static Pothos::BufferChunk processInputsForTest(
         outputVec.insert(outputVec.end(), input.begin(), input.end());
     }
 
-    Pothos::BufferChunk output(typeid(Type), outputVec.size());
-    std::memcpy(
-        reinterpret_cast<void*>(output.address),
-        outputVec.data(),
-        output.length);
-
-    return output;
+    return CommsTests::stdVectorToBufferChunk(outputVec);
 }
 
 //
@@ -186,34 +182,21 @@ static typename std::enable_if<std::is_floating_point<Type>::value, std::vector<
 }
 
 template <typename Type>
-static typename std::enable_if<!std::is_floating_point<Type>::value, void>::type compareBufferChunks(
+static inline typename std::enable_if<!std::is_floating_point<Type>::value, void>::type compareBufferChunks(
     const Pothos::BufferChunk& expected,
     const Pothos::BufferChunk& output)
 {
-    POTHOS_TEST_EQUAL(expected.dtype, output.dtype);
-    POTHOS_TEST_EQUAL(expected.elements(), output.elements());
-
-    POTHOS_TEST_EQUALA(
-        expected.as<const Type*>(),
-        output.as<const Type*>(),
-        expected.elements());
+    CommsTests::testBufferChunksEqual<Type>(expected, output);
 }
 
 template <typename Type>
-static typename std::enable_if<std::is_floating_point<Type>::value, void>::type compareBufferChunks(
+static inline typename std::enable_if<std::is_floating_point<Type>::value, void>::type compareBufferChunks(
     const Pothos::BufferChunk& expected,
     const Pothos::BufferChunk& output)
 {
     static constexpr Type epsilon = Type(1e-6);
 
-    POTHOS_TEST_EQUAL(expected.dtype, output.dtype);
-    POTHOS_TEST_EQUAL(expected.elements(), output.elements());
-
-    POTHOS_TEST_CLOSEA(
-        expected.as<const Type*>(),
-        output.as<const Type*>(),
-        epsilon,
-        expected.elements());
+    CommsTests::testBufferChunksClose<Type>(expected, output, epsilon);
 }
 
 //
