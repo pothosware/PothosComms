@@ -42,6 +42,10 @@ POTHOS_MODULE_UTIL(
         Pow.cpp
         Root.cpp
         TestPowRoot.cpp
+        Beta.cpp
+        Gamma.cpp
+        TestBeta.cpp
+        TestGamma.cpp
     LIBRARIES CommsFunctions
     DESTINATION comms
     ENABLE_DOCS
