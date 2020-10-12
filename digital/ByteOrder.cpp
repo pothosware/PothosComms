@@ -1,174 +1,72 @@
 // Copyright (c) 2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
+#include "ByteOrder.hpp"
+
 #include <Pothos/Exception.hpp>
 #include <Pothos/Framework.hpp>
 
-#include <Poco/ByteOrder.h>
+#include <Poco/Platform.h>
 
 #include <algorithm>
 #include <complex>
-#include <type_traits>
+#include <cstring>
 #include <unordered_map>
 
-#if POCO_OS == POCO_OS_MAC_OS_X
-#include <libkern/OSByteOrder.h>
-#endif
-
 //
-// This type_traits SFINAE magic results in the correct functions being
-// called for a given type.
+// Templated implementation getters, to be called on class construction
 //
 
 template <typename T>
-struct IsComplex : std::false_type {};
+using ByteOrderFcn = void(*)(const T*, T*, size_t);
 
 template <typename T>
-struct IsComplex<std::complex<T>> : std::true_type {};
+static inline ByteOrderFcn<T> getFlipBytesFcn()
+{
+    return byteswapBuffer<T>;
+}
 
 template <typename T>
-struct BufferType
+static inline ByteOrderFcn<T> getBigEndianFcn()
 {
-    using Type = T;
-};
+#if defined(POCO_ARCH_BIGENDIAN)
+    return [](const T* in, T* out, size_t numElements)
+    {
+        std::memcpy(out, in, (numElements * sizeof(T)));
+    };
+#else
+    return getFlipBytesFcn<T>();
+#endif
+}
 
-template <>
-struct BufferType<float>
+template <typename T>
+static inline ByteOrderFcn<T> getLittleEndianFcn()
 {
-    using Type = Poco::UInt32;
-};
+#if defined(POCO_ARCH_BIGENDIAN)
+    return getFlipBytesFcn<T>();
+#else
+    return [](const T* in, T* out, size_t numElements)
+    {
+        std::memcpy(out, in, (numElements * sizeof(T)));
+    };
+#endif
+}
 
-template <>
-struct BufferType<double>
+template <typename T>
+static inline ByteOrderFcn<T> getToNetworkFcn()
 {
-    using Type = Poco::UInt64;
-};
+    return getBigEndianFcn<T>();
+}
 
-#if POCO_OS == POCO_OS_MAC_OS_X
+template <typename T>
+static inline ByteOrderFcn<T> getFromNetworkFcn()
+{
+    return getBigEndianFcn<T>();
+}
 
-// For some reason, despite specifically supporting OS X, Poco uses manual
-// bit-shifting instead of OS X's optimized byteswap functions. Unfortunately,
-// that means we have to implement enough that GENERATE_FUNCS() uses these
-// functions for OS X.
-#define GENERATE_BASE_FUNC(func)
-
-    static inline Poco::UInt16 byteswap(Poco::UInt16 val)
-    {
-        return OSSwapInt16(val);
-    }
-
-    static inline Poco::UInt32 byteswap(Poco::UInt32 val)
-    {
-        return OSSwapInt32(val);
-    }
-
-    static inline Poco::UInt64 byteswap(Poco::UInt64 val)
-    {
-        return OSSwapInt64(val);
-    }
-
-    template <typename T>
-    static inline typename std::enable_if<!IsComplex<T>::value && std::is_floating_point<T>::value, T>::type byteswap(T val)
-    {
-        const auto* pCastedVal = reinterpret_cast<const typename BufferType<double>::Type*>(&val);
-        const auto ret = byteswap(*pCastedVal);
-        const auto* pCastedRet = reinterpret_cast<const T*>(&ret);
-
-        return *pCastedRet;
-    }
-
-    template <typename T>
-    static inline T flipBytesBase(T val)
-    {
-        return byteswap(val);
-    }
-
-    template <typename T>
-    static inline T toBigEndianBase(T val)
-    {
-#if defined(POCO_ARCH_BIGENDIAN)
-        return val;
-#else
-        return byteswap(val);
-#endif
-    }
-
-    template <typename T>
-    static inline T toLittleEndianBase(T val)
-    {
-#if defined(POCO_ARCH_BIGENDIAN)
-        return byteswap(val);
-#else
-        return val;
-#endif
-    }
-
-    template <typename T>
-    static inline T toNetworkBase(T val)
-    {
-#if defined(POCO_ARCH_BIGENDIAN)
-        return val;
-#else
-        return byteswap(val);
-#endif
-    }
-
-    template <typename T>
-    static inline T fromNetworkBase(T val)
-    {
-#if defined(POCO_ARCH_BIGENDIAN)
-        return val;
-#else
-        return byteswap(val);
-#endif
-    }
-
-#else
-
-#define GENERATE_BASE_FUNC(func) \
-    template <typename T> \
-    static inline T func ## Base(T val) \
-    { \
-        return Poco::ByteOrder::func(val); \
-    }
-#endif
-
-#define GENERATE_FUNCS(func) \
-    GENERATE_BASE_FUNC(func) \
- \
-    template <typename T> \
-    static inline typename std::enable_if<!IsComplex<T>::value && !std::is_floating_point<T>::value, T>::type func(T val) \
-    { \
-        return func ## Base(val); \
-    } \
- \
-    template <typename T> \
-    static inline typename std::enable_if<!IsComplex<T>::value && std::is_floating_point<T>::value, T>::type func(T val) \
-    { \
-        static_assert(sizeof(T) == sizeof(typename BufferType<T>::Type), "type size mismatch"); \
-        const auto* pCastedVal = reinterpret_cast<const typename BufferType<T>::Type*>(&val); \
-        const auto ret = func ## Base(*pCastedVal); \
-        const auto* pCastedRet = reinterpret_cast<const T*>(&ret); \
-        return *pCastedRet; \
-    } \
- \
-    template <typename T> \
-    static inline typename std::enable_if<IsComplex<T>::value, T>::type func(T val) \
-    { \
-        return T{func(val.real()), func(val.imag())}; \
-    } \
- \
-    template <typename T> \
-    static inline void func ## Buffer(T* out, const T* in, size_t numElements) \
-    { \
-        for(size_t i = 0; i < numElements; ++i) out[i] = func(in[i]); \
-    }
-
-GENERATE_FUNCS(flipBytes)
-GENERATE_FUNCS(toBigEndian)
-GENERATE_FUNCS(toLittleEndian)
-GENERATE_FUNCS(toNetwork)
-GENERATE_FUNCS(fromNetwork)
+//
+// Class implementation
+//
 
 enum class ByteOrderType
 {
@@ -189,6 +87,29 @@ static const ByteOrderTypeMap TypeMap =
     {"Host to Network", ByteOrderType::Network}
 };
 
+template <typename T>
+static ByteOrderFcn<T> getByteOrderFcn(const std::string& byteOrder)
+{
+    using ByteOrderFcnMap = std::unordered_map<std::string, ByteOrderFcn<T>>;
+    static const ByteOrderFcnMap FcnMap =
+    {
+        {"Swap Order",      getFlipBytesFcn<T>()},
+        {"Big Endian",      getBigEndianFcn<T>()},
+        {"Little Endian",   getLittleEndianFcn<T>()},
+        {"Network to Host", getFromNetworkFcn<T>()},
+        {"Host to Network", getToNetworkFcn<T>()}
+    };
+
+    auto iter = FcnMap.find(byteOrder);
+    if (iter != FcnMap.end()) return iter->second;
+    else
+    {
+        throw Pothos::InvalidArgumentException(
+            "Invalid byte order",
+            byteOrder);
+    }
+}
+
 /***********************************************************************
  * |PothosDoc Byte Order
  *
@@ -198,7 +119,7 @@ static const ByteOrderTypeMap TypeMap =
  * |keywords bytes big little host network endian
  *
  * |param dtype[Data Type] The output data type produced by the mapper.
- * |widget DTypeChooser(uint=1,cuint=1,dim=1)
+ * |widget DTypeChooser(int=1,uint=1,float=1,cint=1,cuint=1,cfloat=1,dim=1)
  * |default "uint64"
  * |preview disable
  *
@@ -228,7 +149,8 @@ class ByteOrder : public Pothos::Block
 {
 public:
     ByteOrder(size_t dimension):
-        _order(ByteOrderType::Swap)
+        _order(ByteOrderType::Swap),
+        _fcn(getByteOrderFcn<T>("Swap Order"))
     {
         const Pothos::DType dtype(typeid(T), dimension);
         
@@ -266,37 +188,7 @@ public:
         }
 
         _order = mapIter->second;
-    }
-
-    void bufferWork(T* out, const T* in, size_t numElements)
-    {
-        switch(_order)
-        {
-            case ByteOrderType::Swap:
-                flipBytesBuffer(out, in, numElements);
-                break;
-
-            case ByteOrderType::Big:
-                toBigEndianBuffer(out, in, numElements);
-                break;
-
-            case ByteOrderType::Little:
-                toLittleEndianBuffer(out, in, numElements);
-                break;
-
-            case ByteOrderType::Host:
-                fromNetworkBuffer(out, in, numElements);
-                break;
-
-            case ByteOrderType::Network:
-                toNetworkBuffer(out, in, numElements);
-                break;
-
-            default:
-                throw Pothos::AssertionViolationException(
-                          "Private enum field is set to an invalid value",
-                          std::to_string(static_cast<int>(_order)));
-        }
+        _fcn = getByteOrderFcn<T>(order);
     }
 
     void msgWork(const Pothos::Packet &inPkt)
@@ -307,10 +199,7 @@ public:
         auto outPort = this->output(0);
         outPkt.payload = outPort->getBuffer(numElements);
 
-        bufferWork(
-            outPkt.payload.template as<T*>(),
-            inPkt.payload.as<const T*>(),
-            numElements);
+        _fcn(inPkt.payload, outPkt.payload, numElements);
 
         // Copy labels.
         outPkt.labels = inPkt.labels;
@@ -340,10 +229,7 @@ public:
             return;
         }
 
-        bufferWork(
-            outPort->buffer().template as<T*>(),
-            inPort->buffer().template as<const T*>(),
-            numElements*inPort->dtype().dimension());
+        _fcn(inPort->buffer(), outPort->buffer(), numElements*inPort->dtype().dimension());
 
         inPort->consume(numElements);
         outPort->produce(numElements);
@@ -351,6 +237,7 @@ public:
 
 private:
     ByteOrderType _order;
+    ByteOrderFcn<T> _fcn;
 };
 
 static Pothos::Block* makeByteOrder(const Pothos::DType& dtype)
@@ -361,6 +248,9 @@ static Pothos::Block* makeByteOrder(const Pothos::DType& dtype)
         if(Pothos::DType(typeid(std::complex<T>)) == Pothos::DType::fromDType(dtype, 1)) \
             return new ByteOrder<std::complex<T>>(dtype.dimension()); \
 
+    IfTypeDeclareBlock(std::int16_t)
+    IfTypeDeclareBlock(std::int32_t)
+    IfTypeDeclareBlock(std::int64_t)
     IfTypeDeclareBlock(std::uint16_t)
     IfTypeDeclareBlock(std::uint32_t)
     IfTypeDeclareBlock(std::uint64_t)
