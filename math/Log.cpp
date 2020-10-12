@@ -47,6 +47,15 @@ static inline LogFcn<Type> getLog10Fcn()
 }
 
 template <typename Type>
+static inline LogFcn<Type> getLog1PFcn()
+{
+    return [](const Type* in, Type* out, const size_t num)
+    {
+        for (size_t i = 0; i < num; ++i) out[i] = std::log1p(in[i]);
+    };
+}
+
+template <typename Type>
 static inline LogFcn<Type> getLogNFcn(Type base)
 {
     return [base](const Type* in, Type* out, const size_t num)
@@ -167,6 +176,7 @@ class LogN: public Log<Type>
 LOGFACTORY(logFactory,   getLogFcn)
 LOGFACTORY(log2Factory,  getLog2Fcn)
 LOGFACTORY(log10Factory, getLog10Fcn)
+LOGFACTORY(log1pFactory, getLog1PFcn)
 
 static Pothos::Block* logNFactory(
     const Pothos::DType& dtype,
@@ -204,7 +214,7 @@ static Pothos::Block* logNFactory(
  *
  * |factory /comms/log(dtype)
  **********************************************************************/
-static Pothos::BlockRegistry registerlog(
+static Pothos::BlockRegistry registerLog(
     "/comms/log",
     Pothos::Callable(&logFactory));
 
@@ -224,7 +234,7 @@ static Pothos::BlockRegistry registerlog(
  *
  * |factory /comms/log2(dtype)
  **********************************************************************/
-static Pothos::BlockRegistry registerlog2(
+static Pothos::BlockRegistry registerLog2(
     "/comms/log2",
     Pothos::Callable(&log2Factory));
 
@@ -244,9 +254,29 @@ static Pothos::BlockRegistry registerlog2(
  *
  * |factory /comms/log10(dtype)
  **********************************************************************/
-static Pothos::BlockRegistry registerlog10(
+static Pothos::BlockRegistry registerLog10(
     "/comms/log10",
     Pothos::Callable(&log10Factory));
+
+/***********************************************************************
+ * |PothosDoc Log(x+1)
+ *
+ * Perform the log of each element, plus one.
+ *
+ * out[n] = log1p(in[n])
+ *
+ * |category /Math
+ *
+ * |param dtype[Data Type] The data type.
+ * |widget DTypeChooser(float=1,int=1,uint=1,dim=1)
+ * |default "float32"
+ * |preview disable
+ *
+ * |factory /comms/log1p(dtype)
+ **********************************************************************/
+static Pothos::BlockRegistry registerLog1p(
+    "/comms/log1p",
+    Pothos::Callable(&log1pFactory));
 
 /***********************************************************************
  * |PothosDoc Log N

@@ -39,6 +39,13 @@ static double log10Tmpl(Type input)
 
 // Make it easier to templatize
 template <typename Type>
+static double log1pTmpl(Type input)
+{
+    return std::log1p(input);
+}
+
+// Make it easier to templatize
+template <typename Type>
 static double logNTmpl(Type input, Type base)
 {
     return std::log(input) / std::log(base);
@@ -177,6 +184,20 @@ POTHOS_TEST_BLOCK("/comms/tests", test_log10)
     testFixedBaseImpl<uint32_t>("/comms/log10", &log10Tmpl<uint32_t>);
     testFixedBaseImpl<uint16_t>("/comms/log10", &log10Tmpl<uint16_t>);
     testFixedBaseImpl<uint8_t>("/comms/log10", &log10Tmpl<uint8_t>);
+}
+
+POTHOS_TEST_BLOCK("/comms/tests", test_log1p)
+{
+    testFixedBaseImpl<double>("/comms/log1p", &log1pTmpl<double>);
+    testFixedBaseImpl<float>("/comms/log1p", &log1pTmpl<float>);
+    testFixedBaseImpl<int64_t>("/comms/log1p", &log1pTmpl<int64_t>);
+    testFixedBaseImpl<int32_t>("/comms/log1p", &log1pTmpl<int32_t>);
+    testFixedBaseImpl<int16_t>("/comms/log1p", &log1pTmpl<int16_t>);
+    testFixedBaseImpl<int8_t>("/comms/log1p", &log1pTmpl<int8_t>);
+    testFixedBaseImpl<uint64_t>("/comms/log1p", &log1pTmpl<uint64_t>);
+    testFixedBaseImpl<uint32_t>("/comms/log1p", &log1pTmpl<uint32_t>);
+    testFixedBaseImpl<uint16_t>("/comms/log1p", &log1pTmpl<uint16_t>);
+    testFixedBaseImpl<uint8_t>("/comms/log1p", &log1pTmpl<uint8_t>);
 }
 
 POTHOS_TEST_BLOCK("/comms/tests", test_logN)
