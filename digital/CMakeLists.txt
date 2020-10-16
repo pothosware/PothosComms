@@ -42,6 +42,8 @@ POTHOS_MODULE_UTIL(
         FrameSync.cpp
         ByteOrder.cpp
         TestByteOrder.cpp
+        Bitwise.cpp
+        TestBitwise.cpp
     DESTINATION comms
     ENABLE_DOCS
 )
