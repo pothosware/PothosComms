@@ -60,6 +60,45 @@ void _getTestParameters(
 
 template <>
 void _getTestParameters(
+    std::vector<std::int16_t>* pInputs,
+    std::vector<std::int16_t>* pSwapped)
+{
+    std::vector<std::uint16_t> uintInputs;
+    std::vector<std::uint16_t> uintSwapped;
+    _getTestParameters(&uintInputs, &uintSwapped);
+
+    (*pInputs) = reinterpretCastVector<std::uint16_t, std::int16_t>(uintInputs);
+    (*pSwapped) = reinterpretCastVector<std::uint16_t, std::int16_t>(uintSwapped);
+}
+
+template <>
+void _getTestParameters(
+    std::vector<std::int32_t>* pInputs,
+    std::vector<std::int32_t>* pSwapped)
+{
+    std::vector<std::uint32_t> uintInputs;
+    std::vector<std::uint32_t> uintSwapped;
+    _getTestParameters(&uintInputs, &uintSwapped);
+
+    (*pInputs) = reinterpretCastVector<std::uint32_t, std::int32_t>(uintInputs);
+    (*pSwapped) = reinterpretCastVector<std::uint32_t, std::int32_t>(uintSwapped);
+}
+
+template <>
+void _getTestParameters(
+    std::vector<std::int64_t>* pInputs,
+    std::vector<std::int64_t>* pSwapped)
+{
+    std::vector<std::uint64_t> uintInputs;
+    std::vector<std::uint64_t> uintSwapped;
+    _getTestParameters(&uintInputs, &uintSwapped);
+
+    (*pInputs) = reinterpretCastVector<std::uint64_t, std::int64_t>(uintInputs);
+    (*pSwapped) = reinterpretCastVector<std::uint64_t, std::int64_t>(uintSwapped);
+}
+
+template <>
+void _getTestParameters(
     std::vector<float>* pInputs,
     std::vector<float>* pSwapped)
 {
@@ -333,11 +372,17 @@ static void testByteOrder()
 
 POTHOS_TEST_BLOCK("/comms/tests", test_byte_order)
 {
+    testByteOrder<std::int16_t>();
+    testByteOrder<std::int32_t>();
+    testByteOrder<std::int64_t>();
     testByteOrder<std::uint16_t>();
     testByteOrder<std::uint32_t>();
     testByteOrder<std::uint64_t>();
     testByteOrder<float>();
     testByteOrder<double>();
+    testByteOrder<std::complex<std::int16_t>>();
+    testByteOrder<std::complex<std::int32_t>>();
+    testByteOrder<std::complex<std::int64_t>>();
     testByteOrder<std::complex<std::uint16_t>>();
     testByteOrder<std::complex<std::uint32_t>>();
     testByteOrder<std::complex<std::uint64_t>>();
