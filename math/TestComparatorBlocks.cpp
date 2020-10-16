@@ -1,6 +1,9 @@
 // Copyright (c) 2015-2015 Tony Kirke
 // Copyright (c) 2016-2016 Josh Blum
+// Copyright (c) 2020-2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
+
+#include "common/Testing.hpp"
 
 #include <Pothos/Testing.hpp>
 #include <Pothos/Framework.hpp>
@@ -8,6 +11,10 @@
 #include <cstdint>
 #include <cmath>
 #include <iostream>
+
+//
+// /comms/comparator
+//
 
 static const size_t NUM_POINTS = 13;
 
@@ -91,4 +98,88 @@ POTHOS_TEST_BLOCK("/comms/tests", test_comparator)
   test_comp("<=");
   test_comp("==");
   test_comp("!=");
+}
+
+//
+// /comms/const_comparator
+//
+
+template <typename T>
+static void testConstComparator(T constant, const std::string& op)
+{
+    constexpr size_t numPoints = 25;
+
+    static const Pothos::DType dtype(typeid(T));
+
+    std::cout << "Type: " << dtype.name()
+              << ", operator: " << op
+              << ", constant: " << std::to_string(constant) // So chars look nice
+              << std::endl;
+
+    auto block = Pothos::BlockRegistry::make("/comms/const_comparator", dtype, op);
+    block.call("setConstant", constant);
+    POTHOS_TEST_EQUAL(constant, block.call<T>("constant"));
+
+    Pothos::BufferChunk input(dtype, numPoints);
+    Pothos::BufferChunk expectedOutput(typeid(char), numPoints);
+
+    T* inputBuf = input.as<T*>();
+    char* expectedOutputBuf = expectedOutput.as<char*>();
+
+    const T firstTestNum = constant - (numPoints / 2);
+    for(size_t i = 0; i < numPoints; ++i)
+    {
+        inputBuf[i] = firstTestNum + static_cast<T>(i);
+
+        if(op == ">") expectedOutputBuf[i]  = (inputBuf[i] > constant) ? 1 : 0;
+        if(op == "<") expectedOutputBuf[i]  = (inputBuf[i] < constant) ? 1 : 0;
+        if(op == ">=") expectedOutputBuf[i] = (inputBuf[i] >= constant) ? 1 : 0;
+        if(op == "<=") expectedOutputBuf[i] = (inputBuf[i] <= constant) ? 1 : 0;
+        if(op == "==") expectedOutputBuf[i] = (inputBuf[i] == constant) ? 1 : 0;
+        if(op == "!=") expectedOutputBuf[i] = (inputBuf[i] != constant) ? 1 : 0;
+    }
+
+    auto feederSource = Pothos::BlockRegistry::make("/blocks/feeder_source", dtype);
+    feederSource.call("feedBuffer", input);
+
+    auto collectorSink = Pothos::BlockRegistry::make("/blocks/collector_sink", "char");
+
+    {
+        Pothos::Topology topology;
+
+        topology.connect(feederSource, 0, block, 0);
+        topology.connect(block, 0, collectorSink, 0);
+
+        topology.commit();
+        POTHOS_TEST_TRUE(topology.waitInactive(0.01));
+    }
+
+    CommsTests::testBufferChunksEqual<char>(
+        expectedOutput,
+        collectorSink.call<Pothos::BufferChunk>("getBuffer"));
+}
+
+template <typename T>
+static void testConstComparatorForType(T constant)
+{
+    testConstComparator(constant, ">");
+    testConstComparator(constant, ">=");
+    testConstComparator(constant, "<");
+    testConstComparator(constant, "<=");
+    testConstComparator(constant, "==");
+    testConstComparator(constant, "!=");
+}
+
+POTHOS_TEST_BLOCK("/comms/tests", test_const_comparator)
+{
+    testConstComparatorForType<int8_t>(-100);
+    testConstComparatorForType<int16_t>(-1000);
+    testConstComparatorForType<int32_t>(-10000);
+    testConstComparatorForType<int64_t>(-100000);
+    testConstComparatorForType<uint8_t>(100);
+    testConstComparatorForType<uint16_t>(1000);
+    testConstComparatorForType<uint32_t>(10000);
+    testConstComparatorForType<uint64_t>(100000);
+    testConstComparatorForType<float>(1234.5);
+    testConstComparatorForType<double>(6.789);
 }
