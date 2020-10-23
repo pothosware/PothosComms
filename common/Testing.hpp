@@ -37,6 +37,33 @@ namespace CommsTests
         return ret;
     }
 
+    // Copy the input vector some number of times and return a longer vector. This
+    // is used to make sure when SIMD implementations are used, the test data is
+    // long enough that the SIMD codepaths are tested.
+    template <typename T>
+    static std::vector<T> stretchStdVector(
+        const std::vector<T>& inputs,
+        size_t numRepetitions)
+    {
+        std::vector<T> outputs;
+        outputs.reserve(inputs.size() * numRepetitions);
+
+        for(size_t i = 0; i < numRepetitions; ++i)
+        {
+            outputs.insert(outputs.end(), inputs.begin(), inputs.end());
+        }
+
+        return outputs;
+    }
+
+    template <typename T>
+    static inline Pothos::BufferChunk stdVectorToStretchedBufferChunk(
+        const std::vector<T>& inputs,
+        size_t numRepetitions)
+    {
+        return stdVectorToBufferChunk<T>(stretchStdVector<T>(inputs, numRepetitions));
+    }
+
     template <typename T>
     static void testBufferChunksEqual(
         const Pothos::BufferChunk& expected,

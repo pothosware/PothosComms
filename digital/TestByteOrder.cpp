@@ -178,23 +178,17 @@ static void getTestParameters(
     Pothos::BufferChunk* pInputs,
     Pothos::BufferChunk* pSwapped)
 {
-    static const Pothos::DType dtype(typeid(T));
+    static constexpr size_t numRepetitions = 100;
 
     std::vector<T> inputsVec;
     std::vector<T> swappedVec;
     _getTestParameters(&inputsVec, &swappedVec);
 
-    (*pInputs) = Pothos::BufferChunk(dtype, inputsVec.size());
-    std::memcpy(
-        reinterpret_cast<void*>(pInputs->address),
-        (const void*)inputsVec.data(),
-        pInputs->length);
+    inputsVec = CommsTests::stretchStdVector<T>(inputsVec, numRepetitions);
+    swappedVec = CommsTests::stretchStdVector<T>(swappedVec, numRepetitions);
 
-    (*pSwapped) = Pothos::BufferChunk(dtype, swappedVec.size());
-    std::memcpy(
-        reinterpret_cast<void*>(pSwapped->address),
-        (const void*)swappedVec.data(),
-        pSwapped->length);
+    *pInputs = CommsTests::stdVectorToBufferChunk<T>(inputsVec);
+    *pSwapped = CommsTests::stdVectorToBufferChunk<T>(swappedVec);
 }
 
 static void setAndCheckByteOrder(

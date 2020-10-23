@@ -39,20 +39,6 @@ static std::vector<Type> linspace(Type begin, Type end, Type step)
     return output;
 }
 
-template <typename Type>
-static Pothos::BufferChunk processInputsForTest(
-    const std::vector<Type>& input,
-    size_t numRepeats = DefaultNumRepeats)
-{
-    std::vector<Type> outputVec;
-    for (size_t i = 0; i < numRepeats; ++i)
-    {
-        outputVec.insert(outputVec.end(), input.begin(), input.end());
-    }
-
-    return CommsTests::stdVectorToBufferChunk(outputVec);
-}
-
 //
 // Test code
 //
@@ -65,8 +51,8 @@ struct TestValues
     Type exponent;
 
     TestValues(const std::vector<Type>& vals, Type exp):
-        inputs(processInputsForTest(vals)),
-        expectedOutputs(processInputsForTest(vals)),
+        inputs(CommsTests::stdVectorToStretchedBufferChunk<Type>(vals, DefaultNumRepeats)),
+        expectedOutputs(CommsTests::stdVectorToStretchedBufferChunk<Type>(vals, DefaultNumRepeats)),
         exponent(exp)
     {
         // When the root can resolve to either a negative or positive

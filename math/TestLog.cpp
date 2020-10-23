@@ -9,6 +9,7 @@
 #include <cmath>
 #include <iostream>
 
+// TODO: refactor to extend buffers with reasonable values to test SIMD code paths
 static constexpr size_t NUM_POINTS = 12;
 
 //

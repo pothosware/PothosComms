@@ -19,7 +19,7 @@
 // Common
 //
 
-constexpr size_t bufferLen = 64; // Long enough for any SIMD frame
+constexpr size_t bufferLen = 100; // Long enough for any SIMD frame, plus manual operations
 
 //
 // /comms/arithmetic

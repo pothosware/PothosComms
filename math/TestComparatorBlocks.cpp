@@ -12,6 +12,8 @@
 #include <cmath>
 #include <iostream>
 
+// TODO: refactor to extend buffers to test SIMD code paths
+
 //
 // /comms/comparator
 //
