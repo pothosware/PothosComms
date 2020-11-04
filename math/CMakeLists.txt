@@ -42,6 +42,8 @@ POTHOS_MODULE_UTIL(
         Pow.cpp
         Root.cpp
         TestPowRoot.cpp
+        RSqrt.cpp
+        TestRSqrt.cpp
         Beta.cpp
         Gamma.cpp
         TestBeta.cpp
