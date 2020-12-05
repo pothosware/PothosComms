@@ -145,6 +145,5 @@ static void testBeta()
 
 POTHOS_TEST_BLOCK("/comms/tests", test_beta)
 {
-    testBeta<float>();
     testBeta<double>();
 }

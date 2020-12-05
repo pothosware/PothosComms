@@ -17,7 +17,9 @@ namespace detail
         {
             float f;
             unsigned long i;
-        } conv = { .f = number };
+        } conv;
+
+        conv.f  = number;
         conv.i = 0x5f3759df - ( conv.i >> 1 );
         conv.f *= ( threehalfs - ( x2 * conv.f * conv.f ) );
 
