@@ -29,15 +29,15 @@ void testSincTmpl()
     const auto inputs = CommsTests::stdVectorToStretchedBufferChunk<Type>(
         std::vector<Type>
         {
-             0.        ,  0.05555556,  0.11111111,  0.16666667,  0.22222222,
-             0.27777778,  0.33333333,  0.38888889,  0.44444444,  0.5
+             0.0f       ,  0.05555556f,  0.11111111f,  0.16666667f,  0.22222222f,
+             0.27777778f,  0.33333333f,  0.38888889f,  0.44444444f,  0.5f,
         },
         numRepetitions);
     const auto expectedOutputs = CommsTests::stdVectorToStretchedBufferChunk<Type>(
         std::vector<Type>
         {
-            1.        ,  0.99948568,  0.99794366,  0.9953768 ,  0.99178985,
-            0.98718944,  0.98158409,  0.97498415,  0.96740182,  0.95885108
+            1.0f       ,  0.99948568f,  0.99794366f,  0.9953768f ,  0.99178985f,
+            0.98718944f,  0.98158409f,  0.97498415f,  0.96740182f,  0.95885108f,
         },
         numRepetitions);
 
