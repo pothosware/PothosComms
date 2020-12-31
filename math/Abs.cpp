@@ -2,6 +2,10 @@
 //                    2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
+#ifdef POTHOS_XSIMD
+#include "SIMD/MathBlocks_SIMD.hpp"
+#endif
+
 #include <Pothos/Framework.hpp>
 #include <cstdint>
 #include <iostream>
@@ -17,8 +21,21 @@
 template <typename InType, typename OutType>
 using AbsFcn = void(*)(const InType*, OutType*, const size_t);
 
+#ifdef POTHOS_XSIMD
+
 template <typename InType, typename OutType>
-static inline AbsFcn<InType, OutType> getAbsFcn()
+static typename std::enable_if<std::is_same<InType, OutType>::value, AbsFcn<InType, OutType>>::type getAbsFcn()
+{
+    return PothosCommsSIMD::absDispatch<InType>();
+}
+
+template <typename InType, typename OutType>
+static typename std::enable_if<!std::is_same<InType, OutType>::value, AbsFcn<InType, OutType>>::type
+#else
+template <typename InType, typename OutType>
+static AbsFcn<InType, OutType>
+#endif
+getAbsFcn()
 {
     return [](const InType* in, OutType* out, const size_t num)
     {
@@ -50,7 +67,7 @@ template <typename InType, typename OutType>
 class Abs : public Pothos::Block
 {
 public:
-    Abs(const size_t dimension): _fcn(getAbsFcn<InType, OutType>())
+    Abs(const size_t dimension)
     {
         this->setupInput(0, Pothos::DType(typeid(InType), dimension));
         this->setupOutput(0, Pothos::DType(typeid(OutType), dimension));
@@ -70,7 +87,7 @@ public:
 
         //perform abs operation
         const size_t N = elems*inPort->dtype().dimension();
-        _fcn(in, out, N);
+        _absFcn(in, out, N);
 
         //produce and consume on 0th ports
         inPort->consume(elems);
@@ -78,8 +95,11 @@ public:
     }
 
 private:
-    AbsFcn<InType, OutType> _fcn;
+    static AbsFcn<InType, OutType> _absFcn;
 };
+
+template <typename InType, typename OutType>
+AbsFcn<InType, OutType> Abs<InType, OutType>::_absFcn = getAbsFcn<InType, OutType>();
 
 /***********************************************************************
  * registration

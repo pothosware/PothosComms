@@ -1,0 +1,12 @@
+{
+    "namespace": "PothosCommsSIMD",
+    "functions":
+    [
+        {
+            "name": "abs",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        }
+    ]
+}
