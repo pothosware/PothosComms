@@ -15,6 +15,12 @@
             "params": ["const T*", "const T*", "T*", "size_t"]
         },
         {
+            "name": "beta",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "const T*", "T*", "size_t"]
+        },
+        {
             "name": "div",
             "returnType": "void",
             "paramTypes": ["T"],

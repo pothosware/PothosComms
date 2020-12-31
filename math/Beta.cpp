@@ -1,6 +1,10 @@
 // Copyright (c) 2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
+#ifdef POTHOS_XSIMD
+#include "SIMD/MathBlocks_SIMD.hpp"
+#endif
+
 #include <Pothos/Framework.hpp>
 
 #include <cmath>
@@ -11,6 +15,16 @@
 
 template <typename Type>
 using BetaFcn = void(*)(const Type*, const Type*, Type*, size_t);
+
+#ifdef POTHOS_XSIMD
+
+template <typename Type>
+static inline BetaFcn<Type> getBetaFcn()
+{
+    return PothosCommsSIMD::betaDispatch<Type>();
+}
+
+#else
 
 template <typename Type>
 static inline BetaFcn<Type> getBetaFcn()
@@ -27,6 +41,8 @@ static inline BetaFcn<Type> getBetaFcn()
         }
     };
 }
+
+#endif
 
 //
 // Block implementation
