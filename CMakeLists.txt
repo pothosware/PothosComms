@@ -28,6 +28,17 @@ if (NOT JSON_HPP_INCLUDE_DIR)
 endif (NOT JSON_HPP_INCLUDE_DIR)
 
 ########################################################################
+# SIMD dynamic dispatch, if supported by this Pothos build
+########################################################################
+include(PothosConfigSIMD OPTIONAL RESULT_VARIABLE SIMD_SUPPORTED)
+if(SIMD_SUPPORTED)
+    find_package(xsimd)
+    if(xsimd_FOUND)
+        add_definitions(-DPOTHOS_XSIMD)
+    endif()
+endif()
+
+########################################################################
 # Spuce library
 ########################################################################
 if(NOT SPUCE_IN_TREE)
