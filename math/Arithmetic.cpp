@@ -2,6 +2,10 @@
 //                    2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
+#ifdef POTHOS_XSIMD
+#include "SIMD/MathBlocks_SIMD.hpp"
+#endif
+
 #include <Pothos/Framework.hpp>
 #include <cstdint>
 #include <iostream>
@@ -9,6 +13,7 @@
 #include <vector>
 #include <cstring> //memset
 #include <algorithm> //min/max
+#include <type_traits>
 
 //
 // Implementation getters to be called on class construction
@@ -17,8 +22,57 @@
 template <typename Type>
 using ArithFcn = void(*)(const Type*, const Type*, Type*, const size_t);
 
+#ifdef POTHOS_XSIMD
+
+//
+// For complex multiplication and addition, always use the default implementations
+// because of differences in SIMD complex layout. This SFINAE stuff below will make
+// the compiler choose the right version.
+//
+
+template <typename Type>
+struct IsComplex : std::false_type {};
+
+template <typename Type>
+struct IsComplex<std::complex<Type>> : std::true_type {};
+
+template <typename Type>
+using EnableForSIMDFcn = typename std::enable_if<!IsComplex<Type>::value, ArithFcn<Type>>::type;
+
+template <typename Type>
+using EnableForDefaultFcn = typename std::enable_if<IsComplex<Type>::value, ArithFcn<Type>>::type;
+
 template <typename Type>
 static inline ArithFcn<Type> getAddFcn()
+{
+    return PothosCommsSIMD::addDispatch<Type>();
+}
+
+template <typename Type>
+static inline ArithFcn<Type> getSubFcn()
+{
+    return PothosCommsSIMD::subDispatch<Type>();
+}
+
+template <typename Type>
+static inline EnableForSIMDFcn<Type> getMulFcn()
+{
+    return PothosCommsSIMD::mulDispatch<Type>();
+}
+
+template <typename Type>
+static inline EnableForSIMDFcn<Type> getDivFcn()
+{
+    return PothosCommsSIMD::divDispatch<Type>();
+}
+
+#else
+
+template <typename Type>
+using EnableForDefaultFcn = ArithFcn<Type>;
+
+template <typename Type>
+static inline EnableForDefaultFcn<Type> getAddFcn()
 {
     return [](const Type* in0, const Type* in1, Type* out, const size_t num)
     {
@@ -27,16 +81,17 @@ static inline ArithFcn<Type> getAddFcn()
 }
 
 template <typename Type>
-static inline ArithFcn<Type> getSubFcn()
+static inline EnableForDefaultFcn<Type> getSubFcn()
 {
     return [](const Type* in0, const Type* in1, Type* out, const size_t num)
     {
         for (size_t i = 0; i < num; ++i) out[i] = in0[i] - in1[i];
     };
 }
+#endif
 
 template <typename Type>
-static inline ArithFcn<Type> getMulFcn()
+static inline EnableForDefaultFcn<Type> getMulFcn()
 {
     return [](const Type* in0, const Type* in1, Type* out, const size_t num)
     {
@@ -45,7 +100,7 @@ static inline ArithFcn<Type> getMulFcn()
 }
 
 template <typename Type>
-static inline ArithFcn<Type> getDivFcn()
+static inline EnableForDefaultFcn<Type> getDivFcn()
 {
     return [](const Type* in0, const Type* in1, Type* out, const size_t num)
     {
@@ -190,38 +245,13 @@ public:
     }
 
 private:
+    ArithFcn<Type> _arithmeticFcn;
+
     size_t _numInlineBuffers;
     std::vector<size_t> _preload;
 
     ArithFcn<Type> _fcn;
 };
-
-/***********************************************************************
- * templated arithmetic vector operators
- **********************************************************************/
-template <typename Type>
-void addArray(const Type *in0, const Type *in1, Type *out, const size_t num)
-{
-    for (size_t i = 0; i < num; i++) out[i] = in0[i] + in1[i];
-}
-
-template <typename Type>
-void subArray(const Type *in0, const Type *in1, Type *out, const size_t num)
-{
-    for (size_t i = 0; i < num; i++) out[i] = in0[i] - in1[i];
-}
-
-template <typename Type>
-void mulArray(const Type *in0, const Type *in1, Type *out, const size_t num)
-{
-    for (size_t i = 0; i < num; i++) out[i] = in0[i] * in1[i];
-}
-
-template <typename Type>
-void divArray(const Type *in0, const Type *in1, Type *out, const size_t num)
-{
-    for (size_t i = 0; i < num; i++) out[i] = in0[i] / in1[i];
-}
 
 /***********************************************************************
  * registration

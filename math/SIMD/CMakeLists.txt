@@ -4,7 +4,8 @@
 ########################################################################
 
 set(SIMDInputs
-    Abs.cpp)
+    Abs.cpp
+    Arithmetic.cpp)
 
 PothosGenerateSIMDSources(
     SIMDSources

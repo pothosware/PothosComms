@@ -7,6 +7,30 @@
             "returnType": "void",
             "paramTypes": ["T"],
             "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "add",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "const T*", "T*", "size_t"]
+        },
+        {
+            "name": "div",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "const T*", "T*", "size_t"]
+        },
+        {
+            "name": "mul",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "const T*", "T*", "size_t"]
+        },
+        {
+            "name": "sub",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "const T*", "T*", "size_t"]
         }
     ]
 }
