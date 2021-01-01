@@ -89,7 +89,7 @@ static void testTrigonometricOperation(
         POTHOS_TEST_TRUE(topology.waitInactive(0.01));
     }
 
-    static constexpr T epsilon = T(1e-6);
+    static constexpr T epsilon = T(1e-3);
     CommsTests::testBufferChunksClose<T>(
         testParams.expectedOutputs,
         sink.call<Pothos::BufferChunk>("getBuffer"),

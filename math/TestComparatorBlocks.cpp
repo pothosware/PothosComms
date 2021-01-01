@@ -12,13 +12,12 @@
 #include <cmath>
 #include <iostream>
 
-// TODO: refactor to extend buffers to test SIMD code paths
-
 //
 // /comms/comparator
 //
 
 static const size_t NUM_POINTS = 13;
+static const size_t NUM_REPETITIONS = 50;
 
 template <typename Type>
 void testComparatorTmpl(const double val, const std::string op_string)
@@ -32,16 +31,19 @@ void testComparatorTmpl(const double val, const std::string op_string)
     auto collector = Pothos::BlockRegistry::make("/blocks/collector_sink", "char");
 
     //load the feeder
-    auto buffIn0 = Pothos::BufferChunk(typeid(Type), NUM_POINTS);
-    auto pIn0 = buffIn0.as<Type *>();
-    auto buffIn1 = Pothos::BufferChunk(typeid(Type), NUM_POINTS);
-    auto pIn1 = buffIn1.as<Type *>();
-
-    for (size_t i = 0; i < buffIn0.elements(); i++)
+    std::vector<Type> vecIn0(NUM_POINTS);
+    std::vector<Type> vecIn1(NUM_POINTS);
+    for (size_t i = 0; i < vecIn0.size(); ++i)
     {
-        pIn0[i] = Type(i);
-        pIn1[i] = Type(val);
+        vecIn0[i] = Type(i);
+        vecIn1[i] = Type(val);
     }
+
+    vecIn0 = CommsTests::stretchStdVector<Type>(vecIn0, NUM_REPETITIONS);
+    vecIn1 = CommsTests::stretchStdVector<Type>(vecIn1, NUM_REPETITIONS);
+
+    auto buffIn0 = CommsTests::stdVectorToBufferChunk<Type>(vecIn0);
+    auto buffIn1 = CommsTests::stdVectorToBufferChunk<Type>(vecIn1);
     
     feeder0.call("feedBuffer", buffIn0);
     feeder1.call("feedBuffer", buffIn1);
@@ -58,23 +60,23 @@ void testComparatorTmpl(const double val, const std::string op_string)
 
     //check the collector
     Pothos::BufferChunk buffOut = collector.call("getBuffer");
-    POTHOS_TEST_EQUAL(buffOut.length, NUM_POINTS*sizeof(char));
+    POTHOS_TEST_EQUAL(buffOut.length, NUM_POINTS*NUM_REPETITIONS*sizeof(char));
     auto pOut = buffOut.as<const char *>();
     for (size_t i = 0; i < NUM_POINTS; i++)
     {
       char expected;
       if (op_string == ">")
-        expected = (pIn0[i] > pIn1[i]);
+        expected = (vecIn0[i] > vecIn1[i]);
       else if (op_string == "<")
-        expected = (pIn0[i] < pIn1[i]);
+        expected = (vecIn0[i] < vecIn1[i]);
       else if (op_string == "<=")
-        expected = (pIn0[i] <= pIn1[i]);
+        expected = (vecIn0[i] <= vecIn1[i]);
       else if (op_string == ">=")
-        expected = (pIn0[i] >= pIn1[i]);
+        expected = (vecIn0[i] >= vecIn1[i]);
       else if (op_string == "==")
-        expected = (pIn0[i] == pIn1[i]);
+        expected = (vecIn0[i] == vecIn1[i]);
       else if (op_string == "!=")
-        expected = (pIn0[i] != pIn1[i]);
+        expected = (vecIn0[i] != vecIn1[i]);
       POTHOS_TEST_EQUAL(pOut[i], expected);
     }
 }

@@ -2,6 +2,8 @@
 //               2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
+#include "common/Testing.hpp"
+
 #include <Pothos/Testing.hpp>
 #include <Pothos/Framework.hpp>
 #include <Pothos/Proxy.hpp>
@@ -9,8 +11,8 @@
 #include <cmath>
 #include <iostream>
 
-// TODO: refactor to extend buffers with reasonable values to test SIMD code paths
 static constexpr size_t NUM_POINTS = 12;
+static constexpr size_t NUM_REPETITIONS = 50;
 
 //
 // Utility code
@@ -74,14 +76,14 @@ static void testLogNImpl(Type base)
     auto log = Pothos::BlockRegistry::make(blockPath, dtype, base);
     POTHOS_TEST_EQUAL(base, log.template call<Type>("base"));
 
-    Pothos::BufferChunk abuffOut = collector.call("getBuffer");
     // Load the feeder
-    auto buffIn = Pothos::BufferChunk(typeid(Type), NUM_POINTS);
-    auto pIn = buffIn.as<Type *>();
-    for (size_t i = 0; i < buffIn.elements(); i++)
+    std::vector<Type> vecIn(NUM_POINTS);
+    for(size_t i = 0; i < vecIn.size(); i++)
     {
-        pIn[i] = Type(10*(i+1));
+        vecIn[i] = Type(10*(i+1));
     }
+    vecIn = CommsTests::stretchStdVector<Type>(vecIn, NUM_REPETITIONS);
+    auto buffIn = CommsTests::stdVectorToBufferChunk<Type>(vecIn);
     feeder.call("feedBuffer", buffIn);
 
     {
@@ -99,7 +101,7 @@ static void testLogNImpl(Type base)
     for (size_t i = 0; i < buffOut.elements(); i++)
     {
         // Allow up to an error of 1 because of fixed point truncation rounding
-        const auto expected = logNTmpl(pIn[i], base);
+        const auto expected = logNTmpl(vecIn[i], base);
         POTHOS_TEST_CLOSE(pOut[i], expected, 1);
     }
 }
@@ -114,14 +116,14 @@ static void testFixedBaseImpl(const std::string& blockPath, LogTmplFcn<Type> log
     auto log = Pothos::BlockRegistry::make(blockPath, dtype);
     auto collector = Pothos::BlockRegistry::make("/blocks/collector_sink", dtype);
 
-    Pothos::BufferChunk abuffOut = collector.call("getBuffer");
     //load the feeder
-    auto buffIn = Pothos::BufferChunk(typeid(Type), NUM_POINTS);
-    auto pIn = buffIn.as<Type *>();
-    for (size_t i = 0; i < buffIn.elements(); i++)
+    std::vector<Type> vecIn(NUM_POINTS);
+    for(size_t i = 0; i < vecIn.size(); i++)
     {
-        pIn[i] = Type(10*(i+1));
+        vecIn[i] = Type(10*(i+1));
     }
+    vecIn = CommsTests::stretchStdVector<Type>(vecIn, NUM_REPETITIONS);
+    auto buffIn = CommsTests::stdVectorToBufferChunk<Type>(vecIn);
     feeder.call("feedBuffer", buffIn);
 
     //run the topology
@@ -139,7 +141,7 @@ static void testFixedBaseImpl(const std::string& blockPath, LogTmplFcn<Type> log
     auto pOut = buffOut.as<const Type *>();
     for (size_t i = 0; i < buffOut.elements(); i++)
     {
-        const auto expected = logFcn(pIn[i]);
+        const auto expected = logFcn(vecIn[i]);
         //allow up to an error of 1 because of fixed point truncation rounding
         POTHOS_TEST_CLOSE(pOut[i], expected, 1);
     }
