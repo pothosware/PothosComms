@@ -159,6 +159,12 @@
             "params": ["const T*", "const T*", "char*", "size_t"]
         },
         {
+            "name": "pow",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "T", "size_t"]
+        },
+        {
             "name": "sub",
             "returnType": "void",
             "paramTypes": ["T"],
