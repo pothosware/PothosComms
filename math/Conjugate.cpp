@@ -2,11 +2,16 @@
 //                    2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
+#ifdef POTHOS_XSIMD
+#include "SIMD/MathBlocks_SIMD.hpp"
+#endif
+
 #include <Pothos/Framework.hpp>
 #include <cstdint>
 #include <iostream>
 #include <complex>
 #include <algorithm> //min/max
+#include <type_traits>
 
 //
 // Implementation getters to be called on class construction
@@ -14,6 +19,16 @@
 
 template <typename Type>
 using ConjFcn = void(*)(const Type*, Type*, const size_t);
+
+#ifdef POTHOS_XSIMD
+
+template <typename Type>
+static inline ConjFcn<Type> getConjFcn()
+{
+    return PothosCommsSIMD::conjDispatch<Type>();
+}
+
+#else
 
 template <typename Type>
 static inline ConjFcn<Type> getConjFcn()
@@ -23,6 +38,8 @@ static inline ConjFcn<Type> getConjFcn()
         for (size_t i = 0; i < num; ++i) out[i] = std::conj(in[i]);
     };
 }
+
+#endif
 
 /***********************************************************************
  * |PothosDoc Conjugate
@@ -45,7 +62,7 @@ template <typename Type>
 class Conjugate : public Pothos::Block
 {
 public:
-    Conjugate(const size_t dimension): _fcn(getConjFcn<Type>())
+    Conjugate(const size_t dimension)
     {
         this->setupInput(0, Pothos::DType(typeid(Type), dimension));
         this->setupOutput(0, Pothos::DType(typeid(Type), dimension));
@@ -73,8 +90,11 @@ public:
     }
 
 private:
-    ConjFcn<Type> _fcn;
+    static ConjFcn<Type> _fcn;
 };
+
+template <typename Type>
+ConjFcn<Type> Conjugate<Type>::_fcn = getConjFcn<Type>();
 
 /***********************************************************************
  * registration
