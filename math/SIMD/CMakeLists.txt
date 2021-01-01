@@ -9,7 +9,8 @@ set(SIMDInputs
     Beta.cpp
     Comparator.cpp
     Conjugate.cpp
-    ConstArithmetic.cpp)
+    ConstArithmetic.cpp
+    ConstComparator.cpp)
 
 PothosGenerateSIMDSources(
     SIMDSources

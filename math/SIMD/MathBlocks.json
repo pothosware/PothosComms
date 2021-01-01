@@ -27,6 +27,42 @@
             "params": ["const T*", "T*", "size_t"]
         },
         {
+            "name": "constEqualTo",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T", "char*", "size_t"]
+        },
+        {
+            "name": "constGreaterThan",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T", "char*", "size_t"]
+        },
+        {
+            "name": "constGreaterThanOrEqual",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T", "char*", "size_t"]
+        },
+        {
+            "name": "constLessThan",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T", "char*", "size_t"]
+        },
+        {
+            "name": "constLessThanOrEqual",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T", "char*", "size_t"]
+        },
+        {
+            "name": "constNotEqualTo",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T", "char*", "size_t"]
+        },
+        {
             "name": "div",
             "returnType": "void",
             "paramTypes": ["T"],
