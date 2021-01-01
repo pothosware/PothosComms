@@ -14,6 +14,7 @@ set(SIMDInputs
     Gamma.cpp
     Log.cpp
     Pow.cpp
+    Root.cpp
     RSqrt.cpp)
 
 PothosGenerateSIMDSources(

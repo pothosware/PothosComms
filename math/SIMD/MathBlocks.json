@@ -21,6 +21,12 @@
             "params": ["const T*", "const T*", "T*", "size_t"]
         },
         {
+            "name": "cbrt",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
             "name": "conj",
             "returnType": "void",
             "paramTypes": ["T"],
@@ -166,6 +172,12 @@
         },
         {
             "name": "rsqrt",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "sqrt",
             "returnType": "void",
             "paramTypes": ["T"],
             "params": ["const T*", "T*", "size_t"]
