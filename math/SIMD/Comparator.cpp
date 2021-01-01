@@ -8,7 +8,7 @@
 #include <complex>
 #include <type_traits>
 
-// Actually enforce IsComparatorSupported
+// Actually enforce EnableForSIMDComparator
 #ifdef _MSC_VER
 #pragma warning(error: 4667) // no function template defined that matches forced instantiation
 #endif
