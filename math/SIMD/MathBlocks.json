@@ -117,6 +117,36 @@
             "params": ["const T*", "T*", "size_t"]
         },
         {
+            "name": "log",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "log2",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "log10",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "log1p",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "logN",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "T", "size_t"]
+        },
+        {
             "name": "mul",
             "returnType": "void",
             "paramTypes": ["T"],

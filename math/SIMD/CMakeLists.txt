@@ -11,7 +11,8 @@ set(SIMDInputs
     Conjugate.cpp
     ConstArithmetic.cpp
     ConstComparator.cpp
-    Gamma.cpp)
+    Gamma.cpp
+    Log.cpp)
 
 PothosGenerateSIMDSources(
     SIMDSources

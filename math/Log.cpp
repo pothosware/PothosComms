@@ -2,6 +2,10 @@
 //               2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
+#ifdef POTHOS_XSIMD
+#include "SIMD/MathBlocks_SIMD.hpp"
+#endif
+
 #include <Pothos/Exception.hpp>
 #include <Pothos/Framework.hpp>
 
@@ -10,17 +14,68 @@
 #include <functional>
 #include <type_traits>
 
+// Use std::function instead of function pointer because LogN's return
+// callable needs to capture a parameter.
+template <typename Type>
+using LogFcn = std::function<void(const Type*, Type*, const size_t)>;
+
+#ifdef POTHOS_XSIMD
+
+template <typename Type>
+using EnableForSIMDFcn = typename std::enable_if<std::is_floating_point<Type>::value, LogFcn<Type>>::type;
+
+template <typename Type>
+using EnableForDefaultFcn = typename std::enable_if<!std::is_floating_point<Type>::value, LogFcn<Type>>::type;
+
+#else
+
+template <typename Type>
+using EnableForDefaultFcn = LogFcn<Type>;
+
+#endif
+
 /***********************************************************************
  * Implementation getters to be called on class construction
  **********************************************************************/
 
-// Use std::function instead of function pointer because LogN's lambda
-// needs to capture a parameter.
-template <typename Type>
-using LogFcn = std::function<void(const Type*, Type*, const size_t)>;
+#ifdef POTHOS_XSIMD
 
 template <typename Type>
-static inline LogFcn<Type> getLogFcn()
+static inline EnableForSIMDFcn<Type> getLogFcn()
+{
+    return PothosCommsSIMD::logDispatch<Type>();
+}
+
+template <typename Type>
+static inline EnableForSIMDFcn<Type> getLog2Fcn()
+{
+    return PothosCommsSIMD::log2Dispatch<Type>();
+}
+
+template <typename Type>
+static inline EnableForSIMDFcn<Type> getLog10Fcn()
+{
+    return PothosCommsSIMD::log10Dispatch<Type>();
+}
+
+template <typename Type>
+static inline EnableForSIMDFcn<Type> getLog1pFcn()
+{
+    return PothosCommsSIMD::log1pDispatch<Type>();
+}
+
+template <typename Type>
+static inline EnableForSIMDFcn<Type> getLogNFcn(Type base)
+{
+    using namespace std::placeholders;
+
+    return std::bind(PothosCommsSIMD::logNDispatch<Type>(), _1, _2, base, _3);
+}
+
+#endif
+
+template <typename Type>
+static inline EnableForDefaultFcn<Type> getLogFcn()
 {
     return [](const Type* in, Type* out, const size_t num)
     {
@@ -29,7 +84,7 @@ static inline LogFcn<Type> getLogFcn()
 }
 
 template <typename Type>
-static inline LogFcn<Type> getLog2Fcn()
+static inline EnableForDefaultFcn<Type> getLog2Fcn()
 {
     return [](const Type* in, Type* out, const size_t num)
     {
@@ -38,7 +93,7 @@ static inline LogFcn<Type> getLog2Fcn()
 }
 
 template <typename Type>
-static inline LogFcn<Type> getLog10Fcn()
+static inline EnableForDefaultFcn<Type> getLog10Fcn()
 {
     return [](const Type* in, Type* out, const size_t num)
     {
@@ -47,7 +102,7 @@ static inline LogFcn<Type> getLog10Fcn()
 }
 
 template <typename Type>
-static inline LogFcn<Type> getLog1PFcn()
+static inline EnableForDefaultFcn<Type> getLog1pFcn()
 {
     return [](const Type* in, Type* out, const size_t num)
     {
@@ -56,7 +111,7 @@ static inline LogFcn<Type> getLog1PFcn()
 }
 
 template <typename Type>
-static inline LogFcn<Type> getLogNFcn(Type base)
+static inline EnableForDefaultFcn<Type> getLogNFcn(Type base)
 {
     return [base](const Type* in, Type* out, const size_t num)
     {
@@ -153,30 +208,30 @@ class LogN: public Log<Type>
  * Factory/registration
  **********************************************************************/
 
-#define ifTypeDeclareLogFactory(Type, LogFcn) \
+#define ifTypeDeclareLogFactory(Type, LogFcnGetter) \
     if(Pothos::DType::fromDType(dtype, 1) == Pothos::DType(typeid(Type))) \
-        return new Log<Type>(dtype.dimension(), LogFcn<Type>());
+        return new Log<Type>(dtype.dimension(), LogFcnGetter<Type>());
 
-#define LOGFACTORY(FactoryFcn, LogFcn) \
+#define LOGFACTORY(FactoryFcn, LogFcnGetter) \
     static Pothos::Block* FactoryFcn(const Pothos::DType& dtype) \
     { \
-        ifTypeDeclareLogFactory(double, LogFcn); \
-        ifTypeDeclareLogFactory(float, LogFcn); \
-        ifTypeDeclareLogFactory(int64_t, LogFcn); \
-        ifTypeDeclareLogFactory(int32_t, LogFcn); \
-        ifTypeDeclareLogFactory(int16_t, LogFcn); \
-        ifTypeDeclareLogFactory(int8_t, LogFcn); \
-        ifTypeDeclareLogFactory(uint64_t, LogFcn); \
-        ifTypeDeclareLogFactory(uint32_t, LogFcn); \
-        ifTypeDeclareLogFactory(uint16_t, LogFcn); \
-        ifTypeDeclareLogFactory(uint8_t, LogFcn); \
+        ifTypeDeclareLogFactory(double, LogFcnGetter); \
+        ifTypeDeclareLogFactory(float, LogFcnGetter); \
+        ifTypeDeclareLogFactory(int64_t, LogFcnGetter); \
+        ifTypeDeclareLogFactory(int32_t, LogFcnGetter); \
+        ifTypeDeclareLogFactory(int16_t, LogFcnGetter); \
+        ifTypeDeclareLogFactory(int8_t, LogFcnGetter); \
+        ifTypeDeclareLogFactory(uint64_t, LogFcnGetter); \
+        ifTypeDeclareLogFactory(uint32_t, LogFcnGetter); \
+        ifTypeDeclareLogFactory(uint16_t, LogFcnGetter); \
+        ifTypeDeclareLogFactory(uint8_t, LogFcnGetter); \
         throw Pothos::InvalidArgumentException( #FactoryFcn "("+dtype.toString()+")", "unsupported type"); \
     }
 
 LOGFACTORY(logFactory,   getLogFcn)
 LOGFACTORY(log2Factory,  getLog2Fcn)
 LOGFACTORY(log10Factory, getLog10Fcn)
-LOGFACTORY(log1pFactory, getLog1PFcn)
+LOGFACTORY(log1pFactory, getLog1pFcn)
 
 static Pothos::Block* logNFactory(
     const Pothos::DType& dtype,
@@ -214,7 +269,7 @@ static Pothos::Block* logNFactory(
  *
  * |factory /comms/log(dtype)
  **********************************************************************/
-static Pothos::BlockRegistry registerLog(
+static Pothos::BlockRegistry registerlog(
     "/comms/log",
     Pothos::Callable(&logFactory));
 
@@ -234,7 +289,7 @@ static Pothos::BlockRegistry registerLog(
  *
  * |factory /comms/log2(dtype)
  **********************************************************************/
-static Pothos::BlockRegistry registerLog2(
+static Pothos::BlockRegistry registerlog2(
     "/comms/log2",
     Pothos::Callable(&log2Factory));
 
@@ -254,7 +309,7 @@ static Pothos::BlockRegistry registerLog2(
  *
  * |factory /comms/log10(dtype)
  **********************************************************************/
-static Pothos::BlockRegistry registerLog10(
+static Pothos::BlockRegistry registerlog10(
     "/comms/log10",
     Pothos::Callable(&log10Factory));
 
