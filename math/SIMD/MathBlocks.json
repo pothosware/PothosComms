@@ -51,6 +51,18 @@
             "params": ["const T*", "const T*", "char*", "size_t"]
         },
         {
+            "name": "KDivX",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "const T&", "T*", "size_t"]
+        },
+        {
+            "name": "KMinusX",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "const T&", "T*", "size_t"]
+        },
+        {
             "name": "lessThan",
             "returnType": "void",
             "paramTypes": ["T"],
@@ -79,6 +91,30 @@
             "returnType": "void",
             "paramTypes": ["T"],
             "params": ["const T*", "const T*", "T*", "size_t"]
+        },
+        {
+            "name": "XDivK",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "const T&", "T*", "size_t"]
+        },
+        {
+            "name": "XMinusK",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "const T&", "T*", "size_t"]
+        },
+        {
+            "name": "XMultK",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "const T&", "T*", "size_t"]
+        },
+        {
+            "name": "XPlusK",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "const T&", "T*", "size_t"]
         }
     ]
 }

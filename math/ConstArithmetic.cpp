@@ -1,6 +1,10 @@
 // Copyright (c) 2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
+#ifdef POTHOS_XSIMD
+#include "SIMD/MathBlocks_SIMD.hpp"
+#endif
+
 #include <Pothos/Callable.hpp>
 #include <Pothos/Exception.hpp>
 #include <Pothos/Framework.hpp>
@@ -9,13 +13,60 @@
 #include <complex>
 #include <cstdint>
 #include <string>
+#include <type_traits>
+
+template <typename T>
+struct IsComplex : std::false_type {};
+
+template <typename T>
+struct IsComplex<std::complex<T>> : std::true_type {};
+
+template <typename T>
+using ConstArithmeticFcn = void(*)(const T*, const T&, T*, size_t);
 
 //
 // Implementation getters, called on class construction
 //
 
+#ifdef POTHOS_XSIMD
+
 template <typename T>
-using ConstArithmeticFcn = void(*)(const T*, const T&, T*, size_t);
+static inline ConstArithmeticFcn<T> getXPlusKFcn()
+{
+    return PothosCommsSIMD::XPlusKDispatch<T>();
+}
+
+template <typename T>
+static inline ConstArithmeticFcn<T> getXSubKFcn()
+{
+    return PothosCommsSIMD::XMinusKDispatch<T>();
+}
+
+template <typename T>
+static inline ConstArithmeticFcn<T> getKSubXFcn()
+{
+    return PothosCommsSIMD::KMinusXDispatch<T>();
+}
+
+template <typename T>
+static inline ConstArithmeticFcn<T> getXMultKFcn()
+{
+    return PothosCommsSIMD::XMultKDispatch<T>();
+}
+
+template <typename T>
+static inline ConstArithmeticFcn<T> getXDivKFcn()
+{
+    return PothosCommsSIMD::XDivKDispatch<T>();
+}
+
+template <typename T>
+static inline ConstArithmeticFcn<T> getKDivXFcn()
+{
+    return PothosCommsSIMD::KDivXDispatch<T>();
+}
+
+#else
 
 template <typename T>
 static inline ConstArithmeticFcn<T> getXPlusKFcn()
@@ -70,6 +121,8 @@ static inline ConstArithmeticFcn<T> getKDivXFcn()
         for (size_t i = 0; i < num; i++) out[i] = k / in[i];
     };
 }
+
+#endif
 
 /***********************************************************************
  * |PothosDoc Const Arithmetic
