@@ -111,6 +111,12 @@
             "params": ["const T*", "const T*", "char*", "size_t"]
         },
         {
+            "name": "lgamma",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
             "name": "mul",
             "returnType": "void",
             "paramTypes": ["T"],
@@ -127,6 +133,12 @@
             "returnType": "void",
             "paramTypes": ["T"],
             "params": ["const T*", "const T*", "T*", "size_t"]
+        },
+        {
+            "name": "tgamma",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
         },
         {
             "name": "XDivK",
