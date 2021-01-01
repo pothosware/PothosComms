@@ -127,6 +127,86 @@ struct XSIMDTraits<double>
 };
 
 template <>
+struct XSIMDTraits<std::complex<std::int8_t>>
+{
+#ifdef XSIMD_BATCH_INT8_SIZE
+    static constexpr bool IsSupported = true;
+#else
+    static constexpr bool IsSupported = false;
+#endif
+};
+
+template <>
+struct XSIMDTraits<std::complex<std::int16_t>>
+{
+#ifdef XSIMD_BATCH_INT16_SIZE
+    static constexpr bool IsSupported = true;
+#else
+    static constexpr bool IsSupported = false;
+#endif
+};
+
+template <>
+struct XSIMDTraits<std::complex<std::int32_t>>
+{
+#ifdef XSIMD_BATCH_INT32_SIZE
+    static constexpr bool IsSupported = true;
+#else
+    static constexpr bool IsSupported = false;
+#endif
+};
+
+template <>
+struct XSIMDTraits<std::complex<std::int64_t>>
+{
+#ifdef XSIMD_BATCH_INT64_SIZE
+    static constexpr bool IsSupported = true;
+#else
+    static constexpr bool IsSupported = false;
+#endif
+};
+
+template <>
+struct XSIMDTraits<std::complex<std::uint8_t>>
+{
+#ifdef XSIMD_BATCH_INT8_SIZE
+    static constexpr bool IsSupported = true;
+#else
+    static constexpr bool IsSupported = false;
+#endif
+};
+
+template <>
+struct XSIMDTraits<std::complex<std::uint16_t>>
+{
+#ifdef XSIMD_BATCH_INT16_SIZE
+    static constexpr bool IsSupported = true;
+#else
+    static constexpr bool IsSupported = false;
+#endif
+};
+
+template <>
+struct XSIMDTraits<std::complex<std::uint32_t>>
+{
+#ifdef XSIMD_BATCH_INT32_SIZE
+    static constexpr bool IsSupported = true;
+#else
+    static constexpr bool IsSupported = false;
+#endif
+};
+
+template <>
+struct XSIMDTraits<std::complex<std::uint64_t>>
+{
+#ifdef XSIMD_BATCH_INT64_SIZE
+    static constexpr bool IsSupported = true;
+#else
+    static constexpr bool IsSupported = false;
+#endif
+};
+
+template <>
 struct XSIMDTraits<std::complex<float>>
 {
 #ifdef XSIMD_BATCH_FLOAT_SIZE
