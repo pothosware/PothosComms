@@ -165,6 +165,12 @@
             "params": ["const T*", "T*", "T", "size_t"]
         },
         {
+            "name": "rsqrt",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
             "name": "sub",
             "returnType": "void",
             "paramTypes": ["T"],

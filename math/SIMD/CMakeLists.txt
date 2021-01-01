@@ -13,7 +13,8 @@ set(SIMDInputs
     ConstComparator.cpp
     Gamma.cpp
     Log.cpp
-    Pow.cpp)
+    Pow.cpp
+    RSqrt.cpp)
 
 PothosGenerateSIMDSources(
     SIMDSources

@@ -1,7 +1,11 @@
 // Copyright (c) 2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
+#ifdef POTHOS_XSIMD
+#include "SIMD/MathBlocks_SIMD.hpp"
+#else
 #include "RSqrt.hpp"
+#endif
 
 #include <Pothos/Exception.hpp>
 #include <Pothos/Framework.hpp>
@@ -13,11 +17,23 @@
 template <typename T>
 using RSqrtFcn = void(*)(const T*, T*, size_t);
 
+#ifdef POTHOS_XSIMD
+
+template <typename T>
+static RSqrtFcn<T> getRSqrtFcn()
+{
+    return PothosCommsSIMD::rsqrtDispatch<T>();
+}
+
+#else
+
 template <typename T>
 static RSqrtFcn<T> getRSqrtFcn()
 {
     return &rsqrtBuffer<T>;
 }
+
+#endif
 
 //
 // Block implementation
