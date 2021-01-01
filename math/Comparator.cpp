@@ -2,9 +2,12 @@
 //                    2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
+#ifdef POTHOS_XSIMD
+#include "SIMD/MathBlocks_SIMD.hpp"
+#endif
+
 #include <Pothos/Framework.hpp>
 #include <cstdint>
-#include <iostream>
 #include <complex>
 #include <algorithm> //min/max
 
@@ -14,6 +17,46 @@
 
 template <typename Type>
 using ComparatorFcn = void(*)(const Type*, const Type*, char*, const size_t);
+
+#ifdef POTHOS_XSIMD
+
+template <typename Type>
+static inline ComparatorFcn<Type> getGreaterThanFcn()
+{
+    return PothosCommsSIMD::greaterThanDispatch<Type>();
+}
+
+template <typename Type>
+static inline ComparatorFcn<Type> getLessThanFcn()
+{
+    return PothosCommsSIMD::lessThanDispatch<Type>();
+}
+
+template <typename Type>
+static inline ComparatorFcn<Type> getGreaterOrEqualFcn()
+{
+    return PothosCommsSIMD::greaterThanOrEqualDispatch<Type>();
+}
+
+template <typename Type>
+static inline ComparatorFcn<Type> getLessOrEqualFcn()
+{
+    return PothosCommsSIMD::lessThanOrEqualDispatch<Type>();
+}
+
+template <typename Type>
+static inline ComparatorFcn<Type> getEqualToFcn()
+{
+    return PothosCommsSIMD::equalToDispatch<Type>();
+}
+
+template <typename Type>
+static inline ComparatorFcn<Type> getNotEqualToFcn()
+{
+    return PothosCommsSIMD::notEqualToDispatch<Type>();
+}
+
+#else
 
 template <typename Type>
 static inline ComparatorFcn<Type> getGreaterThanFcn()
@@ -68,6 +111,8 @@ static inline ComparatorFcn<Type> getNotEqualToFcn()
         for (size_t i = 0; i < num; ++i) out[i] = (in0[i] != in1[i]) ? 1 : 0;
     };
 }
+
+#endif
 
 /***********************************************************************
  * |PothosDoc Comparator
