@@ -45,7 +45,7 @@ namespace detail
         }
 
         // Perform the remaining operations manually.
-        rsqrtBuffer(inPtr, outPtr, (len - (out - outPtr)));
+        rsqrtBuffer(inPtr, outPtr, (len - (outPtr - out)));
     }
 
     template <typename T>

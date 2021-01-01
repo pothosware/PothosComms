@@ -4,26 +4,24 @@
 #pragma once
 
 #include <cmath>
+#include <cstdint>
+#include <cstring>
 
 namespace detail
 {
-    // https://en.wikipedia.org/wiki/Fast_inverse_square_root
-    static float Q_rsqrt(float number)
-    {	
-        const float x2 = number * 0.5F;
-        constexpr float threehalfs = 1.5F;
+    // http://rrrola.wz.cz/inv_sqrt.html
+    static float Q_rsqrt(float f)
+    {
+        static_assert(sizeof(uint32_t) == sizeof(float), "sizeof(uint32_t) != sizeof(float)");
 
-        union
-        {
-            float f;
-            unsigned long i;
-        } conv;
+        uint32_t u = 0;
+        float f2 = 0.0f;
+        std::memcpy(&u, &f, sizeof(f));
 
-        conv.f  = number;
-        conv.i = 0x5f3759df - ( conv.i >> 1 );
-        conv.f *= ( threehalfs - ( x2 * conv.f * conv.f ) );
+        u = 0x5F1FFFF9ul - (u >> 1);
+        std::memcpy(&f2, &u, sizeof(f2));
 
-        return conv.f;
+        return 0.703952253f * f2 * (2.38924456f - f * f2 * f2);
     }
 
     static void rsqrtBuffer(const float* in, float* out, size_t length)
