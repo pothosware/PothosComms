@@ -25,7 +25,7 @@ using ArithFcn = void(*)(const Type*, const Type*, Type*, const size_t);
 #ifdef POTHOS_XSIMD
 
 //
-// For complex multiplication and addition, always use the default implementations
+// For complex multiplication and division, always use the default implementations
 // because of differences in SIMD complex layout. This SFINAE stuff below will make
 // the compiler choose the right version.
 //
