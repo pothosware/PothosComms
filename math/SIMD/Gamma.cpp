@@ -1,9 +1,8 @@
 // Copyright (c) 2020 Nicholas Corgan
 // SPDX-License-Identifier: BSD-3-Clause
 
-#include "common/XSIMDTypes.hpp"
-
 #include <xsimd/xsimd.hpp>
+#include <Pothos/Util/XSIMDTraits.hpp>
 
 #include <cmath>
 #include <type_traits>
@@ -22,16 +21,16 @@ namespace PothosCommsSIMD { namespace POTHOS_SIMD_NAMESPACE {
 namespace detail
 {
     template <typename T, typename Ret>
-    using EnableForSIMDGamma = EnableIfXSIMDSupports<T, Ret>;
+    using EnableForSIMDGamma = Pothos::Util::EnableIfXSIMDSupports<T, Ret>;
 
     template <typename T, typename Ret>
-    using EnableForDefaultGamma = EnableIfXSIMDDoesNotSupport<T, Ret>;
+    using EnableForDefaultGamma = Pothos::Util::EnableIfXSIMDDoesNotSupport<T, Ret>;
 
     // XSIMD's float implementation for lgamma appears to be bugged and
     // outputs incorrect values, so fall back to our default implementation.
     template <typename T>
     struct IsSIMDLnGammaSupported: std::integral_constant<bool,
-        XSIMDTraits<T>::IsSupported &&
+        Pothos::Util::XSIMDTraits<T>::IsSupported &&
         !std::is_same<T, float>::value> {};
 
     template <typename T, typename Ret>

@@ -1,9 +1,8 @@
 // Copyright (c) 2020 Nicholas Corgan
 // SPDX-License-Identifier: BSD-3-Clause
 
-#include "common/XSIMDTypes.hpp"
-
 #include <xsimd/xsimd.hpp>
+#include <Pothos/Util/XSIMDTraits.hpp>
 
 #include <cmath>
 #include <complex>
@@ -31,7 +30,7 @@ namespace detail
     // No int16 support due to XSIMD limitation
     template <typename T>
     struct IsSIMDConjugateSupported : std::integral_constant<bool,
-        XSIMDTraits<T>::IsSupported &&
+        Pothos::Util::XSIMDTraits<T>::IsSupported &&
         !std::is_same<T, std::complex<std::int16_t>>::value &&
         IsComplex<T>::value> {};
 

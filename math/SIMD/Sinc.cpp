@@ -1,9 +1,8 @@
 // Copyright (c) 2020 Nicholas Corgan
 // SPDX-License-Identifier: BSD-3-Clause
 
-#include "common/XSIMDTypes.hpp"
-
 #include <xsimd/xsimd.hpp>
+#include <Pothos/Util/XSIMDTraits.hpp>
 
 #include <cmath>
 #include <type_traits>
@@ -32,7 +31,7 @@ namespace detail
     }
 
     template <typename T>
-    static EnableIfXSIMDSupports<T, void> sinc(const T* in, T* out, size_t len)
+    static Pothos::Util::EnableIfXSIMDSupports<T, void> sinc(const T* in, T* out, size_t len)
     {
         static constexpr size_t simdSize = xsimd::simd_traits<T>::size;
         const auto numSIMDFrames = len / simdSize;
@@ -61,7 +60,7 @@ namespace detail
     }
 
     template <typename T>
-    static inline EnableIfXSIMDDoesNotSupport<T, void> sinc(const T* in, T* out, size_t len)
+    static inline Pothos::Util::EnableIfXSIMDDoesNotSupport<T, void> sinc(const T* in, T* out, size_t len)
     {
         sincUnoptimized(in, out, len);
     }

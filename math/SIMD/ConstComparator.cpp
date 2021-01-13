@@ -1,9 +1,8 @@
 // Copyright (c) 2020 Nicholas Corgan
 // SPDX-License-Identifier: BSD-3-Clause
 
-#include "common/XSIMDTypes.hpp"
-
 #include <xsimd/xsimd.hpp>
+#include <Pothos/Util/XSIMDTraits.hpp>
 
 #include <complex>
 #include <type_traits>
@@ -24,7 +23,7 @@ namespace detail
     // No (u)int16 support due to XSIMD limitation
     template <typename T>
     struct IsSIMDConstComparatorSupported : std::integral_constant<bool,
-        XSIMDTraits<T>::IsSupported &&
+        Pothos::Util::XSIMDTraits<T>::IsSupported &&
         !std::is_same<T, std::int16_t>::value &&
         !std::is_same<T, std::uint16_t>::value> {};
 

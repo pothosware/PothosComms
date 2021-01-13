@@ -3,9 +3,8 @@
 
 #include "RSqrt.hpp"
 
-#include "common/XSIMDTypes.hpp"
-
 #include <xsimd/xsimd.hpp>
+#include <Pothos/Util/XSIMDTraits.hpp>
 
 #include <cmath>
 #include <type_traits>
@@ -24,7 +23,7 @@ namespace PothosCommsSIMD { namespace POTHOS_SIMD_NAMESPACE {
 namespace detail
 {
     template <typename T>
-    static EnableIfXSIMDSupports<T, void> rsqrt(const T* in, T* out, size_t len)
+    static Pothos::Util::EnableIfXSIMDSupports<T, void> rsqrt(const T* in, T* out, size_t len)
     {
         static constexpr size_t simdSize = xsimd::simd_traits<T>::size;
         const auto numSIMDFrames = len / simdSize;
@@ -49,7 +48,7 @@ namespace detail
     }
 
     template <typename T>
-    static EnableIfXSIMDDoesNotSupport<T, void> rsqrt(const T* in, T* out, size_t len)
+    static Pothos::Util::EnableIfXSIMDDoesNotSupport<T, void> rsqrt(const T* in, T* out, size_t len)
     {
         rsqrtBuffer(in, out, len);
     }

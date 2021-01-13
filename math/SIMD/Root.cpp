@@ -1,9 +1,8 @@
 // Copyright (c) 2020 Nicholas Corgan
 // SPDX-License-Identifier: BSD-3-Clause
 
-#include "common/XSIMDTypes.hpp"
-
 #include <xsimd/xsimd.hpp>
+#include <Pothos/Util/XSIMDTraits.hpp>
 
 #include <cmath>
 #include <complex>
@@ -30,7 +29,7 @@ namespace detail
 
     template <typename T>
     struct IsSIMDRootSupported : std::integral_constant<bool,
-        XSIMDTraits<T>::IsSupported &&
+        Pothos::Util::XSIMDTraits<T>::IsSupported &&
         std::is_floating_point<T>::value &&
         !IsComplex<T>::value> {};
 

@@ -1,9 +1,8 @@
 // Copyright (c) 2020 Nicholas Corgan
 // SPDX-License-Identifier: BSD-Clause-3
 
-#include "common/XSIMDTypes.hpp"
-
 #include <xsimd/xsimd.hpp>
+#include <Pothos/Util/XSIMDTraits.hpp>
 
 #include <complex>
 #include <type_traits>
@@ -29,13 +28,13 @@ namespace detail
 
     template <typename T, typename Ret>
     using EnableForSIMDConstArithmetic = typename std::enable_if<
-                                                      XSIMDTraits<T>::IsSupported && !IsComplex<T>::value,
+                                                      Pothos::Util::XSIMDTraits<T>::IsSupported && !IsComplex<T>::value,
                                                       Ret
                                                   >::type;
 
     template <typename T, typename Ret>
     using EnableForDefaultConstArithmetic = typename std::enable_if<
-                                                         !XSIMDTraits<T>::IsSupported || IsComplex<T>::value,
+                                                         !Pothos::Util::XSIMDTraits<T>::IsSupported || IsComplex<T>::value,
                                                          Ret
                                                      >::type;
 
