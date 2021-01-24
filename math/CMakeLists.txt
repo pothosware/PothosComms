@@ -14,6 +14,16 @@ if(MSVC)
     add_definitions(/bigobj) #arithmetic too large in debug mode
 endif(MSVC)
 
+set(libraries CommsFunctions)
+
+if(xsimd_FOUND)
+    include_directories(
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_BINARY_DIR})
+    add_subdirectory(SIMD)
+    list(APPEND libraries CommsMathSIMD)
+endif()
+
 POTHOS_MODULE_UTIL(
     TARGET MathBlocks
     SOURCES
@@ -48,7 +58,7 @@ POTHOS_MODULE_UTIL(
         Gamma.cpp
         TestBeta.cpp
         TestGamma.cpp
-    LIBRARIES CommsFunctions
+    LIBRARIES ${libraries}
     DESTINATION comms
     ENABLE_DOCS
 )

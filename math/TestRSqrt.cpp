@@ -10,7 +10,7 @@
 #include <iostream>
 #include <random>
 
-static constexpr size_t BufferLen = 4096;
+static constexpr size_t BufferLen = 100;
 
 template <typename T>
 struct TestParams

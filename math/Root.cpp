@@ -1,6 +1,10 @@
 // Copyright (c) 2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
+#ifdef POTHOS_XSIMD
+#include "SIMD/MathBlocks_SIMD.hpp"
+#endif
+
 #include <Pothos/Callable.hpp>
 #include <Pothos/Exception.hpp>
 #include <Pothos/Framework.hpp>
@@ -57,8 +61,33 @@ static inline EnableIfUnsigned<T, T> getAvoidNaNFactor(T)
 template <typename T>
 using RootFcn = std::function<void(const T*, T*, size_t)>;
 
+#ifdef POTHOS_XSIMD
+
 template <typename T>
-static inline RootFcn<T> getSqrtFcn()
+using EnableForSIMDFcn = typename std::enable_if<std::is_floating_point<T>::value, RootFcn<T>>::type;
+
+template <typename T>
+using EnableForDefaultFcn = typename std::enable_if<!std::is_floating_point<T>::value, RootFcn<T>>::type;
+
+template <typename T>
+static inline EnableForSIMDFcn<T> getSqrtFcn()
+{
+    return PothosCommsSIMD::sqrtDispatch<T>();
+}
+
+template <typename T>
+static inline EnableForSIMDFcn<T> getCbrtFcn()
+{
+    return PothosCommsSIMD::cbrtDispatch<T>();
+}
+
+#else
+template <typename T>
+using EnableForDefaultFcn = RootFcn<T>;
+#endif
+
+template <typename T>
+static inline EnableForDefaultFcn<T> getSqrtFcn()
 {
     return [](const T* in, T* out, size_t num)
     {
@@ -67,7 +96,7 @@ static inline RootFcn<T> getSqrtFcn()
 }
 
 template <typename T>
-static inline RootFcn<T> getCbrtFcn()
+static inline EnableForDefaultFcn<T> getCbrtFcn()
 {
     return [](const T* in, T* out, size_t num)
     {

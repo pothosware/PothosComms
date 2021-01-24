@@ -19,7 +19,7 @@
 
 // Repeat the test values enough times to trigger both the SIMD and manual
 // cases, if SIMD support is built in.
-static constexpr size_t DefaultNumRepeats = 50;
+static constexpr size_t DefaultNumRepeats = 100;
 
 template <typename Type>
 static std::vector<Type> linspace(Type begin, Type end, Type step)
@@ -180,7 +180,7 @@ static inline typename std::enable_if<std::is_floating_point<Type>::value, void>
     const Pothos::BufferChunk& expected,
     const Pothos::BufferChunk& output)
 {
-    static constexpr Type epsilon = Type(1e-6);
+    static constexpr Type epsilon = Type(1e-3);
 
     CommsTests::testBufferChunksClose<Type>(expected, output, epsilon);
 }

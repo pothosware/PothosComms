@@ -28,6 +28,24 @@ if (NOT JSON_HPP_INCLUDE_DIR)
 endif (NOT JSON_HPP_INCLUDE_DIR)
 
 ########################################################################
+# SIMD dynamic dispatch, if supported by this Pothos build
+########################################################################
+include(PothosConfigSIMD OPTIONAL RESULT_VARIABLE SIMD_SUPPORTED)
+if(SIMD_SUPPORTED)
+    include(CheckIncludeFileCXX)
+    set(CMAKE_REQUIRED_INCLUDES ${Pothos_INCLUDE_DIRS})
+    check_include_file_cxx(Pothos/Util/XSIMDTraits.hpp HAS_POTHOS_XSIMD_TRAITS_HPP)
+
+    if(HAS_POTHOS_XSIMD_TRAITS_HPP)
+        find_package(xsimd)
+        if(xsimd_FOUND)
+            include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+            add_definitions(-DPOTHOS_XSIMD)
+        endif()
+    endif()
+endif()
+
+########################################################################
 # Spuce library
 ########################################################################
 if(NOT SPUCE_IN_TREE)

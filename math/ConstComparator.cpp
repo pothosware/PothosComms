@@ -1,6 +1,10 @@
 // Copyright (c) 2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
+#ifdef POTHOS_XSIMD
+#include "SIMD/MathBlocks_SIMD.hpp"
+#endif
+
 #include <Pothos/Framework.hpp>
 #include <cstdint>
 
@@ -10,6 +14,46 @@
 
 template <typename Type>
 using ConstComparatorFcn = void(*)(const Type*, Type, char*, size_t);
+
+#ifdef POTHOS_XSIMD
+
+template <typename Type>
+static inline ConstComparatorFcn<Type> getGreaterThanFcn()
+{
+    return PothosCommsSIMD::constGreaterThanDispatch<Type>();
+}
+
+template <typename Type>
+static inline ConstComparatorFcn<Type> getLessThanFcn()
+{
+    return PothosCommsSIMD::constLessThanDispatch<Type>();
+}
+
+template <typename Type>
+static inline ConstComparatorFcn<Type> getGreaterThanOrEqualFcn()
+{
+    return PothosCommsSIMD::constGreaterThanOrEqualDispatch<Type>();
+}
+
+template <typename Type>
+static inline ConstComparatorFcn<Type> getLessThanOrEqualFcn()
+{
+    return PothosCommsSIMD::constLessThanOrEqualDispatch<Type>();
+}
+
+template <typename Type>
+static inline ConstComparatorFcn<Type> getEqualToFcn()
+{
+    return PothosCommsSIMD::constEqualToDispatch<Type>();
+}
+
+template <typename Type>
+static inline ConstComparatorFcn<Type> getNotEqualToFcn()
+{
+    return PothosCommsSIMD::constNotEqualToDispatch<Type>();
+}
+
+#else
 
 template <typename Type>
 static inline ConstComparatorFcn<Type> getGreaterThanFcn()
@@ -64,6 +108,8 @@ static inline ConstComparatorFcn<Type> getNotEqualToFcn()
         for(size_t i = 0; i < num; ++i) out[i] = (in[i] != val) ? 1 : 0;
     };
 }
+
+#endif
 
 /*
  * Comparator functions

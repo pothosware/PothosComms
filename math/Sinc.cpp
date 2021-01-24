@@ -1,6 +1,10 @@
 // Copyright (c) 2020 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
+#ifdef POTHOS_XSIMD
+#include "SIMD/MathBlocks_SIMD.hpp"
+#endif
+
 #include <Pothos/Framework.hpp>
 
 #include <cmath>
@@ -11,6 +15,16 @@
 
 template <typename Type>
 using SincFcn = void(*)(const Type*, Type*, const size_t);
+
+#ifdef POTHOS_XSIMD
+
+template <typename Type>
+static inline SincFcn<Type> getSincFcn()
+{
+    return PothosCommsSIMD::sincDispatch<Type>();
+}
+
+#else
 
 template <typename Type>
 static inline SincFcn<Type> getSincFcn()
@@ -24,6 +38,8 @@ static inline SincFcn<Type> getSincFcn()
         }
     };
 }
+
+#endif
 
 /***********************************************************************
  * |PothosDoc Sinc
