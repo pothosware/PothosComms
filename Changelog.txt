@@ -1,5 +1,19 @@
 This this the changelog file for the Pothos Comms toolkit.
 
+Release 0.4.0 (pending)
+==========================
+
+- XSIMD implementation of various blocks
+
+New blocks:
+
+- digital: added bitwise blocks
+- math: added beta, gamma, lngamma
+- Added /comms/rsqrt
+- Added /comms/log1p
+- math: added const_comparator
+- Added Pow, Square Root, Cube Root, Nth Root
+
 Release 0.3.5 (2021-01-24)
 ==========================
 
