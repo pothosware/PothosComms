@@ -1,5 +1,13 @@
 This this the changelog file for the Pothos Comms toolkit.
 
+Release 0.3.5 (2021-01-24)
+==========================
+
+- Suppress GCC 9 warnings for using memcpy/memset
+- Trig: Fix mismatched function pointer cast
+- Fix some blocks not taking DType dimension into account
+- ByteOrder: fixed PothosDocs not allowing all supported types
+
 Release 0.3.4 (2020-07-19)
 ==========================
 
