@@ -1,6 +1,6 @@
 This this the changelog file for the Pothos Comms toolkit.
 
-Release 0.3.5 (pending)
+Release 0.3.5 (2021-01-24)
 ==========================
 
 - Suppress GCC 9 warnings for using memcpy/memset
