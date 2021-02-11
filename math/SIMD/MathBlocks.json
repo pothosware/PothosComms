@@ -3,6 +3,12 @@
     "functions":
     [
         {
+            "name": "sigmoid",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
             "name": "abs",
             "returnType": "void",
             "paramTypes": ["T"],

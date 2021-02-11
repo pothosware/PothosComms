@@ -17,6 +17,7 @@ set(SIMDInputs
     Pow.cpp
     Root.cpp
     RSqrt.cpp
+    Sigmoid.cpp
     Sinc.cpp
     Trigonometric.cpp)
 
