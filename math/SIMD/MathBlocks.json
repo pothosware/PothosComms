@@ -385,6 +385,36 @@
             "returnType": "void",
             "paramTypes": ["T"],
             "params": ["const T*", "const T&", "T*", "size_t"]
+        },
+        {
+            "name": "exp",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "exp2",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "exp10",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "expm1",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "expN",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "T", "size_t"]
         }
     ]
 }
