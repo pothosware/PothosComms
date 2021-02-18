@@ -15,6 +15,7 @@ set(SIMDInputs
     Gamma.cpp
     Exp.cpp
     Log.cpp
+    ModF.cpp
     Pow.cpp
     Root.cpp
     RSqrt.cpp

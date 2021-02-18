@@ -415,6 +415,12 @@
             "returnType": "void",
             "paramTypes": ["T"],
             "params": ["const T*", "T*", "T", "size_t"]
+        },
+        {
+            "name": "modf",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "T*", "size_t"]
         }
     ]
 }

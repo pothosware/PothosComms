@@ -64,6 +64,8 @@ POTHOS_MODULE_UTIL(
         TestSigmoid.cpp
         Exp.cpp
         TestExp.cpp
+        ModF.cpp
+        TestModF.cpp
     LIBRARIES ${libraries}
     DESTINATION comms
     ENABLE_DOCS
