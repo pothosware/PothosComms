@@ -11,6 +11,7 @@ set(SIMDInputs
     Conjugate.cpp
     ConstArithmetic.cpp
     ConstComparator.cpp
+    ErrorFunction.cpp
     Gamma.cpp
     Log.cpp
     Pow.cpp

@@ -183,6 +183,18 @@
             "params": ["const T*", "const T*", "T*", "size_t"]
         },
         {
+            "name": "erf",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
+            "name": "erfc",
+            "returnType": "void",
+            "paramTypes": ["T"],
+            "params": ["const T*", "T*", "size_t"]
+        },
+        {
             "name": "equalTo",
             "returnType": "void",
             "paramTypes": ["T"],
