@@ -60,6 +60,8 @@ POTHOS_MODULE_UTIL(
         TestGamma.cpp
         ErrorFunction.cpp
         TestErrorFunction.cpp
+        Sigmoid.cpp
+        TestSigmoid.cpp
     LIBRARIES ${libraries}
     DESTINATION comms
     ENABLE_DOCS
