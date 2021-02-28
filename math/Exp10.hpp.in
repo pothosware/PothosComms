@@ -3,32 +3,34 @@
 
 #pragma once
 
+#cmakedefine HAVE_EXP10F
+#cmakedefine HAVE_EXP10
+
 #include <cmath>
 
 namespace detail
 {
-    //
-    // There is no exp10 STL function for some reason, so
-    // abstract it on this layer.
-    //
-
     template <typename T>
     inline T exp10(T in)
     {
         return T(std::pow(T(10), in));
     }
 
+#ifdef HAVE_EXP10F
     template <>
     inline float exp10(float in)
     {
         return ::exp10f(in);
     }
+#endif
 
+#ifdef HAVE_EXP10
     template <>
     inline double exp10(double in)
     {
         return ::exp10(in);
     }
+#endif
 }
 
 template <typename T>

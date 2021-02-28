@@ -14,12 +14,25 @@ if(MSVC)
     add_definitions(/bigobj) #arithmetic too large in debug mode
 endif(MSVC)
 
+# exp10 and exp10f are GNU extensions, so we know MSVC won't have them.
+if(NOT MSVC)
+    include(CheckSymbolExists)
+    set(CMAKE_REQUIRED_DEFINITIONS -D_GNU_SOURCE)
+    set(CMAKE_REQUIRED_LIBRARIES m)
+    check_symbol_exists(exp10f "math.h" HAVE_EXP10F)
+    check_symbol_exists(exp10 "math.h" HAVE_EXP10)
+endif()
+configure_file(
+    Exp10.hpp.in
+    ${CMAKE_CURRENT_BINARY_DIR}/Exp10.hpp)
+
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR})
+
 set(libraries CommsFunctions)
 
 if(xsimd_FOUND)
-    include_directories(
-        ${CMAKE_CURRENT_SOURCE_DIR}
-        ${CMAKE_CURRENT_BINARY_DIR})
     add_subdirectory(SIMD)
     list(APPEND libraries CommsMathSIMD)
 endif()
