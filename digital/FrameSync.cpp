@@ -1,4 +1,5 @@
 // Copyright (c) 2015-2017 Josh Blum
+//                    2021 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
 #include "FrameHelper.hpp"
@@ -305,13 +306,15 @@ public:
 
     void work(void);
 
-    void propagateLabels(const Pothos::InputPort *port)
+    void propagateLabels(const Pothos::InputPort *)
     {
-        for (const auto label : port->labels())
+        //labels from input currently discarded
+        /*
+        for (const auto& label : port->labels())
         {
-            //labels from input currently discarded
-            //this->output(0)->postLabel(label);
+            this->output(0)->postLabel(label);
         }
+        */
     }
 
     //! always use a circular buffer to avoid discontinuity over sliding window

@@ -1,5 +1,5 @@
 // Copyright (c) 2014-2016 Tony Kirke
-//                    2020 Nicholas Corgan
+//               2020-2021 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
 #ifdef POTHOS_XSIMD
@@ -146,7 +146,6 @@ class Comparator : public Pothos::Block
 public:
   Comparator(const size_t dimension, ComparatorFcn<Type> fcn): _fcn(fcn)
   {
-    typedef Comparator<Type> ClassType;
     this->setupInput(0, Pothos::DType(typeid(Type), dimension));
     this->setupInput(1, Pothos::DType(typeid(Type), dimension));
     this->setupOutput(0, typeid(char));

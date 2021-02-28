@@ -1,6 +1,6 @@
 // Copyright (c) 2015-2015 Tony Kirke
 // Copyright (c) 2016-2016 Josh Blum
-// Copyright (c) 2020-2020 Nicholas Corgan
+// Copyright (c) 2020-2021 Nicholas Corgan
 // SPDX-License-Identifier: BSL-1.0
 
 #include "common/Testing.hpp"
@@ -64,7 +64,7 @@ void testComparatorTmpl(const double val, const std::string op_string)
     auto pOut = buffOut.as<const char *>();
     for (size_t i = 0; i < NUM_POINTS; i++)
     {
-      char expected;
+      char expected = '\0';
       if (op_string == ">")
         expected = (vecIn0[i] > vecIn1[i]);
       else if (op_string == "<")
