@@ -6,7 +6,7 @@ Build-Depends:
     debhelper (>= 9.0.0),
     cmake (>= 2.8.9),
     libpoco-dev (>= 1.6),
-    nlohmann-json-dev,
+    nlohmann-json3-dev,
     libpothos-dev,
     libspuce-dev
 Standards-Version: 4.5.0
