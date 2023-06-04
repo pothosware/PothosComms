@@ -27,7 +27,9 @@ configure_file(
     Exp10.hpp.in
     ${CMAKE_CURRENT_BINARY_DIR}/Exp10.hpp)
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR})
 
 POTHOS_MODULE_UTIL(
     TARGET MathBlocks
