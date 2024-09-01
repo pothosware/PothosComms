@@ -55,6 +55,12 @@ static const size_t waveTableSize = 4096;
  * </ul>
  * |default 1.0
  *
+ * |param fast[Fast] Use a sample pool for speed at the expense of less entropy.
+ * |option [Enabled] true
+ * |option [Disabled] false
+ * |default true
+ * |preview invalid
+ *
  * |factory /comms/noise_source(dtype)
  * |setter setWaveform(wave)
  * |setter setOffset(offset)
@@ -74,6 +80,7 @@ public:
         _wave("NORMAL"),
         _mean(0.0),
         _b(1.0),
+        _fast(true),
         _gen(_rd()),
         _waveIndex(0, waveTableSize-1)
     {
@@ -97,13 +104,27 @@ public:
 
     void work(void)
     {
-        _index += _waveIndex(_gen); //lookup into table is random each work()
         auto outPort = this->output(0);
         Type *out = outPort->buffer();
-        for (size_t i = 0; i < outPort->elements(); i++)
+        if (_fast)
         {
-            out[i] = _table[_index % waveTableSize];
-            _index++;
+            _index += _waveIndex(_gen); //lookup into table is random each work()
+            for (size_t i = 0; i < outPort->elements(); i++)
+            {
+                out[i] = _table[_index % waveTableSize];
+                _index++;
+            }
+        }
+        else
+        {
+            for (size_t i = 0; i < outPort->elements(); i++)
+            {
+                if (_wave == "UNIFORM") this->setElem(out[i], std::complex<double>(_uniform(_gen), _uniform(_gen)));
+                else if (_wave == "NORMAL") this->setElem(out[i], std::complex<double>(_normal(_gen), _normal(_gen)));
+                else if (_wave == "LAPLACE") this->setElem(out[i], std::complex<double>(_laplace(_gen), _laplace(_gen)));
+                else if (_wave == "POISSON") this->setElem(out[i], std::complex<double>(_poisson(_gen), _poisson(_gen)));
+                else throw Pothos::Exception("NoiseSource::work(void)", "unknown waveform setting: "+_wave);
+            }
         }
         outPort->produce(outPort->elements());
     }
@@ -234,6 +255,7 @@ private:
     std::string _wave;
     double _mean;
     double _b;
+    bool _fast;
 
     std::random_device _rd;
     std::mt19937 _gen;
