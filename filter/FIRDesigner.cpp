@@ -157,7 +157,7 @@ public:
         _weight(1.0),
         _stopDB(60.0),
         _passDB(0.1),
-        _numTaps(50)
+        _numTaps(51)
     {
         this->registerCall(this, POTHOS_FCN_TUPLE(FIRDesigner, setBandType));
         this->registerCall(this, POTHOS_FCN_TUPLE(FIRDesigner, bandType));
