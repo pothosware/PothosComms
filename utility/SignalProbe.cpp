@@ -8,6 +8,8 @@
 #include <iostream>
 #include <algorithm> //min/max
 #include <chrono>
+#include <limits>
+#include "MinMaxHelpers.hpp"
 
 /***********************************************************************
  * |PothosDoc Signal Probe
@@ -20,11 +22,15 @@
  *
  * The calculation for value can be, the last seen value,
  * the RMS (root mean square) over the last buffer,
- * or the mean (average value) over the last buffer.
+ * the mean (average value) over the last buffer,
+ * the minimum value (real) or absolute value (complex) over the last buffer,
+ * the maximum value (real) or absolute value (complex) over the last buffer,
+ * the minimum absolute value (magnitude) over the last buffer,
+ * or the maximum absolute value (magnitude) over the last buffer.
  *
  * |category /Utility
  * |category /Event
- * |keywords rms average mean
+ * |keywords rms average mean min minimum max maximum
  * |alias /blocks/stream_probe
  *
  * |param dtype[Data Type] The data type consumed by the stream probe.
@@ -40,6 +46,10 @@
  * |option [Value] "VALUE"
  * |option [RMS] "RMS"
  * |option [Mean] "MEAN"
+ * |option [Min] "MIN"
+ * |option [Max] "MAX"
+ * |option [Min Abs] "MINABS"
+ * |option [Max Abs] "MAXABS"
  *
  * |param rate How many calculations per second?
  * The probe will perform a calculation at most this many times per second.
@@ -157,6 +167,53 @@ public:
             for (size_t n = 0; n < N; n++) mean += Pothos::Util::fromQ<ProbeType>(x[n], 0);
             mean /= N;
             _value = mean;
+        }
+        else if (_mode == "MIN")
+        {
+            ProbeType minimum = std::numeric_limits<double>::max();
+            ProbeType x_n;
+            for (size_t n = 0; n < N; n++)
+            {
+                x_n = Pothos::Util::fromQ<ProbeType>(x[n], 0);
+                minimum = getMin(minimum, x_n);
+            }
+            _value = minimum;
+        }
+        else if (_mode == "MAX")
+        {
+            ProbeType maximum = std::numeric_limits<double>::lowest();
+            ProbeType x_n;
+            for (size_t n = 0; n < N; n++)
+            {
+                x_n = Pothos::Util::fromQ<ProbeType>(x[n], 0);
+                maximum = getMax(maximum, x_n);
+            }
+            _value = maximum;
+        }
+
+        else if (_mode == "MINABS")
+        {
+            double minimum = std::numeric_limits<double>::max();
+            ProbeType x_n;
+            for (size_t n = 0; n < N; n++)
+            {
+                x_n = Pothos::Util::fromQ<ProbeType>(x[n], 0);
+                const double mag = std::abs(x_n);
+                minimum = std::min<double>(minimum, mag);
+            }
+            _value = minimum;
+        }
+        else if (_mode == "MAXABS")
+        {
+            double maximum = std::numeric_limits<double>::lowest();
+            ProbeType x_n;
+            for (size_t n = 0; n < N; n++)
+            {
+                x_n = Pothos::Util::fromQ<ProbeType>(x[n], 0);
+                const double mag = std::abs(x_n);
+                maximum = std::max<double>(maximum, mag);
+            }
+            _value = maximum;
         }
 
         this->emitSignal("valueChanged", _value);
