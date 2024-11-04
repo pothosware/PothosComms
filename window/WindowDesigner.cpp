@@ -3,6 +3,7 @@
 
 #include <Pothos/Framework.hpp>
 #include <Poco/Logger.h>
+#include <cmath>
 #include <complex>
 #include <algorithm>
 #include <iostream>
@@ -44,10 +45,19 @@ using spuce::design_window;
  * |default 51
  * |widget SpinBox(minimum=1)
  *
+ * |param normalization[Normalization] The option to normalize the output taps.
+ * When normalized, the output taps will be the window taps divided by the
+ * selected metric computed over the window taps.
+ * |option [None] "NONE"
+ * |option [Sum] "SUM"
+ * |option [Power] "POWER"
+ * |default "NONE"
+ *
  * |factory /comms/window_designer()
  * |setter setWindowType(window)
  * |setter setWindowArgs(windowArgs)
  * |setter setNumTaps(numTaps)
+ * |setter setNormalization(normalization)
  **********************************************************************/
 class WindowDesigner : public Pothos::Block
 {
@@ -59,7 +69,8 @@ public:
 
     WindowDesigner(void):
         _windowType("hann"),
-        _numTaps(51)
+        _numTaps(51),
+        _normalization("NONE")
     {
         this->registerCall(this, POTHOS_FCN_TUPLE(WindowDesigner, setWindowType));
         this->registerCall(this, POTHOS_FCN_TUPLE(WindowDesigner, windowType));
@@ -67,6 +78,8 @@ public:
         this->registerCall(this, POTHOS_FCN_TUPLE(WindowDesigner, windowArgs));
         this->registerCall(this, POTHOS_FCN_TUPLE(WindowDesigner, setNumTaps));
         this->registerCall(this, POTHOS_FCN_TUPLE(WindowDesigner, numTaps));
+        this->registerCall(this, POTHOS_FCN_TUPLE(WindowDesigner, setNormalization));
+        this->registerCall(this, POTHOS_FCN_TUPLE(WindowDesigner, normalization));
         this->registerSignal("tapsChanged");
         this->recalculate();
     }
@@ -104,6 +117,17 @@ public:
         return _numTaps;
     }
 
+    void setNormalization(const std::string &normalization)
+    {
+        _normalization = normalization;
+        this->recalculate();
+    }
+
+    std::string normalization(void) const
+    {
+        return _normalization;
+    }
+
     void activate(void)
     {
         this->recalculate();
@@ -116,6 +140,7 @@ private:
     std::string _windowType;
     std::vector<double> _windowArgs;
     size_t _numTaps;
+    std::string _normalization;
 };
 
 void WindowDesigner::recalculate(void)
@@ -126,7 +151,33 @@ void WindowDesigner::recalculate(void)
     if (_numTaps == 0) throw Pothos::Exception("WindowDesigner()", "num taps must be positive");
 
     //generate the window
-    const auto window = design_window(_windowType, _numTaps, _windowArgs.empty()?0.0:_windowArgs.at(0));
+    auto window = design_window(_windowType, _numTaps, _windowArgs.empty()?0.0:_windowArgs.at(0));
+
+    if (_normalization == "SUM")
+    {
+        double accumulator = 0.0;
+        for (size_t n = 0; n < _numTaps; n++)
+        {
+            accumulator += window[n];
+        }
+        for (size_t n = 0; n < _numTaps; n++)
+        {
+            window[n] /= accumulator;
+        }
+    }
+    else if (_normalization == "POWER")
+    {
+        double power = 0.0;
+        for (size_t n = 0; n < _numTaps; n++)
+        {
+            power += window[n]*window[n];
+        }
+        power = std::sqrt(power/_numTaps);
+        for (size_t n = 0; n < _numTaps; n++)
+        {
+            window[n] /= power;
+        }
+    }
 
     this->emitSignal("tapsChanged", window);
 }
